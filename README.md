@@ -5,24 +5,21 @@ An MCP server implementation for interacting with the Unstructured API. This ser
 ## Setup
 
 1. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+- `uv add "mcp[cli]"`
+- `uv pip install --upgrade unstructured-client python-dotenv`
 
 2. Set your Unstructured API key as an environment variable:
-```bash
-export UNSTRUCTURED_API_KEY="your-api-key-here"
-```
+   - Create a `.env` file in the root directory, and add a line with your key: `UNSTRUCTURED_API_KEY="YOUR_KEY"` 
 
 ## Running the Server
-
-```bash
-python server.py
-```
-
-Or using the MCP CLI:
+Using the MCP CLI:
 ```bash
 mcp run server.py
+```
+
+or:
+```bash
+uv run server.py
 ```
 
 ## Available Tools
@@ -96,16 +93,26 @@ Delete a specific workflow.
 Parameters:
 - `workflow_id`: ID of the workflow to delete
 
-## Development
-
-For development and testing, use the MCP Inspector:
-```bash
-mcp dev server.py
-```
-
 ## Claude Desktop Integration
 
 To install in Claude Desktop:
+
+1. Go to `~/Library/Application Support/Claude/` and create a `claude_desktop_config.json`. 
+2. In that file add:
 ```bash
-mcp install server.py --name "Unstructured API"
+{
+    "mcpServers": {
+        "UNS_MCP": {
+            "command": "/Users/mk/.local/bin/uv",
+            "args": [
+                "--directory",
+                "/Users/mk/Code/UNS-MCP",
+                "run",
+                "server.py"
+            ],
+            "disabled": false
+        }
+    }
+}
 ```
+3. Restart Claude Desktop.
