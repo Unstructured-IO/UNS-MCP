@@ -103,10 +103,10 @@ To install in Claude Desktop:
 {
     "mcpServers": {
         "UNS_MCP": {
-            "command": "/Users/mk/.local/bin/uv",
+            "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
             "args": [
                 "--directory",
-                "/Users/mk/Code/UNS-MCP",
+                "ABSOLUTE/PATH/TO/UNS-MCP",
                 "run",
                 "server.py"
             ],
