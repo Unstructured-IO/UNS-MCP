@@ -5,7 +5,7 @@ An MCP server implementation for interacting with the Unstructured API. This ser
 ## Setup
 
 1. Install dependencies:
-- `uv add "mcp[cli]"`
+- `uv sync"`
 - `uv pip install --upgrade unstructured-client python-dotenv`
 
 2. Set your Unstructured API key as an environment variable:
