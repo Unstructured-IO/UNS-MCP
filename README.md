@@ -190,3 +190,8 @@ Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the f
 ```
 mcp dev server.py
 ```
+
+## Running locally minimal client
+```
+uv run python minimal_client/run.py server.py
+```
