@@ -41,6 +41,38 @@ Get detailed information about a specific source connector.
 Parameters:
 - `source_id`: ID of the source connector to get information for
 
+#### create_s3_source
+Create an S3 source connector.
+
+Parameters:
+- `name`: Unique name for the connector
+- `remote_url`: S3 URI to the bucket or folder (e.g., s3://my-bucket/)
+- `key` (optional): AWS access key ID (required if not using anonymous auth)
+- `secret` (optional): AWS secret access key (required if not using anonymous auth)
+- `token` (optional): AWS STS session token for temporary access
+- `anonymous` (optional): Whether to use anonymous authentication (default: false)
+- `endpoint_url` (optional): Custom URL if connecting to a non-AWS S3 bucket
+- `recursive` (optional): Whether to access subfolders within the bucket (default: false)
+
+#### update_s3_source
+Update an existing S3 source connector.
+
+Parameters:
+- `source_id`: ID of the source connector to update
+- `remote_url` (optional): Updated S3 URI to the bucket or folder
+- `key` (optional): Updated AWS access key ID
+- `secret` (optional): Updated AWS secret access key
+- `token` (optional): Updated AWS STS session token
+- `anonymous` (optional): Whether to use anonymous authentication
+- `endpoint_url` (optional): Updated custom URL
+- `recursive` (optional): Updated subfolder access setting
+
+#### delete_s3_source
+Delete an S3 source connector.
+
+Parameters:
+- `source_id`: ID of the source connector to delete
+
 ### Destinations
 
 #### list_destinations
@@ -54,6 +86,34 @@ Get detailed information about a specific destination connector.
 
 Parameters:
 - `destination_id`: ID of the destination connector to get information for
+
+#### create_s3_destination
+Create an S3 destination connector.
+
+Parameters:
+- `name`: Unique name for the connector
+- `remote_url`: S3 URI to the bucket or folder (e.g., s3://my-bucket/)
+- `key`: AWS access key ID
+- `secret`: AWS secret access key
+- `token` (optional): AWS STS session token for temporary access
+- `endpoint_url` (optional): Custom URL if connecting to a non-AWS S3 bucket
+
+#### update_s3_destination
+Update an existing S3 destination connector.
+
+Parameters:
+- `destination_id`: ID of the destination connector to update
+- `remote_url` (optional): Updated S3 URI to the bucket or folder
+- `key` (optional): Updated AWS access key ID
+- `secret` (optional): Updated AWS secret access key
+- `token` (optional): Updated AWS STS session token
+- `endpoint_url` (optional): Updated custom URL
+
+#### delete_s3_destination
+Delete an S3 destination connector.
+
+Parameters:
+- `destination_id`: ID of the destination connector to delete
 
 ### Workflows
 
