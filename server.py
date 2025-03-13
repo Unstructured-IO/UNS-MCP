@@ -54,7 +54,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
 
 
 # Create MCP server instance
-mcp = FastMCP("Unstructured API", lifespan=app_lifespan)
+mcp = FastMCP("Unstructured API", lifespan=app_lifespan, dependencies=["unstructured-client", "python-dotenv"])
 
 # Register connector tools
 from connectors import register_connectors
