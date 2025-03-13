@@ -76,6 +76,7 @@ async def list_sources(ctx: Context, source_type: Optional[str] = None) -> str:
 
     request = ListSourcesRequest()
     if source_type:
+        source_type=source_type.upper() # it needs uppercase to access
         try:
             request.source_type = SourceConnectorType[source_type]
         except KeyError:
@@ -191,6 +192,7 @@ async def list_destinations(ctx: Context, destination_type: Optional[str] = None
 
     request = ListDestinationsRequest()
     if destination_type:
+        destination_type = destination_type.upper()
         try:
             request.destination_type = DestinationConnectorType[destination_type]
         except KeyError:
