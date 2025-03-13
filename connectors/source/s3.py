@@ -74,7 +74,7 @@ async def create_s3_source(
         result.append(f"Name: {info.name}")
         result.append(f"ID: {info.id}")
         result.append("Configuration:")
-        for key, value in info.config.items():
+        for key, value in info.config:
             # Don't print secrets in the output
             if key in ["secret", "token"] and value:
                 value = "********"
@@ -168,7 +168,7 @@ async def update_s3_source(
         result.append(f"Name: {info.name}")
         result.append(f"ID: {info.id}")
         result.append("Configuration:")
-        for key, value in info.config.items():
+        for key, value in info.config:
             # Don't print secrets in the output
             if key in ["secret", "token"] and value:
                 value = "********"
