@@ -136,7 +136,7 @@ async def update_pinecone_destination(
     except Exception as e:
         return f"Error updating Pinecone destination connector: {str(e)}"
 
-async def delete_Pinecone_destination(ctx: Context, destination_id: str) -> str:
+async def delete_pinecone_destination(ctx: Context, destination_id: str) -> str:
     """Delete an Pinecone destination connector.
 
     Args:
