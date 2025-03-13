@@ -5,12 +5,15 @@ An MCP server implementation for interacting with the Unstructured API. This ser
 ## Setup
 
 1. Install dependencies:
-- `uv sync"`
+- `uv add "mcp[cli]"`
 - `uv pip install --upgrade unstructured-client python-dotenv`
+
+or use `uv sync`. 
 
 2. Set your Unstructured API key as an environment variable:
    - Create a `.env` file in the root directory, and add a line with your key: `UNSTRUCTURED_API_KEY="YOUR_KEY"` 
 
+Right now only production API is tested. ENV key can be generated in Account Settings -> API Keys -> Generate New Key button
 ## Running the Server
 Using the MCP CLI:
 ```bash
@@ -116,3 +119,10 @@ To install in Claude Desktop:
 }
 ```
 3. Restart Claude Desktop.
+
+## Debugging tools
+
+To spawn UI where each tool can be run individually, use the following command:
+```
+mcp dev server.py
+```
