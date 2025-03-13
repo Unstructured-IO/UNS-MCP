@@ -186,3 +186,8 @@ To spawn UI where each tool can be run individually, use the following command:
 ```
 mcp dev server.py
 ```
+
+## Running locally minimal client
+```
+uv run python minimal_client/run.py server.py
+```
