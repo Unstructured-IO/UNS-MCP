@@ -17,7 +17,7 @@ from unstructured_client.models.shared import (
     AzureSourceConnectorConfig,
 )
 
-from connectors.logging_utils import create_log_for_created_updated_connector
+from connectors.logging_utils import create_log_for_created_updated_source_connector
 
 
 async def create_azure_source(
@@ -43,10 +43,9 @@ async def create_azure_source(
         response: CreateSourceResponse = await client.sources.create_source_async(
             request=CreateSourceRequest(create_source_connector=source_connector)
         )
-        result = create_log_for_created_updated_connector(
+        result = create_log_for_created_updated_source_connector(
             response,
             source_name="Azure",
-            source_or_destination="Source",
             created_or_updated="Created",
         )
         return result
@@ -122,10 +121,9 @@ async def update_azure_source(
                 update_source_connector=UpdateSourceConnector(config=config),
             )
         )
-        result = create_log_for_created_updated_connector(
+        result = create_log_for_created_updated_source_connector(
             response,
             source_name="Azure",
-            source_or_destination="Source",
             created_or_updated="Updated",
         )
         return result
