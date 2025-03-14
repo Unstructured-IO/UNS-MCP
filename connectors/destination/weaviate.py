@@ -8,24 +8,20 @@ from unstructured_client.models.shared import (
     CreateDestinationConnector, UpdateDestinationConnector
 )
 
-async def create_pinecone_destination(
+async def create_weaviate_destination(
     ctx: Context,
-    name: str,
-    index_name: str,
     api_key: str,
-    name_space: str="default",
-    batch_size: str=50,
+    cluster_url: str,
+    collection: Optional[str] = None,
+
     
 ) -> str:
-    """Create an pinecone vector database destination connector.
+    """Create an weaviate vector database destination connector.
 
     Args:
-        name: Name of the destination connector
-        index_name: Name of the pinecone index
-        name_space: Namespace of the pinecone index with default value of "default"
-        batch_size: Batch size for indexing with default value of 50
-        api_key: Pinecone API key
-
+        api_key: API key for the weaviate cluster
+        cluster_url: URL of the weaviate cluster
+        collection (optional): Name of the collection to use in the weaviate cluster
 
     Returns:
         String containing the created destination connector information
@@ -33,15 +29,13 @@ async def create_pinecone_destination(
     client = ctx.request_context.lifespan_context.client
 
     config = {
-        "index_name": index_name,
         "key": api_key,
-        "namespace": name_space,
-        "batch_size": batch_size
+        "cluster_url": cluster_url,
+        "collection": collection
     }
 
     destination_connector = CreateDestinationConnector(
-        name=name,
-        type="pinecone",
+        type="weaviate",
         config=config
     )
 
@@ -54,7 +48,7 @@ async def create_pinecone_destination(
 
         info = response.destination_connector_information
 
-        result = [f"PineCone Destination Connector created:"]
+        result = [f"weaviate Destination Connector created:"]
         result.append(f"Name: {info.name}")
         result.append(f"ID: {info.id}")
         result.append("Configuration:")
@@ -66,22 +60,25 @@ async def create_pinecone_destination(
 
         return "\n".join(result)
     except Exception as e:
-        return f"Error creating Pinecone destination connector: {str(e)}"
+        return f"Error creating weaviate destination connector: {str(e)}"
 
-async def update_pinecone_destination(
+async def update_weaviate_destination(
     ctx: Context,
     destination_id: str,
-    index_name: Optional[str] = None,
     api_key: Optional[str] = None,
-    name_space: str="default",
-    batch_size: str="50",
+    cluster_url:Optional[str]=None,
+    collection: Optional[str] = None,
     
 
    
 ) -> str:
-    """Update an Pinecone destination connector.
+    """Update an weaviate destination connector.
 
     Args:
+        destination_id: ID of the destination connector to update
+        api_key (optional): API key for the weaviate cluster
+        cluster_url (optional): URL of the weaviate cluster
+        collection (optional): Name of the collection to use in the weaviate cluster
 
     Returns:
         String containing the updated destination connector information
@@ -100,15 +97,13 @@ async def update_pinecone_destination(
     # Update configuration with new values
     config = dict(current_config)
     
-    if index_name is not None:
-        config["index_name"] = index_name
+    if cluster_url is not None:
+        config["cluster_url"] = cluster_url
     
     if key is not None:
         config["key"] = api_key
-    if name_space is not None:
-        config["namespace"] = name_space
-    if batch_size is not None:
-        config["batch_size"] = batch_size
+    if collection is not None:
+        config["collection"] = collection
 
     destination_connector = UpdateDestinationConnector(config=config)
 
@@ -122,7 +117,7 @@ async def update_pinecone_destination(
 
         info = response.destination_connector_information
 
-        result = [f"Pinecone Destination Connector updated:"]
+        result = [f"weaviate Destination Connector updated:"]
         result.append(f"Name: {info.name}")
         result.append(f"ID: {info.id}")
         result.append("Configuration:")
@@ -134,10 +129,10 @@ async def update_pinecone_destination(
 
         return "\n".join(result)
     except Exception as e:
-        return f"Error updating Pinecone destination connector: {str(e)}"
+        return f"Error updating weaviate destination connector: {str(e)}"
 
-async def delete_pinecone_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an Pinecone destination connector.
+async def delete_weaviate_destination(ctx: Context, destination_id: str) -> str:
+    """Delete an weaviate destination connector.
 
     Args:
         destination_id: ID of the destination connector to delete
@@ -151,6 +146,6 @@ async def delete_pinecone_destination(ctx: Context, destination_id: str) -> str:
         response = await client.destinations.delete_destination_async(
             request=DeleteDestinationRequest(destination_id=destination_id)
         )
-        return f"Pinecone Destination Connector with ID {destination_id} deleted successfully"
+        return f"weaviate Destination Connector with ID {destination_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting Pinecone destination connector: {str(e)}" 
+        return f"Error deleting weaviate destination connector: {str(e)}" 
