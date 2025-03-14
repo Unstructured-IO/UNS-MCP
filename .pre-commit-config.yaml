@@ -39,3 +39,4 @@ repos:
     hooks:
       - id: flake8
         language_version: python3
+        args: ["--max-line-length=100"]
