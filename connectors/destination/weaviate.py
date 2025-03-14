@@ -5,11 +5,14 @@ from unstructured_client.models.operations import (
     GetDestinationRequest
 )
 from unstructured_client.models.shared import (
-    CreateDestinationConnector, UpdateDestinationConnector
+    CreateDestinationConnector, 
+    UpdateDestinationConnector,
+    DestinationConnectorType
 )
 
 async def create_weaviate_destination(
     ctx: Context,
+    name: str,
     api_key: str,
     cluster_url: str,
     collection: Optional[str] = None,
@@ -29,13 +32,14 @@ async def create_weaviate_destination(
     client = ctx.request_context.lifespan_context.client
 
     config = {
-        "key": api_key,
+        "api_key": api_key,
         "cluster_url": cluster_url,
         "collection": collection
     }
 
     destination_connector = CreateDestinationConnector(
-        type="weaviate",
+        name=name,
+        type=DestinationConnectorType.WEAVIATE_CLOUD,
         config=config
     )
 
@@ -54,7 +58,7 @@ async def create_weaviate_destination(
         result.append("Configuration:")
         for key, value in info.config:
             # Don't print secrets in the output
-            if key =="key" and value:
+            if key =="api_key" and value:
                 value = "********"
             result.append(f"  {key}: {value}")
 
@@ -69,8 +73,6 @@ async def update_weaviate_destination(
     cluster_url:Optional[str]=None,
     collection: Optional[str] = None,
     
-
-   
 ) -> str:
     """Update an weaviate destination connector.
 
@@ -78,8 +80,8 @@ async def update_weaviate_destination(
         destination_id: ID of the destination connector to update
         api_key (optional): API key for the weaviate cluster
         cluster_url (optional): URL of the weaviate cluster
-        collection (optional): Name of the collection to use in the weaviate cluster
-
+        collection (optional): Name of the collection(like a file) to use in the weaviate cluster
+        
     Returns:
         String containing the updated destination connector information
     """
@@ -100,8 +102,8 @@ async def update_weaviate_destination(
     if cluster_url is not None:
         config["cluster_url"] = cluster_url
     
-    if key is not None:
-        config["key"] = api_key
+    if api_key is not None:
+        config["api_key"] = api_key
     if collection is not None:
         config["collection"] = collection
 
@@ -123,7 +125,7 @@ async def update_weaviate_destination(
         result.append("Configuration:")
         for key, value in info.config:
             # Don't print secrets in the output
-            if key =="key" and value:
+            if key =="api_key" and value:
                 value = "********"
             result.append(f"  {key}: {value}")
 
