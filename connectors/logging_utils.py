@@ -11,7 +11,7 @@ def create_log_for_created_updated_connector(response, source_name: str,
                                              created_or_updated: Literal[
                                                  'Created', "Updated"]) -> str:
     info: SourceConnectorInformation | None = response.source_connector_information
-    config: AzureSourceConnectorConfig | None = response.source_connector_config if info else None
+    config: AzureSourceConnectorConfig | None = response.config if info else None
 
     result = [f"{source_name} {source_or_destination} Connector {created_or_updated}:"]
 

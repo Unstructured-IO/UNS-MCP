@@ -8,7 +8,7 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateSourceConnector, UpdateSourceConnector, SourceConnectorType,
-    AzureSourceConnectorConfigInput, AzureSourceConnectorConfig
+    AzureSourceConnectorConfigInput, AzureSourceConnectorConfig, UpdateSourceConnectorConfig
 )
 
 from connectors.logging_utils import create_log_for_created_updated_connector
@@ -130,13 +130,13 @@ async def update_azure_source(
     update_source_connector=UpdateSourceConnector(
         config=input_config
     )
-
+    request = UpdateSourceRequest(
+        source_id=source_id,
+        update_source_connector=update_source_connector
+    )
     try:
         response = await client.sources.update_source_async(
-            request=UpdateSourceRequest(
-                source_id=source_id,
-                update_source_connector=update_source_connector
-            )
+            request=request
         )
         result = create_log_for_created_updated_connector(response, source_name='Azure', source_or_destination='Source', created_or_updated='Updated')
         return result
