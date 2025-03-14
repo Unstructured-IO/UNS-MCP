@@ -30,9 +30,9 @@ repos:
             "--fix",
             "--select=I,UP015,UP032,UP034,UP018,COM,C4,PT,SIM,PLR0402",
             # remove SIM115 after a separate PR to fix the issue
-            "--ignore=PT011,PT012,SIM117,SIM115,PT006",
+            "--ignore=PT011,PT012,SIM117,PT006",
           ]
-      - id: ruff-format
+      # - id: ruff-format
 
   - repo: https://github.com/pycqa/flake8
     rev: 7.1.1

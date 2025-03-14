@@ -20,12 +20,17 @@ def _prepare_s3_source_config(
     recursive: Optional[bool],
 ) -> S3SourceConnectorConfigInput:
     """Prepare the Azure source connector configuration."""
-    return S3SourceConnectorConfigInput(
+    config = S3SourceConnectorConfigInput(
         remote_url=remote_url,
         recursive=recursive,
         key=os.getenv("AWS_KEY"),
         secret=os.getenv("AWS_SECRET"),
     )
+    if os.getenv("TOKEN"):
+        config.token = os.getenv("TOKEN")
+    if os.getenv("ENDPOINT_URL"):
+        config.endpoint_url = os.getenv("ENDPOINT_URL")
+    return config
 
 
 async def create_s3_source(

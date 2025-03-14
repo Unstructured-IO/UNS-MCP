@@ -8,12 +8,12 @@ An MCP server implementation for interacting with the Unstructured API. This ser
 - `uv add "mcp[cli]"`
 - `uv pip install --upgrade unstructured-client python-dotenv`
 
-or use `uv sync`. 
+or use `uv sync`.
 
 2. Set your Unstructured API key as an environment variable.
-   - Create a `.env` file in the root directory, and add a line with your key: `UNSTRUCTURED_API_KEY="YOUR_KEY"` 
+   - Create a `.env` file in the root directory, and add a line with your key: `UNSTRUCTURED_API_KEY="YOUR_KEY"`
 
-To test in local, any working key that pointing to prod env would work. However, to be able to return valid results from client's side (e.g, Claude for Desktop), your personal key that is fetched from `https://platform.unstructured.io/app/account/api-keys` is needed. 
+To test in local, any working key that pointing to prod env would work. However, to be able to return valid results from client's side (e.g, Claude for Desktop), your personal key that is fetched from `https://platform.unstructured.io/app/account/api-keys` is needed.
 
 ## Running the Server
 Using the MCP CLI:
@@ -161,7 +161,7 @@ Parameters:
 
 To install in Claude Desktop:
 
-1. Go to `~/Library/Application Support/Claude/` and create a `claude_desktop_config.json`. 
+1. Go to `~/Library/Application Support/Claude/` and create a `claude_desktop_config.json`.
 2. In that file add:
 ```bash
 {
@@ -186,7 +186,7 @@ To install in Claude Desktop:
 
 ## Debugging tools
 
-Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the following command to spin up a debugging UI. From there, you will be able to add environment variables (pointing to your local env) on the left pane. Include your personal API key there as env var. Go to `tools`, you can test out the capabilities you add to the MCP server. 
+Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the following command to spin up a debugging UI. From there, you will be able to add environment variables (pointing to your local env) on the left pane. Include your personal API key there as env var. Go to `tools`, you can test out the capabilities you add to the MCP server.
 ```
 mcp dev server.py
 ```
