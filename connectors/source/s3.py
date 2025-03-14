@@ -1,4 +1,6 @@
 from typing import Dict, Optional
+import os
+from dotenv import load_dotenv
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
     CreateSourceRequest, UpdateSourceRequest, DeleteSourceRequest,
@@ -15,7 +17,6 @@ async def create_s3_source(
     key: Optional[str] = None,
     secret: Optional[str] = None,
     token: Optional[str] = None,
-    anonymous: bool = False,
     endpoint_url: Optional[str] = None,
     recursive: bool = False
 ) -> str:
@@ -24,10 +25,9 @@ async def create_s3_source(
     Args:
         name: A unique name for this connector
         remote_url: The S3 URI to the bucket or folder (e.g., s3://my-bucket/)
-        key: The AWS access key ID (required if not using anonymous auth)
-        secret: The AWS secret access key (required if not using anonymous auth)
+        key: The AWS access key ID
+        secret: The AWS secret access key
         token: The AWS STS session token for temporary access (optional)
-        anonymous: Whether to use anonymous authentication
         endpoint_url: Custom URL if connecting to a non-AWS S3 bucket
         recursive: Whether to access subfolders within the bucket
 
@@ -35,19 +35,28 @@ async def create_s3_source(
         String containing the created source connector information
     """
     client = ctx.request_context.lifespan_context.client
+    
+    load_dotenv()
+    
+    if key is None:
+        key = os.getenv("AWS_ACCESS_KEY_ID")
+        if not key:
+            print("AWS_ACCESS_KEY_ID not found in environment variables, provide it manually in chat")
+    
+    if secret is None:
+        secret = os.getenv("AWS_SECRET_ACCESS_KEY")
+        if not secret:
+            print("AWS_SECRET_ACCESS_KEY not found in environment variables, provide it manually in chat")
+    
+    if not key or not secret:
+        return "Both AWS access key ID and secret access key are required"
 
     config = {
         "remote_url": remote_url,
-        "recursive": recursive
+        "recursive": recursive,
+        "key": key,
+        "secret": secret
     }
-
-    if anonymous:
-        config["anonymous"] = True
-    else:
-        if not key or not secret:
-            return "When not using anonymous authentication, both key and secret are required"
-        config["key"] = key
-        config["secret"] = secret
 
     if token:
         config["token"] = token
@@ -91,7 +100,6 @@ async def update_s3_source(
     key: Optional[str] = None,
     secret: Optional[str] = None,
     token: Optional[str] = None,
-    anonymous: Optional[bool] = None,
     endpoint_url: Optional[str] = None,
     recursive: Optional[bool] = None
 ) -> str:
@@ -103,7 +111,6 @@ async def update_s3_source(
         key: The AWS access key ID
         secret: The AWS secret access key
         token: The AWS STS session token for temporary access
-        anonymous: Whether to use anonymous authentication
         endpoint_url: Custom URL if connecting to a non-AWS S3 bucket
         recursive: Whether to access subfolders within the bucket
 
@@ -111,6 +118,18 @@ async def update_s3_source(
         String containing the updated source connector information
     """
     client = ctx.request_context.lifespan_context.client
+    
+    load_dotenv()
+    
+    if key is None and secret is None:
+        env_key = os.getenv("AWS_ACCESS_KEY_ID")
+        env_secret = os.getenv("AWS_SECRET_ACCESS_KEY")
+        if not env_key:
+            print("AWS_ACCESS_KEY_ID not found in environment variables, provide it manually in chat")
+        if not env_secret:
+            print("AWS_SECRET_ACCESS_KEY not found in environment variables, provide it manually in chat")
+        key = env_key
+        secret = env_secret
 
     # Get the current source connector configuration
     try:
@@ -126,16 +145,6 @@ async def update_s3_source(
     
     if remote_url is not None:
         config["remote_url"] = remote_url
-    
-    if anonymous is not None:
-        if anonymous:
-            config["anonymous"] = True
-            # Remove auth keys if switching to anonymous
-            config.pop("key", None)
-            config.pop("secret", None)
-            config.pop("token", None)
-        else:
-            config.pop("anonymous", None)
     
     if key is not None:
         config["key"] = key

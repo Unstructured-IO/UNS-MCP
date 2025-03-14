@@ -25,7 +25,9 @@ def load_environment_variables() -> None:
     """
     load_dotenv()
     required_vars = [
-        "UNSTRUCTURED_API_KEY"
+        "UNSTRUCTURED_API_KEY",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY"
     ]
 
     for var in required_vars:
