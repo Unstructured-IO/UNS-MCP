@@ -32,13 +32,16 @@ async def create_weaviate_destination(
     ctx: Context,
     name: str,
     cluster_url: str,
-    collection: Optional[str] = None,
+    collection: str,
 ) -> str:
     """Create an weaviate vector database destination connector.
 
     Args:
         cluster_url: URL of the weaviate cluster
-        collection (optional): Name of the collection usually a table to use in the weaviate cluster
+        collection : Name of the collection to use in the weaviate cluster
+        Note: The collection is a table in the weaviate cluster.
+              In platform, there are dedicated code to generate collection for users
+              here, due to the simplicity of the server, we are not generating it for users.
 
     Returns:
         String containing the created destination connector information
