@@ -13,39 +13,39 @@ from unstructured_client.models.shared import (
 )
 
 
-async def create_s3_destination(
+async def create_astradb_destination(
     ctx: Context,
     name: str,
-    remote_url: str,
-    key: str,
-    secret: str,
-    token: Optional[str] = None,
-    endpoint_url: Optional[str] = None,
+    token: str,
+    api_endpoint: str,
+    collection_name: str,
+    keyspace: str,
+    batch_size: int = 20,
 ) -> str:
-    """Create an S3 destination connector.
+    """Create an AstraDB destination connector.
 
     Args:
         name: A unique name for this connector
-        remote_url: The S3 URI to the bucket or folder 
-        key: The AWS access key ID
-        secret: The AWS secret access key
-        token: The AWS STS session token for temporary access (optional)
-        endpoint_url: Custom URL if connecting to a non-AWS S3 bucket
+        token: The AstraDB application token
+        api_endpoint: The AstraDB API endpoint
+        collection_name: The name of the collection to use
+        keyspace: The AstraDB keyspace
+        batch_size: The batch size for inserting documents (default: 20)
 
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = {"remote_url": remote_url, "key": key, "secret": secret}
+    config = {
+        "token": token,
+        "api_endpoint": api_endpoint,
+        "collection_name": collection_name,
+        "keyspace": keyspace,
+        "batch_size": batch_size
+    }
 
-    if token:
-        config["token"] = token
-
-    if endpoint_url:
-        config["endpoint_url"] = endpoint_url
-
-    destination_connector = CreateDestinationConnector(name=name, type="s3", config=config)
+    destination_connector = CreateDestinationConnector(name=name, type="astradb", config=config)
 
     try:
         response = await client.destinations.create_destination_async(
@@ -54,39 +54,39 @@ async def create_s3_destination(
 
         info = response.destination_connector_information
 
-        result = ["S3 Destination Connector created:"]
+        result = ["AstraDB Destination Connector created:"]
         result.append(f"Name: {info.name}")
         result.append(f"ID: {info.id}")
         result.append("Configuration:")
         for key, value in info.config:
             # Don't print secrets in the output
-            if key in ["secret", "token"] and value:
+            if key == "token" and value:
                 value = "********"
             result.append(f"  {key}: {value}")
 
         return "\n".join(result)
     except Exception as e:
-        return f"Error creating S3 destination connector: {str(e)}"
+        return f"Error creating AstraDB destination connector: {str(e)}"
 
 
-async def update_s3_destination(
+async def update_astradb_destination(
     ctx: Context,
     destination_id: str,
-    remote_url: Optional[str] = None,
-    key: Optional[str] = None,
-    secret: Optional[str] = None,
     token: Optional[str] = None,
-    endpoint_url: Optional[str] = None,
+    api_endpoint: Optional[str] = None,
+    collection_name: Optional[str] = None,
+    keyspace: Optional[str] = None,
+    batch_size: Optional[int] = None,
 ) -> str:
-    """Update an S3 destination connector.
+    """Update an AstraDB destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        remote_url: The S3 URI to the bucket or folder
-        key: The AWS access key ID
-        secret: The AWS secret access key
-        token: The AWS STS session token for temporary access
-        endpoint_url: Custom URL if connecting to a non-AWS S3 bucket
+        token: The AstraDB application token
+        api_endpoint: The AstraDB API endpoint
+        collection_name: The name of the collection to use
+        keyspace: The AstraDB keyspace
+        batch_size: The batch size for inserting documents
 
     Returns:
         String containing the updated destination connector information
@@ -105,20 +105,20 @@ async def update_s3_destination(
     # Update configuration with new values
     config = dict(current_config)
 
-    if remote_url is not None:
-        config["remote_url"] = remote_url
-
-    if key is not None:
-        config["key"] = key
-
-    if secret is not None:
-        config["secret"] = secret
-
     if token is not None:
         config["token"] = token
 
-    if endpoint_url is not None:
-        config["endpoint_url"] = endpoint_url
+    if api_endpoint is not None:
+        config["api_endpoint"] = api_endpoint
+
+    if collection_name is not None:
+        config["collection_name"] = collection_name
+
+    if keyspace is not None:
+        config["keyspace"] = keyspace
+
+    if batch_size is not None:
+        config["batch_size"] = batch_size
 
     destination_connector = UpdateDestinationConnector(config=config)
 
@@ -132,23 +132,23 @@ async def update_s3_destination(
 
         info = response.destination_connector_information
 
-        result = ["S3 Destination Connector updated:"]
+        result = ["AstraDB Destination Connector updated:"]
         result.append(f"Name: {info.name}")
         result.append(f"ID: {info.id}")
         result.append("Configuration:")
         for key, value in info.config:
             # Don't print secrets in the output
-            if key in ["secret", "token"] and value:
+            if key == "token" and value:
                 value = "********"
             result.append(f"  {key}: {value}")
 
         return "\n".join(result)
     except Exception as e:
-        return f"Error updating S3 destination connector: {str(e)}"
+        return f"Error updating AstraDB destination connector: {str(e)}"
 
 
-async def delete_s3_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an S3 destination connector.
+async def delete_astradb_destination(ctx: Context, destination_id: str) -> str:
+    """Delete an AstraDB destination connector.
 
     Args:
         destination_id: ID of the destination connector to delete
@@ -162,6 +162,6 @@ async def delete_s3_destination(ctx: Context, destination_id: str) -> str:
         _ = await client.destinations.delete_destination_async(
             request=DeleteDestinationRequest(destination_id=destination_id),
         )
-        return f"S3 Destination Connector with ID {destination_id} deleted successfully"
+        return f"AstraDB Destination Connector with ID {destination_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting S3 destination connector: {str(e)}"
+        return f"Error deleting AstraDB destination connector: {str(e)}" 
