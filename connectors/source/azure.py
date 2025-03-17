@@ -4,30 +4,36 @@ from typing import Optional
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
     CreateSourceRequest,
-    UpdateSourceRequest,
+    CreateSourceResponse,
     DeleteSourceRequest,
     GetSourceRequest,
-    CreateSourceResponse,
+    UpdateSourceRequest,
 )
 from unstructured_client.models.shared import (
-    CreateSourceConnector,
-    UpdateSourceConnector,
-    SourceConnectorType,
-    AzureSourceConnectorConfigInput,
     AzureSourceConnectorConfig,
+    AzureSourceConnectorConfigInput,
+    CreateSourceConnector,
+    SourceConnectorType,
+    UpdateSourceConnector,
 )
 
-from connectors.logging_utils import create_log_for_created_updated_source_connector
+from connectors.source.logging_utils import (
+    create_log_for_created_updated_source_connector,
+)
 
 
 async def create_azure_source(
-    ctx: Context, name: str, remote_url: str, recursive: bool = False
+    ctx: Context,
+    name: str,
+    remote_url: str,
+    recursive: bool = False,
 ) -> str:
     """Create an Azure source connector.
 
     Args:
         name: A unique name for this connector
-        remote_url: The Azure Storage remote URL, with the format az://<container-name>/<path/to/file/or/folder/in/container/as/needed>
+        remote_url: The Azure Storage remote URL,
+        with the format az://<container-name>/<path/to/file/or/folder/in/container/as/needed>
         recursive: Whether to access subfolders within the bucket
 
     Returns:
@@ -36,12 +42,14 @@ async def create_azure_source(
     client = ctx.request_context.lifespan_context.client
     config = _prepare_azure_source_config(remote_url, recursive)
     source_connector = CreateSourceConnector(
-        name=name, type=SourceConnectorType.AZURE, config=config
+        name=name,
+        type=SourceConnectorType.AZURE,
+        config=config,
     )
 
     try:
         response: CreateSourceResponse = await client.sources.create_source_async(
-            request=CreateSourceRequest(create_source_connector=source_connector)
+            request=CreateSourceRequest(create_source_connector=source_connector),
         )
         result = create_log_for_created_updated_source_connector(
             response,
@@ -65,13 +73,10 @@ async def delete_azure_source(ctx: Context, source_id: str) -> str:
     client = ctx.request_context.lifespan_context.client
 
     try:
-        await client.sources.delete_source_async(
-            request=DeleteSourceRequest(source_id=source_id)
-        )
+        await client.sources.delete_source_async(request=DeleteSourceRequest(source_id=source_id))
         return f"S3 Source Connector with ID {source_id} deleted successfully"
     except Exception as e:
         return f"Error deleting S3 source connector: {str(e)}"
-
 
 
 async def update_azure_source(
@@ -84,7 +89,8 @@ async def update_azure_source(
 
     Args:
         source_id: ID of the source connector to update
-        remote_url: The Azure Storage remote URL, with the format az://<container-name>/<path/to/file/or/folder/in/container/as/needed>
+        remote_url: The Azure Storage remote URL, with the format
+        az://<container-name>/<path/to/file/or/folder/in/container/as/needed>
         recursive: Whether to access subfolders within the bucket
 
     Returns:
@@ -94,7 +100,7 @@ async def update_azure_source(
 
     try:
         get_response = await client.sources.get_source_async(
-            request=GetSourceRequest(source_id=source_id)
+            request=GetSourceRequest(source_id=source_id),
         )
         current_config: AzureSourceConnectorConfig = (
             get_response.source_connector_information.config
@@ -110,16 +116,14 @@ async def update_azure_source(
     if recursive is not None:
         input_config.recursive = recursive
 
-    config = _prepare_azure_source_config(
-        input_config.remote_url, input_config.recursive
-    )
+    config = _prepare_azure_source_config(input_config.remote_url, input_config.recursive)
 
     try:
         response = await client.sources.update_source_async(
             request=UpdateSourceRequest(
                 source_id=source_id,
                 update_source_connector=UpdateSourceConnector(config=config),
-            )
+            ),
         )
         result = create_log_for_created_updated_source_connector(
             response,
@@ -132,14 +136,41 @@ async def update_azure_source(
 
 
 def _prepare_azure_source_config(
-    remote_url: Optional[str], recursive: Optional[bool]
+    remote_url: Optional[str],
+    recursive: Optional[bool],
 ) -> AzureSourceConnectorConfigInput:
     """Prepare the Azure source connector configuration."""
-    return AzureSourceConnectorConfigInput(
-        remote_url=remote_url,
-        recursive=recursive,
-        account_name=os.getenv("AZURE_ACCOUNT_NAME"),
-        account_key=os.getenv("AZURE_ACCOUNT_KEY"),
-        sas_token=os.getenv("AZURE_SAS_TOKEN"),
-        connection_string=os.getenv("AZURE_CONNECTION_STRING"),
-    )
+    if os.getenv("AZURE_CONNECTION_STRING") and not (
+        os.getenv("AZURE_ACCOUNT_NAME")
+        or os.getenv("AZURE_ACCOUNT_KEY")
+        or os.getenv("AZURE_SAS_TOKEN")
+    ):
+        return AzureSourceConnectorConfigInput(
+            remote_url=remote_url,
+            recursive=recursive,
+            connection_string=os.getenv("AZURE_CONNECTION_STRING"),
+        )
+    elif (
+        os.getenv("AZURE_ACCOUNT_NAME")
+        and os.getenv("AZURE_ACCOUNT_KEY")
+        and not (os.getenv("AZURE_SAS_TOKEN") or os.getenv("AZURE_CONNECTION_STRING"))
+    ):
+        return AzureSourceConnectorConfigInput(
+            remote_url=remote_url,
+            recursive=recursive,
+            account_name=os.getenv("AZURE_ACCOUNT_NAME"),
+            account_key=os.getenv("AZURE_ACCOUNT_KEY"),
+        )
+    elif (
+        os.getenv("AZURE_ACCOUNT_NAME")
+        and os.getenv("AZURE_SAS_TOKEN")
+        and not (os.getenv("AZURE_ACCOUNT_KEY") or os.getenv("AZURE_CONNECTION_STRING"))
+    ):
+        return AzureSourceConnectorConfigInput(
+            remote_url=remote_url,
+            recursive=recursive,
+            account_name=os.getenv("AZURE_ACCOUNT_NAME"),
+            sas_token=os.getenv("AZURE_SAS_TOKEN"),
+        )
+    else:
+        raise ValueError("No Azure credentials provided")
