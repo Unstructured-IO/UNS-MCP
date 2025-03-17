@@ -1,22 +1,34 @@
-from dotenv import load_dotenv
 import os
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, Optional, Dict, List
 from dataclasses import dataclass
+from typing import AsyncIterator, Dict, Optional
 
-from mcp.server.fastmcp import FastMCP, Context
+from dotenv import load_dotenv
+from mcp.server.fastmcp import Context, FastMCP
 from unstructured_client import UnstructuredClient
 from unstructured_client.models.operations import (
-    ListSourcesRequest, ListWorkflowsRequest, GetSourceRequest,
-    ListDestinationsRequest, GetDestinationRequest, GetWorkflowRequest,
-    CreateWorkflowRequest, RunWorkflowRequest, UpdateWorkflowRequest,
-    DeleteWorkflowRequest
+    CreateWorkflowRequest,
+    DeleteWorkflowRequest,
+    GetDestinationRequest,
+    GetSourceRequest,
+    GetWorkflowRequest,
+    ListDestinationsRequest,
+    ListSourcesRequest,
+    ListWorkflowsRequest,
+    RunWorkflowRequest,
+    UpdateWorkflowRequest,
 )
 from unstructured_client.models.shared import (
-    SourceConnectorType, WorkflowState, DestinationConnectorType,
-    WorkflowNode, WorkflowNodeType, CreateWorkflow, UpdateWorkflow,
-    WorkflowType, Schedule
+    CreateWorkflow,
+    DestinationConnectorType,
+    SourceConnectorType,
+    UpdateWorkflow,
+    WorkflowState,
 )
+
+# Register connector tools
+from connectors import register_connectors
+
 
 def load_environment_variables() -> None:
     """
@@ -24,9 +36,7 @@ def load_environment_variables() -> None:
     Raises an error if critical environment variables are missing.
     """
     load_dotenv()
-    required_vars = [
-        "UNSTRUCTURED_API_KEY"
-    ]
+    required_vars = ["UNSTRUCTURED_API_KEY"]
 
     for var in required_vars:
         if not os.getenv(var):
@@ -54,10 +64,13 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
 
 
 # Create MCP server instance
-mcp = FastMCP("Unstructured API", lifespan=app_lifespan, dependencies=["unstructured-client", "python-dotenv"])
+mcp = FastMCP(
+    "Unstructured API",
+    lifespan=app_lifespan,
+    dependencies=["unstructured-client", "python-dotenv"],
+)
 
-# Register connector tools
-from connectors import register_connectors
+
 register_connectors(mcp)
 
 
@@ -76,7 +89,7 @@ async def list_sources(ctx: Context, source_type: Optional[str] = None) -> str:
 
     request = ListSourcesRequest()
     if source_type:
-        source_type=source_type.upper() # it needs uppercase to access
+        source_type = source_type.upper()  # it needs uppercase to access
         try:
             request.source_type = SourceConnectorType[source_type]
         except KeyError:
@@ -85,10 +98,7 @@ async def list_sources(ctx: Context, source_type: Optional[str] = None) -> str:
     response = await client.sources.list_sources_async(request=request)
 
     # Sort sources by name
-    sorted_sources = sorted(
-        response.response_list_sources,
-        key=lambda source: source.name.lower()
-    )
+    sorted_sources = sorted(response.response_list_sources, key=lambda source: source.name.lower())
 
     if not sorted_sources:
         return "No sources found"
@@ -103,10 +113,10 @@ async def list_sources(ctx: Context, source_type: Optional[str] = None) -> str:
 
 @mcp.tool()
 async def list_workflows(
-        ctx: Context,
-        destination_id: Optional[str] = None,
-        source_id: Optional[str] = None,
-        status: Optional[str] = None
+    ctx: Context,
+    destination_id: Optional[str] = None,
+    source_id: Optional[str] = None,
+    status: Optional[str] = None,
 ) -> str:
     """
     List workflows from the Unstructured API.
@@ -121,10 +131,7 @@ async def list_workflows(
     """
     client = ctx.request_context.lifespan_context.client
 
-    request = ListWorkflowsRequest(
-        destination_id=destination_id,
-        source_id=source_id
-    )
+    request = ListWorkflowsRequest(destination_id=destination_id, source_id=source_id)
 
     if status:
         try:
@@ -137,7 +144,7 @@ async def list_workflows(
     # Sort workflows by name
     sorted_workflows = sorted(
         response.response_list_workflows,
-        key=lambda workflow: workflow.name.lower()
+        key=lambda workflow: workflow.name.lower(),
     )
 
     if not sorted_workflows:
@@ -163,13 +170,11 @@ async def get_source_info(ctx: Context, source_id: str) -> str:
     """
     client = ctx.request_context.lifespan_context.client
 
-    response = await client.sources.get_source_async(
-        request=GetSourceRequest(source_id=source_id)
-    )
+    response = await client.sources.get_source_async(request=GetSourceRequest(source_id=source_id))
 
     info = response.source_connector_information
 
-    result = [f"Source Connector Information:"]
+    result = ["Source Connector Information:"]
     result.append(f"Name: {info.name}")
     result.append("Configuration:")
     for key, value in info.config:
@@ -202,7 +207,7 @@ async def list_destinations(ctx: Context, destination_type: Optional[str] = None
 
     sorted_destinations = sorted(
         response.response_list_destinations,
-        key=lambda dest: dest.name.lower()
+        key=lambda dest: dest.name.lower(),
     )
 
     if not sorted_destinations:
@@ -228,12 +233,12 @@ async def get_destination_info(ctx: Context, destination_id: str) -> str:
     client = ctx.request_context.lifespan_context.client
 
     response = await client.destinations.get_destination_async(
-        request=GetDestinationRequest(destination_id=destination_id)
+        request=GetDestinationRequest(destination_id=destination_id),
     )
 
     info = response.destination_connector_information
 
-    result = [f"Destination Connector Information:"]
+    result = ["Destination Connector Information:"]
     result.append(f"Name: {info.name}")
     result.append("Configuration:")
     for key, value in info.config:
@@ -255,7 +260,7 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
     client = ctx.request_context.lifespan_context.client
 
     response = await client.workflows.get_workflow_async(
-        request=GetWorkflowRequest(workflow_id=workflow_id)
+        request=GetWorkflowRequest(workflow_id=workflow_id),
     )
 
     info = response.workflow_information
@@ -297,7 +302,7 @@ async def create_workflow(ctx: Context, workflow_config: Dict) -> str:
     try:
         workflow = CreateWorkflow(**workflow_config)
         response = await client.workflows.create_workflow_async(
-            request=CreateWorkflowRequest(create_workflow=workflow)
+            request=CreateWorkflowRequest(create_workflow=workflow),
         )
 
         info = response.workflow_information
@@ -320,7 +325,7 @@ async def run_workflow(ctx: Context, workflow_id: str) -> str:
 
     try:
         response = await client.workflows.run_workflow_async(
-            request=RunWorkflowRequest(workflow_id=workflow_id)
+            request=RunWorkflowRequest(workflow_id=workflow_id),
         )
         return f"Workflow execution initiated: {response.raw_response}"
     except Exception as e:
@@ -344,10 +349,7 @@ async def update_workflow(ctx: Context, workflow_id: str, workflow_config: Dict)
     try:
         workflow = UpdateWorkflow(**workflow_config)
         response = await client.workflows.update_workflow_async(
-            request=UpdateWorkflowRequest(
-                workflow_id=workflow_id,
-                update_workflow=workflow
-            )
+            request=UpdateWorkflowRequest(workflow_id=workflow_id, update_workflow=workflow),
         )
 
         info = response.workflow_information
@@ -370,11 +372,12 @@ async def delete_workflow(ctx: Context, workflow_id: str) -> str:
 
     try:
         response = await client.workflows.delete_workflow_async(
-            request=DeleteWorkflowRequest(workflow_id=workflow_id)
+            request=DeleteWorkflowRequest(workflow_id=workflow_id),
         )
         return f"Workflow deleted successfully: {response.raw_response}"
     except Exception as e:
         return f"Error deleting workflow: {str(e)}"
+
 
 if __name__ == "__main__":
     load_environment_variables()
