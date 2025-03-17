@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 from mcp.server.fastmcp import Context
@@ -9,43 +10,51 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
+    DestinationConnectorType,
     UpdateDestinationConnector,
+    WeaviateDestinationConnectorConfigInput,
 )
 
 
-async def create_s3_destination(
+def _prepare_weaviate_source_config(
+    collection: str,
+    cluster_url: str,
+) -> WeaviateDestinationConnectorConfigInput:
+    """Prepare the Azure source connector configuration."""
+    return WeaviateDestinationConnectorConfigInput(
+        cluster_url=cluster_url,
+        api_key=os.getenv("WEAVIATE_CLOUD_API_KEY"),
+        collection=collection,
+    )
+
+
+async def create_weaviate_destination(
     ctx: Context,
     name: str,
-    remote_url: str,
-    key: str,
-    secret: str,
-    token: Optional[str] = None,
-    endpoint_url: Optional[str] = None,
+    cluster_url: str,
+    collection: str,
 ) -> str:
-    """Create an S3 destination connector.
+    """Create an weaviate vector database destination connector.
 
     Args:
-        name: A unique name for this connector
-        remote_url: The S3 URI to the bucket or folder (e.g., s3://my-bucket/)
-        key: The AWS access key ID
-        secret: The AWS secret access key
-        token: The AWS STS session token for temporary access (optional)
-        endpoint_url: Custom URL if connecting to a non-AWS S3 bucket
+        cluster_url: URL of the weaviate cluster
+        collection : Name of the collection to use in the weaviate cluster
+        Note: The collection is a table in the weaviate cluster.
+              In platform, there are dedicated code to generate collection for users
+              here, due to the simplicity of the server, we are not generating it for users.
 
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = {"remote_url": remote_url, "key": key, "secret": secret}
+    config = _prepare_weaviate_source_config(collection, cluster_url)
 
-    if token:
-        config["token"] = token
-
-    if endpoint_url:
-        config["endpoint_url"] = endpoint_url
-
-    destination_connector = CreateDestinationConnector(name=name, type="s3", config=config)
+    destination_connector = CreateDestinationConnector(
+        name=name,
+        type=DestinationConnectorType.WEAVIATE_CLOUD,
+        config=config,
+    )
 
     try:
         response = await client.destinations.create_destination_async(
@@ -54,39 +63,35 @@ async def create_s3_destination(
 
         info = response.destination_connector_information
 
-        result = ["S3 Destination Connector created:"]
+        result = ["weaviate Destination Connector created:"]
         result.append(f"Name: {info.name}")
         result.append(f"ID: {info.id}")
         result.append("Configuration:")
         for key, value in info.config:
             # Don't print secrets in the output
-            if key in ["secret", "token"] and value:
+            if key == "api_key" and value:
                 value = "********"
             result.append(f"  {key}: {value}")
 
         return "\n".join(result)
     except Exception as e:
-        return f"Error creating S3 destination connector: {str(e)}"
+        return f"Error creating weaviate destination connector: {str(e)}"
 
 
-async def update_s3_destination(
+async def update_weaviate_destination(
     ctx: Context,
     destination_id: str,
-    remote_url: Optional[str] = None,
-    key: Optional[str] = None,
-    secret: Optional[str] = None,
-    token: Optional[str] = None,
-    endpoint_url: Optional[str] = None,
+    api_key: Optional[str] = None,
+    cluster_url: Optional[str] = None,
+    collection: Optional[str] = None,
 ) -> str:
-    """Update an S3 destination connector.
+    """Update an weaviate destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        remote_url: The S3 URI to the bucket or folder
-        key: The AWS access key ID
-        secret: The AWS secret access key
-        token: The AWS STS session token for temporary access
-        endpoint_url: Custom URL if connecting to a non-AWS S3 bucket
+        api_key (optional): API key for the weaviate cluster
+        cluster_url (optional): URL of the weaviate cluster
+        collection (optional): Name of the collection(like a file) to use in the weaviate cluster
 
     Returns:
         String containing the updated destination connector information
@@ -105,20 +110,13 @@ async def update_s3_destination(
     # Update configuration with new values
     config = dict(current_config)
 
-    if remote_url is not None:
-        config["remote_url"] = remote_url
+    if cluster_url is not None:
+        config["cluster_url"] = cluster_url
 
-    if key is not None:
-        config["key"] = key
-
-    if secret is not None:
-        config["secret"] = secret
-
-    if token is not None:
-        config["token"] = token
-
-    if endpoint_url is not None:
-        config["endpoint_url"] = endpoint_url
+    if api_key is not None:
+        config["api_key"] = api_key
+    if collection is not None:
+        config["collection"] = collection
 
     destination_connector = UpdateDestinationConnector(config=config)
 
@@ -132,23 +130,23 @@ async def update_s3_destination(
 
         info = response.destination_connector_information
 
-        result = ["S3 Destination Connector updated:"]
+        result = ["weaviate Destination Connector updated:"]
         result.append(f"Name: {info.name}")
         result.append(f"ID: {info.id}")
         result.append("Configuration:")
         for key, value in info.config:
             # Don't print secrets in the output
-            if key in ["secret", "token"] and value:
+            if key == "api_key" and value:
                 value = "********"
             result.append(f"  {key}: {value}")
 
         return "\n".join(result)
     except Exception as e:
-        return f"Error updating S3 destination connector: {str(e)}"
+        return f"Error updating weaviate destination connector: {str(e)}"
 
 
-async def delete_s3_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an S3 destination connector.
+async def delete_weaviate_destination(ctx: Context, destination_id: str) -> str:
+    """Delete an weaviate destination connector.
 
     Args:
         destination_id: ID of the destination connector to delete
@@ -162,6 +160,6 @@ async def delete_s3_destination(ctx: Context, destination_id: str) -> str:
         _ = await client.destinations.delete_destination_async(
             request=DeleteDestinationRequest(destination_id=destination_id),
         )
-        return f"S3 Destination Connector with ID {destination_id} deleted successfully"
+        return f"weaviate Destination Connector with ID {destination_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting S3 destination connector: {str(e)}"
+        return f"Error deleting weaviate destination connector: {str(e)}"
