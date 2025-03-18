@@ -25,7 +25,6 @@ from firecrawl import FirecrawlApp
 async def invoke_firecrawl(
     ctx: Context,
     url: str,
-    api_key: str,
     s3_uri: str,
     limit: int = 100,
 ) -> Dict[str, Any]:
@@ -33,16 +32,18 @@ async def invoke_firecrawl(
 
     Args:
         url: URL to crawl
-        api_key: Firecrawl API key
         s3_uri: S3 URI where results will be uploaded 
         limit: Maximum number of pages to crawl (default: 100)
 
     Returns:
         Dictionary with crawl job information including the job ID
     """
+    # Get the API key from environment variable
+    api_key = os.getenv("FIRECRAWL_API_KEY")
+    
     # Validate parameters
     if not api_key:
-        return {"error": "API key is required"}
+        return {"error": "Firecrawl API key is required. Set FIRECRAWL_API_KEY environment variable."}
     
     if not s3_uri:
         return {"error": "S3 URI is required"}
@@ -77,7 +78,7 @@ async def invoke_firecrawl(
             crawl_id = crawl_status["id"]
             # Start background task without waiting for it (fire and forget)
             asyncio.create_task(
-                wait_for_crawl_completion(ctx, crawl_id, s3_uri, api_key=api_key)
+                wait_for_crawl_completion(ctx, crawl_id, s3_uri)
             )
             
             # Update the response to indicate background processing
@@ -93,19 +94,20 @@ async def invoke_firecrawl(
 async def check_crawl_status(
     ctx: Context,
     crawl_id: str,
-    api_key: str,
 ) -> Dict[str, Any]:
-    """Check the status of an existing crawl job.
+    """Check the status of an existing Firecrawl crawl job.
 
     Args:
         crawl_id: ID of the crawl job to check
-        api_key: Firecrawl API key
 
     Returns:
         Dictionary containing the current status of the crawl job
     """
+    # Get the API key from environment variable
+    api_key = os.getenv("FIRECRAWL_API_KEY")
+    
     if not api_key:
-        return {"error": "API key is required"}
+        return {"error": "Firecrawl API key is required. Set FIRECRAWL_API_KEY environment variable."}
     
     try:
         # Initialize the Firecrawl client
@@ -194,24 +196,25 @@ async def wait_for_crawl_completion(
     s3_uri: str,
     poll_interval: int = 30,
     timeout: int = 3600,
-    api_key: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Poll a crawl job until completion and upload results to S3.
+    """Poll a Firecrawl crawl job until completion and upload results to S3.
 
     Args:
         crawl_id: ID of the crawl job to monitor
         s3_uri: S3 URI where results will be uploaded
         poll_interval: How often to check job status in seconds (default: 30)
         timeout: Maximum time to wait in seconds (default: 1 hour)
-        api_key: Firecrawl API key
 
     Returns:
         Dictionary with information about the completed job and S3 URI
     """
     start_time = time.time()
     
+    # Get the API key from environment variable
+    api_key = os.getenv("FIRECRAWL_API_KEY")
+    
     if not api_key:
-        return {"error": "API key is required"}
+        return {"error": "Firecrawl API key is required. Set FIRECRAWL_API_KEY environment variable."}
     
     # Validate S3 URI
     if not s3_uri:

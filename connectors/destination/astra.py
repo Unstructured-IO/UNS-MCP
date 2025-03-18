@@ -1,4 +1,5 @@
 from typing import Optional
+import os
 
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
@@ -16,8 +17,6 @@ from unstructured_client.models.shared import (
 async def create_astradb_destination(
     ctx: Context,
     name: str,
-    token: str,
-    api_endpoint: str,
     collection_name: str,
     keyspace: str,
     batch_size: int = 20,
@@ -26,16 +25,28 @@ async def create_astradb_destination(
 
     Args:
         name: A unique name for this connector
-        token: The AstraDB application token
-        api_endpoint: The AstraDB API endpoint
-        collection_name: The name of the collection to use
-        keyspace: The AstraDB keyspace
+        collection_name: The name of the collection to use 
+        keyspace: The AstraDB keyspace 
         batch_size: The batch size for inserting documents (default: 20)
 
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
+
+    # Get credentials from environment variables
+    token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
+    api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
+
+    # Validate required parameters
+    if not token:
+        return "Error: AstraDB application token is required. Set ASTRA_DB_APPLICATION_TOKEN environment variable."
+    if not api_endpoint:
+        return "Error: AstraDB API endpoint is required. Set ASTRA_DB_API_ENDPOINT environment variable."
+    if not collection_name:
+        return "Error: AstraDB collection name is required."
+    if not keyspace:
+        return "Error: AstraDB keyspace is required."
 
     config = {
         "token": token,
@@ -72,8 +83,6 @@ async def create_astradb_destination(
 async def update_astradb_destination(
     ctx: Context,
     destination_id: str,
-    token: Optional[str] = None,
-    api_endpoint: Optional[str] = None,
     collection_name: Optional[str] = None,
     keyspace: Optional[str] = None,
     batch_size: Optional[int] = None,
@@ -82,16 +91,18 @@ async def update_astradb_destination(
 
     Args:
         destination_id: ID of the destination connector to update
-        token: The AstraDB application token
-        api_endpoint: The AstraDB API endpoint
-        collection_name: The name of the collection to use
-        keyspace: The AstraDB keyspace
-        batch_size: The batch size for inserting documents
+        collection_name: The name of the collection to use (optional)
+        keyspace: The AstraDB keyspace (optional)
+        batch_size: The batch size for inserting documents (optional)
 
     Returns:
         String containing the updated destination connector information
     """
     client = ctx.request_context.lifespan_context.client
+
+    # Get credentials from environment variables
+    token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
+    api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
 
     # Get the current destination connector configuration
     try:
