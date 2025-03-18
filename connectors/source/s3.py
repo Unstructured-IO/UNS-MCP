@@ -14,6 +14,10 @@ from unstructured_client.models.shared import (
     UpdateSourceConnector,
 )
 
+from connectors.utils import (
+    create_log_for_created_updated_connector,
+)
+
 
 def _prepare_s3_source_config(
     remote_url: Optional[str],
@@ -57,20 +61,13 @@ async def create_s3_source(
         response = await client.sources.create_source_async(
             request=CreateSourceRequest(create_source_connector=source_connector),
         )
-
-        info = response.source_connector_information
-
-        result = ["S3 Source Connector created:"]
-        result.append(f"Name: {info.name}")
-        result.append(f"ID: {info.id}")
-        result.append("Configuration:")
-        for key, value in info.config:
-            # Don't print secrets in the output
-            if key in ["secret", "token"] and value:
-                value = "********"
-            result.append(f"  {key}: {value}")
-
-        return "\n".join(result)
+        result = create_log_for_created_updated_connector(
+            response,
+            connector_name="S3",
+            connector_type="Source",
+            created_or_updated="Created",
+        )
+        return result
     except Exception as e:
         return f"Error creating S3 source connector: {str(e)}"
 
@@ -120,20 +117,13 @@ async def update_s3_source(
                 update_source_connector=source_connector,
             ),
         )
-
-        info = response.source_connector_information
-
-        result = ["S3 Source Connector updated:"]
-        result.append(f"Name: {info.name}")
-        result.append(f"ID: {info.id}")
-        result.append("Configuration:")
-        for key, value in info.config:
-            # Don't print secrets in the output
-            if key in ["secret", "token"] and value:
-                value = "********"
-            result.append(f"  {key}: {value}")
-
-        return "\n".join(result)
+        result = create_log_for_created_updated_connector(
+            response,
+            connector_name="S3",
+            connector_type="Source",
+            created_or_updated="Updated",
+        )
+        return result
     except Exception as e:
         return f"Error updating S3 source connector: {str(e)}"
 

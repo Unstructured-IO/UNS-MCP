@@ -15,8 +15,12 @@ from unstructured_client.models.shared import (
     WeaviateDestinationConnectorConfigInput,
 )
 
+from connectors.utils import (
+    create_log_for_created_updated_connector,
+)
 
-def _prepare_weaviate_source_config(
+
+def _prepare_weaviate_dest_config(
     collection: str,
     cluster_url: str,
 ) -> WeaviateDestinationConnectorConfigInput:
@@ -48,7 +52,7 @@ async def create_weaviate_destination(
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_weaviate_source_config(collection, cluster_url)
+    config = _prepare_weaviate_dest_config(collection, cluster_url)
 
     destination_connector = CreateDestinationConnector(
         name=name,
@@ -60,20 +64,14 @@ async def create_weaviate_destination(
         response = await client.destinations.create_destination_async(
             request=CreateDestinationRequest(create_destination_connector=destination_connector),
         )
+        result = create_log_for_created_updated_connector(
+            response,
+            connector_name="Weaviate",
+            connector_type="Destination",
+            created_or_updated="Created",
+        )
+        return result
 
-        info = response.destination_connector_information
-
-        result = ["weaviate Destination Connector created:"]
-        result.append(f"Name: {info.name}")
-        result.append(f"ID: {info.id}")
-        result.append("Configuration:")
-        for key, value in info.config:
-            # Don't print secrets in the output
-            if key == "api_key" and value:
-                value = "********"
-            result.append(f"  {key}: {value}")
-
-        return "\n".join(result)
     except Exception as e:
         return f"Error creating weaviate destination connector: {str(e)}"
 
@@ -81,7 +79,6 @@ async def create_weaviate_destination(
 async def update_weaviate_destination(
     ctx: Context,
     destination_id: str,
-    api_key: Optional[str] = None,
     cluster_url: Optional[str] = None,
     collection: Optional[str] = None,
 ) -> str:
@@ -89,7 +86,6 @@ async def update_weaviate_destination(
 
     Args:
         destination_id: ID of the destination connector to update
-        api_key (optional): API key for the weaviate cluster
         cluster_url (optional): URL of the weaviate cluster
         collection (optional): Name of the collection(like a file) to use in the weaviate cluster
 
@@ -113,8 +109,6 @@ async def update_weaviate_destination(
     if cluster_url is not None:
         config["cluster_url"] = cluster_url
 
-    if api_key is not None:
-        config["api_key"] = api_key
     if collection is not None:
         config["collection"] = collection
 
@@ -128,19 +122,13 @@ async def update_weaviate_destination(
             ),
         )
 
-        info = response.destination_connector_information
-
-        result = ["weaviate Destination Connector updated:"]
-        result.append(f"Name: {info.name}")
-        result.append(f"ID: {info.id}")
-        result.append("Configuration:")
-        for key, value in info.config:
-            # Don't print secrets in the output
-            if key == "api_key" and value:
-                value = "********"
-            result.append(f"  {key}: {value}")
-
-        return "\n".join(result)
+        result = create_log_for_created_updated_connector(
+            response,
+            connector_name="Weaviate",
+            connector_type="Destination",
+            created_or_updated="Updated",
+        )
+        return result
     except Exception as e:
         return f"Error updating weaviate destination connector: {str(e)}"
 
