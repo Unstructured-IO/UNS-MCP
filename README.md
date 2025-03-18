@@ -74,6 +74,39 @@ Delete an S3 source connector.
 Parameters:
 - `source_id`: ID of the source connector to delete
 
+#### invoke_firecrawl
+Start an asynchronous web crawl job using Firecrawl.
+
+Parameters:
+- `url`: URL to crawl
+- `api_key`: Firecrawl API key
+- `s3_uri`: S3 URI where results will be uploaded (e.g., s3://my-bucket/folder/)
+- `limit` (optional): Maximum number of pages to crawl (default: 100)
+
+#### check_crawl_status
+Check the status of an existing Firecrawl crawl job.
+
+Parameters:
+- `crawl_id`: ID of the crawl job to check
+- `api_key`: Firecrawl API key
+
+#### wait_for_crawl_completion
+Poll a Firecrawl crawl job until completion and upload results to S3. 
+
+Parameters:
+- `crawl_id`: ID of the crawl job to monitor
+- `s3_uri`: S3 URI where results will be uploaded. The crawl job ID will be appended directly to this URI
+- `poll_interval` (optional): How often to check job status in seconds (default: 30)
+- `timeout` (optional): Maximum time to wait in seconds (default: 3600)
+- `api_key`: Firecrawl API key
+
+Returns:
+- A dictionary with crawl statistics and S3 upload information including:
+  - Number of successfully uploaded files
+  - Number of failed uploads
+  - Total bytes uploaded
+  - Original crawl job statistics
+
 ### Destinations
 
 #### list_destinations
@@ -112,6 +145,34 @@ Parameters:
 
 #### delete_s3_destination
 Delete an S3 destination connector.
+
+Parameters:
+- `destination_id`: ID of the destination connector to delete
+
+#### create_astradb_destination
+Create an AstraDB destination connector.
+
+Parameters:
+- `name`: Unique name for the connector
+- `token`: The AstraDB application token
+- `api_endpoint`: The AstraDB API endpoint
+- `collection_name`: The name of the collection to use
+- `keyspace`: The AstraDB keyspace
+- `batch_size` (optional): The batch size for inserting documents (default: 20)
+
+#### update_astradb_destination
+Update an existing AstraDB destination connector.
+
+Parameters:
+- `destination_id`: ID of the destination connector to update
+- `token` (optional): Updated AstraDB application token
+- `api_endpoint` (optional): Updated AstraDB API endpoint
+- `collection_name` (optional): Updated collection name
+- `keyspace` (optional): Updated AstraDB keyspace
+- `batch_size` (optional): Updated batch size for inserting documents
+
+#### delete_astradb_destination
+Delete an AstraDB destination connector.
 
 Parameters:
 - `destination_id`: ID of the destination connector to delete
