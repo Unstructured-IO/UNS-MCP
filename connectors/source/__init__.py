@@ -9,3 +9,8 @@ def register_source_connectors(mcp: FastMCP):
     mcp.tool()(create_s3_source)
     mcp.tool()(update_s3_source)
     mcp.tool()(delete_s3_source)
+
+    from .azure import create_azure_source, update_azure_source, delete_azure_source
+    mcp.tool()(create_azure_source)
+    mcp.tool()(update_azure_source)
+    mcp.tool()(delete_azure_source)
