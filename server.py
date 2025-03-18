@@ -1,7 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import AsyncIterator, Dict, Optional
+from typing import AsyncIterator, Optional
 
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context, FastMCP
@@ -25,6 +25,7 @@ from unstructured_client.models.shared import (
     UpdateWorkflow,
     WorkflowState,
 )
+from unstructured_client.models.shared.createworkflow import CreateWorkflowTypedDict
 
 # Register connector tools
 from connectors import register_connectors
@@ -287,12 +288,24 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
-async def create_workflow(ctx: Context, workflow_config: Dict) -> str:
+async def create_workflow(ctx: Context, workflow_config: CreateWorkflowTypedDict) -> str:
     """Create a new workflow.
 
     Args:
-        workflow_config: Dictionary containing the workflow configuration
-            Must include required fields as per CreateWorkflow model
+        workflow_config: A Typed Dictionary containing required fields (destination_id,
+        name, source_id, workflow_type) and non-required fields (schedule, and workflow_nodes)
+        Note workflow_nodes is a list of WorkflowNodeTypedDict: partition, prompter,chunk, embed
+        Below is an example of a partition workflow node:
+            {
+                "name": "vlm-partition",
+                "type": "partition",
+                "sub_type": "vlm",
+                "settings": {
+                            "provider": "bedrock",
+                            "model": "us.amazon.nova-lite-v1:0"
+                            }
+            }
+
 
     Returns:
         String containing the created workflow information
@@ -333,13 +346,17 @@ async def run_workflow(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
-async def update_workflow(ctx: Context, workflow_id: str, workflow_config: Dict) -> str:
+async def update_workflow(
+    ctx: Context,
+    workflow_id: str,
+    workflow_config: CreateWorkflowTypedDict,
+) -> str:
     """Update an existing workflow.
 
     Args:
         workflow_id: ID of the workflow to update
-        workflow_config: Dictionary containing the updated workflow configuration
-            Must include required fields as per UpdateWorkflow model
+        workflow_config: A Typed Dictionary containing required fields (destination_id,
+        name, source_id, workflow_type) and non-required fields (schedule, and workflow_nodes)
 
     Returns:
         String containing the updated workflow information
