@@ -10,10 +10,9 @@ def register_source_connectors(mcp: FastMCP):
     mcp.tool()(delete_s3_source)
     
     # Register Firecrawl connector tools
-    from .firecrawl import invoke_firecrawl, check_crawl_status, wait_for_crawl_completion
+    from .firecrawl import invoke_firecrawl, check_crawl_status
     mcp.tool()(invoke_firecrawl)
     mcp.tool()(check_crawl_status)
-    mcp.tool()(wait_for_crawl_completion)
 
     from .azure import create_azure_source, update_azure_source, delete_azure_source
     mcp.tool()(create_azure_source)
