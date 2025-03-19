@@ -16,7 +16,14 @@ def register_source_connectors(mcp: FastMCP):
     mcp.tool()(invoke_firecrawl_llmtxt)
     mcp.tool()(check_llmtxt_status)
 
-    from .azure import create_azure_source, update_azure_source, delete_azure_source
+    from .azure import create_azure_source, delete_azure_source, update_azure_source
+
     mcp.tool()(create_azure_source)
     mcp.tool()(update_azure_source)
     mcp.tool()(delete_azure_source)
+
+    from .gdrive import create_gdrive_source, delete_gdrive_source, update_gdrive_source
+
+    mcp.tool()(create_gdrive_source)
+    mcp.tool()(update_gdrive_source)
+    mcp.tool()(delete_gdrive_source)
