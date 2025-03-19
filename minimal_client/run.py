@@ -11,6 +11,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.server.fastmcp.utilities.logging import configure_logging, get_logger
 from rich import print
+from rich.prompt import Prompt
 
 configure_logging("DEBUG")
 
@@ -148,7 +149,9 @@ class MCPClient:
 
         while True:
             try:
-                query = input("\nQuery: ").strip()
+                query = Prompt.ask("\n[bold green]Query[/bold green]")
+                print()
+                query = query.strip()
 
                 if query.lower() == "quit":
                     break
