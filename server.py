@@ -294,15 +294,16 @@ async def create_workflow(ctx: Context, workflow_config: CreateWorkflowTypedDict
     Args:
         workflow_config: A Typed Dictionary containing required fields (destination_id,
         name, source_id, workflow_type) and non-required fields (schedule, and workflow_nodes)
-        Note workflow_nodes is a list of WorkflowNodeTypedDict: partition, prompter,chunk, embed
+        Note workflow_nodes is only enabled when workflow_type is `custom` and
+        is a list of WorkflowNodeTypedDict: partition, prompter,chunk, embed
         Below is an example of a partition workflow node:
             {
                 "name": "vlm-partition",
                 "type": "partition",
                 "sub_type": "vlm",
                 "settings": {
-                            "provider": "bedrock",
-                            "model": "us.amazon.nova-lite-v1:0"
+                            "provider": "your favorite provider",
+                            "model": "your favorite model"
                             }
             }
 
