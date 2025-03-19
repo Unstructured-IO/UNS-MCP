@@ -26,19 +26,15 @@ To run tests from a specific file:
 pytest tests/connectors/source/test_firecrawl.py
 ```
 
-### Running Specific Test Classes or Methods
+### Running Specific Test Functions
 
-To run a specific test class:
-
-```bash
-pytest tests/connectors/source/test_firecrawl.py::TestEnsureValidS3Uri
-```
-
-To run a specific test method:
+Most tests in this project are defined as functions rather than classes. To run a specific test function:
 
 ```bash
-pytest tests/connectors/source/test_firecrawl.py::TestEnsureValidS3Uri::test_valid_s3_uri
+pytest tests/connectors/source/test_firecrawl.py::test_ensure_valid_s3_uri_valid_input
 ```
+
+
 
 ## Test Structure
 

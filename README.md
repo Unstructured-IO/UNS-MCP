@@ -74,8 +74,8 @@ Delete an S3 source connector.
 Parameters:
 - `source_id`: ID of the source connector to delete
 
-#### invoke_firecrawl
-Start an asynchronous web crawl job using Firecrawl.
+#### invoke_firecrawl_crawlhtml
+Start an asynchronous web crawl job using Firecrawl to retrieve HTML content.
 
 Parameters:
 - `url`: URL to crawl
@@ -84,16 +84,25 @@ Parameters:
 
 Note: Requires `FIRECRAWL_API_KEY` to be set in the environment variables.
 
-#### check_crawl_status
-Check the status of an existing Firecrawl crawl job.
+Returns:
+- Dictionary with job information including job ID and S3 URI for the results
+
+Output Files:
+- The function will create and upload HTML files for each crawled page, with filenames based on the URLs (with special characters replaced).
+
+#### check_crawlhtml_status
+Check the status of an existing Firecrawl HTML crawl job.
 
 Parameters:
 - `crawl_id`: ID of the crawl job to check
 
 Note: Requires `FIRECRAWL_API_KEY` to be set in the environment variables.
 
-#### wait_for_crawl_completion
-Poll a Firecrawl crawl job until completion and upload results to S3. 
+Returns:
+- Dictionary containing the current status of the crawl job including completed and total URLs
+
+#### wait_for_crawlhtml_completion
+Poll a Firecrawl HTML crawl job until completion and upload results to S3. 
 
 Parameters:
 - `crawl_id`: ID of the crawl job to monitor
@@ -108,7 +117,48 @@ Returns:
   - Number of successfully uploaded files
   - Number of failed uploads
   - Total bytes uploaded
-  - Original crawl job statistics
+  - Completed URLs and total URLs statistics
+
+Process:
+- This function polls the Firecrawl API until the crawl job is complete
+- Once completed, it downloads the HTML content for all crawled pages
+- The HTML content is saved as individual files in a temporary directory
+- All files are then uploaded to the specified S3 URI in a subfolder named with the crawl ID
+- After successful upload, the temporary files are automatically cleaned up
+
+#### invoke_firecrawl_llmtxt
+Start an asynchronous LLM-optimized text generation job using Firecrawl.
+
+Parameters:
+- `url`: URL to crawl
+- `s3_uri`: S3 URI where results will be uploaded (e.g., s3://my-bucket/folder/)
+- `max_urls` (optional): Maximum number of pages to crawl (1-100, default: 10)
+
+Note: Requires `FIRECRAWL_API_KEY` to be set in the environment variables.
+
+Returns:
+- Dictionary with job information including job ID and S3 URI for the results
+
+Output Files:
+- The function will create and upload a file named `llmfull.txt` containing the LLM-optimized text extracted from the crawled web pages.
+
+#### check_llmtxt_status
+Check the status of an existing LLM text generation job.
+
+Parameters:
+- `job_id`: ID of the LLM text generation job to check  
+
+Note: Requires `FIRECRAWL_API_KEY` to be set in the environment variables.
+
+Returns:
+- Dictionary containing the current status of the job and LLM-optimized text content (llmsfulltxt) if completed
+
+Process:
+- The job crawls the specified URL and related pages (up to max_urls)
+- Firecrawl processes the content to generate LLM-optimized text
+- When check_llmtxt_status indicates completion, the text is available in the response
+- A background task automatically saves the text to a file named llmfull.txt
+- The file is uploaded to the specified S3 URI in a subfolder named with the job ID
 
 ### Destinations
 
