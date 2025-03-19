@@ -87,7 +87,7 @@ class MCPClient:
             messages=self.history,
             tools=self.available_tools,
         )
-        logger.debug(f"Model response: {response}")
+        logger.debug(f"ASSISTANT response: {response}")
         content_to_process = response.content
 
         max_loops = 5
