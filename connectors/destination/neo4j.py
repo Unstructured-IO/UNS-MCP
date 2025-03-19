@@ -46,7 +46,7 @@ async def create_neo4j_destination(
     Args:
         name: A unique name for this connector
         database: The neo4j database, e.g. "neo4j"
-        uri: The neo4j URI, e.g. bolt://localhost:7687
+        uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
         username: The neo4j username
 
 
@@ -86,7 +86,10 @@ async def update_neo4j_destination(
 
     Args:
         destination_id: ID of the destination connector to update
-        remote_url: The neo4j URI to the bucket or folder
+        database: The neo4j database, e.g. "neo4j"
+        uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
+        username: The neo4j username
+
 
     Returns:
         String containing the updated destination connector information
