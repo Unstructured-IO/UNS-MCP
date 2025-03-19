@@ -1,6 +1,7 @@
 # Source: https://modelcontextprotocol.io/quickstart/client#best-practices
 
 import asyncio
+import logging
 from contextlib import AsyncExitStack
 from typing import Optional
 
@@ -8,7 +9,23 @@ from anthropic import Anthropic
 from dotenv import load_dotenv
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from mcp.server.fastmcp.utilities.logging import configure_logging, get_logger
+from rich import print
 
+configure_logging("DEBUG")
+
+logger = get_logger(__name__)
+loggers_to_mute = [
+    "anthropic",
+    "httpcore",
+    "requests",
+    "urllib3",
+    "httpx",
+    "botocore",
+    "PIL",
+]
+for logger_name in loggers_to_mute:
+    logging.getLogger(logger_name).setLevel(logging.WARNING)
 load_dotenv()  # load environment variables from .env
 
 
@@ -18,6 +35,8 @@ class MCPClient:
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
         self.anthropic = Anthropic()
+        self.history = []
+        self.available_tools = []
 
     async def connect_to_server(self, server_script_path: str):
         """Connect to an MCP server
@@ -44,11 +63,7 @@ class MCPClient:
         # List available tools
         response = await self.session.list_tools()
         tools = response.tools
-        print("\nConnected to server with tools:", [tool.name for tool in tools])
-
-    async def process_query(self, query: str) -> str:
-        """Process a query using Claude and available tools"""
-        messages = [{"role": "user", "content": query}]
+        logger.info(f"Connected to server with tools: {[tool.name for tool in tools]}")
 
         response = await self.session.list_tools()
         available_tools = [
@@ -59,69 +74,77 @@ class MCPClient:
             }
             for tool in response.tools
         ]
+        self.available_tools = available_tools
 
-        # Initial Claude API call
+    async def process_query(self, query: str) -> None:
+        """Process a query using Claude and available tools"""
+        self.history.append({"role": "user", "content": query})
+
         response = self.anthropic.messages.create(
             model="claude-3-5-sonnet-20241022",
             max_tokens=1000,
-            messages=messages,
-            tools=available_tools,
+            messages=self.history,
+            tools=self.available_tools,
         )
+        logger.debug(f"Model response: {response}")
+        content_to_process = response.content
 
-        # Process response and handle tool calls
-        final_text = []
+        max_loops = 5
+        loop_number = 0
 
-        assistant_message_content = []
-        for content in response.content:
-            if content.type == "text":
-                final_text.append(content.text)
-                assistant_message_content.append(content)
-            elif content.type == "tool_use":
-                tool_name = content.name
-                tool_args = content.input
+        while content_to_process:
 
-                # Execute tool call
+            loop_number += 1
+            if loop_number > max_loops:
+                break
+
+            content_item = content_to_process.pop(0)
+            self.history.append({"role": "assistant", "content": [content_item]})
+
+            if content_item.type == "text":
+                print(f"\n[bold red]ASSISTANT[/bold red]\n{content_item.text}")
+            elif content_item.type == "tool_use":
+
+                tool_name = content_item.name
+                tool_args = content_item.input
+
+                print(f"\n[bold cyan]TOOL CALL[/bold cyan]\n{tool_name} with args {tool_args}\n")
+
                 result = await self.session.call_tool(tool_name, tool_args)
-                final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
+                logger.debug(f"TOOL result: {result}")
 
-                print("\nTool result:")
                 for result_item in result.content:
-                    if result_item.type == "text":
-                        print(result_item.text)
-                    else:
-                        print(result_item)
+                    print(f"\n[bold cyan]TOOL OUTPUT[/bold cyan]:\n{result_item.text}\n")
 
-                assistant_message_content.append(content)
-                messages.append({"role": "assistant", "content": assistant_message_content})
-                messages.append(
+                self.history.append(
                     {
                         "role": "user",
                         "content": [
                             {
                                 "type": "tool_result",
-                                "tool_use_id": content.id,
+                                "tool_use_id": content_item.id,
                                 "content": result.content,
                             },
                         ],
                     },
                 )
 
-                # Get next response from Claude
                 response = self.anthropic.messages.create(
                     model="claude-3-5-sonnet-20241022",
                     max_tokens=1000,
-                    messages=messages,
-                    tools=available_tools,
+                    messages=self.history,
+                    tools=self.available_tools,
                 )
+                logger.debug(f"ASSISTANT response: {response}")
 
-                final_text.append(response.content[0].text)
+                content_to_process.extend(response.content)
 
-        return "\n".join(final_text)
+        return
 
     async def chat_loop(self):
         """Run an interactive chat loop"""
-        print("\nMCP Client Started!")
-        print("Type your queries or 'quit' to exit.")
+        logger.info("MCP Client Started!")
+        logger.info("Type your queries or 'quit' to exit.")
 
         while True:
             try:
@@ -130,11 +153,9 @@ class MCPClient:
                 if query.lower() == "quit":
                     break
 
-                response = await self.process_query(query)
-                print("\n" + response)
-
+                await self.process_query(query)
             except Exception as e:
-                print(f"\nError: {str(e)}")
+                logger.error(f"Error: {str(e)}")
 
     async def cleanup(self):
         """Clean up resources"""
