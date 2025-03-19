@@ -52,7 +52,7 @@ async def create_gdrive_source(
     """
     client = ctx.request_context.lifespan_context.client
     config = _prepare_gdrive_source_config(drive_id, recursive, extensions)
-    source_connector = CreateSourceConnector(name=name, type="gdrive", config=config)
+    source_connector = CreateSourceConnector(name=name, type="google_drive", config=config)
 
     try:
         response = await client.sources.create_source_async(
