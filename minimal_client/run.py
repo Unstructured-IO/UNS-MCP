@@ -1,6 +1,8 @@
 # Source: https://modelcontextprotocol.io/quickstart/client#best-practices
 
 import asyncio
+
+# import json
 from contextlib import AsyncExitStack
 from typing import Optional
 
@@ -59,7 +61,7 @@ class MCPClient:
             }
             for tool in response.tools
         ]
-
+        # print("\nAvailable tools:", json.dumps(available_tools, indent=2))
         # Initial Claude API call
         response = self.anthropic.messages.create(
             model="claude-3-5-sonnet-20241022",
