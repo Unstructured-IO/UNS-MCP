@@ -9,3 +9,10 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "unstructured-client>=0.31.1",
 ]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["connectors", "minimal_client"]  # Explicitly list your packages
