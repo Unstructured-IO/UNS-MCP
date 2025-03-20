@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 from contextlib import AsyncExitStack
 from typing import Optional
 
@@ -11,8 +12,10 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.server.fastmcp.utilities.logging import configure_logging, get_logger
 from rich import print
+from rich.prompt import Prompt
 
-configure_logging("DEBUG")
+log_level = getattr(logging, os.getenv("LOG_LEVEL").upper(), logging.INFO)
+configure_logging(log_level)
 
 logger = get_logger(__name__)
 loggers_to_mute = [
@@ -25,7 +28,10 @@ loggers_to_mute = [
     "PIL",
 ]
 for logger_name in loggers_to_mute:
-    logging.getLogger(logger_name).setLevel(logging.WARNING)
+    logging.getLogger(logger_name).setLevel(
+        max(logging.WARNING, log_level),  # Set error if error or higher
+    )
+
 load_dotenv()  # load environment variables from .env
 
 
@@ -86,16 +92,15 @@ class MCPClient:
             messages=self.history,
             tools=self.available_tools,
         )
-        logger.debug(f"Model response: {response}")
+        logger.debug(f"ASSISTANT response: {response}")
         content_to_process = response.content
 
-        max_loops = 5
-        loop_number = 0
+        max_model_calls = 5
+        model_call = 1
 
         while content_to_process:
 
-            loop_number += 1
-            if loop_number > max_loops:
+            if model_call > max_model_calls:
                 break
 
             content_item = content_to_process.pop(0)
@@ -135,11 +140,13 @@ class MCPClient:
                     messages=self.history,
                     tools=self.available_tools,
                 )
+                model_call += 1
+
                 logger.debug(f"ASSISTANT response: {response}")
 
                 content_to_process.extend(response.content)
-
-        return
+            else:
+                logger.error(f"Unsupported content type: {content_item.type}")
 
     async def chat_loop(self):
         """Run an interactive chat loop"""
@@ -148,7 +155,9 @@ class MCPClient:
 
         while True:
             try:
-                query = input("\nQuery: ").strip()
+                query = Prompt.ask("\n[bold green]Query[/bold green]")
+                print()
+                query = query.strip()
 
                 if query.lower() == "quit":
                     break
