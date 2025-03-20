@@ -10,12 +10,49 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
+    AstraDBConnectorConfigInput,
     UpdateDestinationConnector,
 )
 
 from connectors.utils import (
     create_log_for_created_updated_connector,
 )
+
+
+def _prepare_astra_dest_config(
+    collection_name: Optional[str] = None,
+    keyspace: Optional[str] = None,
+    batch_size: Optional[int] = None,
+) -> AstraDBConnectorConfigInput:
+    """Prepare the AstraDB destination connector configuration."""
+    token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
+    api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
+    
+    # Validate required parameters
+    if not token:
+        return "Error: AstraDB application token is required. Set ASTRA_DB_APPLICATION_TOKEN environment variable."
+    if not api_endpoint:
+        return "Error: AstraDB API endpoint is required. Set ASTRA_DB_API_ENDPOINT environment variable."
+    if not collection_name:
+        return "Error: AstraDB collection name is required."
+    if not keyspace:
+        return "Error: AstraDB keyspace is required."
+
+    config = AstraDBConnectorConfigInput(
+        token=token,
+        api_endpoint=api_endpoint,
+        collection_name=collection_name, 
+        keyspace=keyspace,
+    )
+    
+    # Set optional parameters if provided
+    if batch_size is not None:
+        # Ensure batch_size is positive
+        if batch_size <= 0:
+            raise ValueError("batch_size must be a positive integer")
+        config.batch_size = batch_size
+    
+    return config
 
 
 async def create_astradb_destination(
@@ -38,27 +75,12 @@ async def create_astradb_destination(
     """
     client = ctx.request_context.lifespan_context.client
 
-    # Get credentials from environment variables
-    token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
-    api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
-
-    # Validate required parameters
-    if not token:
-        return "Error: AstraDB application token is required. Set ASTRA_DB_APPLICATION_TOKEN environment variable."
-    if not api_endpoint:
-        return "Error: AstraDB API endpoint is required. Set ASTRA_DB_API_ENDPOINT environment variable."
-    if not collection_name:
-        return "Error: AstraDB collection name is required."
-    if not keyspace:
-        return "Error: AstraDB keyspace is required."
-
-    config = {
-        "token": token,
-        "api_endpoint": api_endpoint,
-        "collection_name": collection_name,
-        "keyspace": keyspace,
-        "batch_size": batch_size
-    }
+    # Prepare the configuration
+    config = _prepare_astra_dest_config(
+        collection_name=collection_name,
+        keyspace=keyspace,
+        batch_size=batch_size,
+    )
 
     destination_connector = CreateDestinationConnector(name=name, type="astradb", config=config)
 
@@ -98,10 +120,6 @@ async def update_astradb_destination(
     """
     client = ctx.request_context.lifespan_context.client
 
-    # Get credentials from environment variables
-    token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
-    api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
-
     # Get the current destination connector configuration
     try:
         get_response = await client.destinations.get_destination_async(
@@ -111,23 +129,22 @@ async def update_astradb_destination(
     except Exception as e:
         return f"Error retrieving destination connector: {str(e)}"
 
-    # Update configuration with new values
-    config = dict(current_config)
+    # Use current values if new ones aren't provided
+    if collection_name is None and "collection_name" in current_config:
+        collection_name = current_config["collection_name"]
+    if keyspace is None and "keyspace" in current_config:
+        keyspace = current_config["keyspace"]
+    if batch_size is None and "batch_size" in current_config:
+        batch_size = current_config["batch_size"]
 
-    if token is not None:
-        config["token"] = token
-
-    if api_endpoint is not None:
-        config["api_endpoint"] = api_endpoint
-
-    if collection_name is not None:
-        config["collection_name"] = collection_name
-
-    if keyspace is not None:
-        config["keyspace"] = keyspace
-
-    if batch_size is not None:
-        config["batch_size"] = batch_size
+    try:
+        config = _prepare_astra_dest_config(
+            collection_name=collection_name,
+            keyspace=keyspace,
+            batch_size=batch_size,
+        )
+    except ValueError as e:
+        return f"Error: {str(e)}"
 
     destination_connector = UpdateDestinationConnector(config=config)
 
