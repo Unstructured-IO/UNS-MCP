@@ -69,6 +69,11 @@ async def create_astradb_destination(
         collection_name: The name of the collection to use 
         keyspace: The AstraDB keyspace 
         batch_size: The batch size for inserting documents (default: 20)
+        
+        Note: A collection in AstraDB is a schemaless document store optimized for NoSQL workloads, 
+              equivalent to a table in traditional databases.
+              A keyspace is the top-level namespace in AstraDB that groups multiple collections.
+              We require the users to create their own collection and keyspace before creating the connector.
 
     Returns:
         String containing the created destination connector information
@@ -114,6 +119,8 @@ async def update_astradb_destination(
         collection_name: The name of the collection to use (optional)
         keyspace: The AstraDB keyspace (optional)
         batch_size: The batch size for inserting documents (optional)
+        
+        Note: We require the users to create their own collection and keyspace before creating the connector.
 
     Returns:
         String containing the updated destination connector information
@@ -128,8 +135,9 @@ async def update_astradb_destination(
         current_config = get_response.destination_connector_information.config
     except Exception as e:
         return f"Error retrieving destination connector: {str(e)}"
-
+    
     # Use current values if new ones aren't provided
+    current_config = dict(current_config)
     if collection_name is None and "collection_name" in current_config:
         collection_name = current_config["collection_name"]
     if keyspace is None and "keyspace" in current_config:
