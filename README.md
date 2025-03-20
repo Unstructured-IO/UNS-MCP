@@ -204,4 +204,4 @@ make local-client
 
 Env variables to configure behavior of the client:
 - `LOG_LEVEL="ERROR"` # If you would like to hide outputs from the LLM and present clear messages for the user
-- `CONFIRM_TOOL_USE='false'` If you would like to disable the tool use confirmation before running it (True by default)
+- `CONFIRM_TOOL_USE='false'` If you would like to disable the tool use confirmation before running it (True by default). **BE MINDFUL** about that option, as LLM can decide to purge all data from your account or run some expensive workflows; use only for development purposes.
