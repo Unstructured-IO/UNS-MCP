@@ -42,8 +42,10 @@ Get detailed information about a specific source connector.
 Parameters:
 - `source_id`: ID of the source connector to get information for
 
-#### create_s3_source
-Create an S3 source connector.
+#### create_[connector]_source
+Create a source connector. We plan on adding all the source connectors that are available in Unstructured Platform (https://platform.unstructured.io). Please refer to our CHANGELOG.md for new source connectors we are rapidly adding.
+
+Below is example for `create_s3_source`
 
 Parameters:
 - `name`: Unique name for the connector
@@ -55,8 +57,8 @@ Parameters:
 - `endpoint_url` (optional): Custom URL if connecting to a non-AWS S3 bucket
 - `recursive` (optional): Whether to access subfolders within the bucket (default: false)
 
-#### update_s3_source
-Update an existing S3 source connector.
+#### update_[connector]_source
+Update an existing source connector. Below is an example of `update_s3_source`:
 
 Parameters:
 - `source_id`: ID of the source connector to update
@@ -68,8 +70,8 @@ Parameters:
 - `endpoint_url` (optional): Updated custom URL
 - `recursive` (optional): Updated subfolder access setting
 
-#### delete_s3_source
-Delete an S3 source connector.
+#### delete_[connector]_source
+Delete a source connector. Below is an example of `delete_s3_source`:
 
 Parameters:
 - `source_id`: ID of the source connector to delete
@@ -88,8 +90,10 @@ Get detailed information about a specific destination connector.
 Parameters:
 - `destination_id`: ID of the destination connector to get information for
 
-#### create_s3_destination
-Create an S3 destination connector.
+#### create_[connector]_destination
+Create a destination connector. We plan on adding all the destination connectors that are available in Unstructured Platform (https://platform.unstructured.io). Please refer to our CHANGELOG.md for new destination connectors we are rapidly adding.
+
+Below is an example of `create_s3_destination`:
 
 Parameters:
 - `name`: Unique name for the connector
@@ -99,8 +103,8 @@ Parameters:
 - `token` (optional): AWS STS session token for temporary access
 - `endpoint_url` (optional): Custom URL if connecting to a non-AWS S3 bucket
 
-#### update_s3_destination
-Update an existing S3 destination connector.
+#### update_[connector]_destination
+Update an existing destination connector. Below is an example of `update_s3_destination`:
 
 Parameters:
 - `destination_id`: ID of the destination connector to update
@@ -110,8 +114,8 @@ Parameters:
 - `token` (optional): Updated AWS STS session token
 - `endpoint_url` (optional): Updated custom URL
 
-#### delete_s3_destination
-Delete an S3 destination connector.
+#### delete_[connector]_destination
+Delete a destination connector. Below is an example of `delete_s3_destination`:
 
 Parameters:
 - `destination_id`: ID of the destination connector to delete
@@ -143,7 +147,7 @@ Parameters:
 Create a new workflow.
 
 Parameters:
-- `workflow_config`: Dictionary containing the workflow configuration (must include required fields as per CreateWorkflow model)
+- `workflow_config`: Dictionary containing the workflow configuration (must include required fields as per CreateWorkflow model). It
 
 #### run_workflow
 Run a specific workflow.
@@ -156,7 +160,10 @@ Update an existing workflow.
 
 Parameters:
 - `workflow_id`: ID of the workflow to update
-- `workflow_config`: Dictionary containing the updated workflow configuration (must include required fields as per UpdateWorkflow model)
+- `workflow_config`:
+    A dictionary containing the updated workflow configuration (must include required fields as per UpdateWorkflow model).
+    More specifically, it's a `CreateWorkflowTypedDict` that one can refer its params [here](https://github.com/Unstructured-IO/unstructured-python-client/blob/main/src/unstructured_client/models/shared/createworkflow.py#L33).
+
 
 #### delete_workflow
 Delete a specific workflow.
@@ -172,14 +179,21 @@ To install in Claude Desktop:
 2. In that file add:
 ```bash
 {
-    "mcpServers": {
-        "UNS_MCP": {
+    "mcpServers":
+    {
+        "UNS_MCP":
+        {
             "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
-            "args": [
+            "args":
+            [
                 "--directory",
                 "ABSOLUTE/PATH/TO/UNS-MCP",
                 "run",
                 "server.py"
+            ],
+            "env":
+            [
+            "UNSTRUCTURED_API_KEY":"<your key>"
             ],
             "disabled": false
         }
@@ -189,7 +203,7 @@ To install in Claude Desktop:
 3. Restart Claude Desktop.
 
 4. Example Issues seen from Claude Desktop.
-    - You will see `No destinations found` when you query for a list of destionation connectors. Check your API key in `.env`, it needs to be your personal key in `https://platform.unstructured.io/app/account/api-keys`.
+    - You will see `No destinations found` when you query for a list of destionation connectors. Check your API key in `.env` or in your config json, it needs to be your personal key in `https://platform.unstructured.io/app/account/api-keys`.
 
 ## Debugging tools
 
@@ -202,3 +216,7 @@ mcp dev server.py
 ```
 uv run python minimal_client/run.py server.py
 ```
+
+## CHANGELOG.md
+
+Any new developed features/fixes/enhancements will be added to CHANGELOG.md. 0.x.x-dev pre-release format is preferred before we bump to a stable version.
