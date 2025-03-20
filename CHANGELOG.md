@@ -9,9 +9,11 @@
 - enable logging capability for minimal_client and add memory history to minimal_client
 
 ### Features
+
 - ** Source connector adding**: azure, google drive
 
 - ** Destination connector adding**: weaviate
+
 ### Fixes
 
 - fix bugs for source connector config access
@@ -19,11 +21,12 @@
 - refactor code to have common utility funcs
 
 
-
 ## 0.1.0
 
 ### Enhancements
 
 ### Features
+
 - **Launch the initial version of `UNS-MCP`** that includes 14 tools and a minimal_client to interact with the server
+
 ### Fixes
