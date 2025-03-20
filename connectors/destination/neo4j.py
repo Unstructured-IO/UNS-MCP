@@ -23,6 +23,7 @@ def _prepare_neo4j_dest_config(
     database: str,
     uri: str,
     username: str,
+    batch_size: Optional[int] = None,
 ) -> Neo4jDestinationConnectorConfigInput:
 
     """Prepare the Azure source connector configuration."""
@@ -30,6 +31,7 @@ def _prepare_neo4j_dest_config(
         database=database,
         uri=uri,
         username=username,
+        batch_size=batch_size,
         password=os.getenv("NEO4J_PASSWORD"),
     )
 
@@ -40,6 +42,7 @@ async def create_neo4j_destination(
     database: str,
     uri: str,
     username: str,
+    batch_size: Optional[int] = 100,
 ) -> str:
     """Create an neo4j destination connector.
 
@@ -55,7 +58,7 @@ async def create_neo4j_destination(
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_neo4j_dest_config(database, uri, username)
+    config = _prepare_neo4j_dest_config(database, uri, username, batch_size)
 
     destination_connector = CreateDestinationConnector(name=name, type="neo4j", config=config)
 
@@ -81,6 +84,7 @@ async def update_neo4j_destination(
     database: Optional[str] = None,
     uri: Optional[str] = None,
     username: Optional[str] = None,
+    batch_size: Optional[int] = None,
 ) -> str:
     """Update an neo4j destination connector.
 
@@ -114,6 +118,8 @@ async def update_neo4j_destination(
         config["uri"] = uri
     if username is not None:
         config["username"] = username
+    if batch_size is not None:
+        config["batch_size"] = batch_size
 
     destination_connector = UpdateDestinationConnector(config=config)
 
