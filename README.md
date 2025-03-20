@@ -18,12 +18,12 @@ To test in local, any working key that pointing to prod env would work. However,
 ## Running the Server
 Using the MCP CLI:
 ```bash
-mcp run server.py
+mcp run uns_mcp/run.py
 ```
 
 or:
 ```bash
-uv run server.py
+uv run uns_mcp/run.py
 ```
 
 ## Available Tools
