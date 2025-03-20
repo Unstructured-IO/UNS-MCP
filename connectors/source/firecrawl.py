@@ -4,7 +4,7 @@ import tempfile
 import asyncio
 import boto3
 import hashlib
-from typing import Dict, List, Optional, Any, Literal, Union, Callable
+from typing import Dict, List, Optional, Any, Literal
 
 from mcp.server.fastmcp import Context
 
