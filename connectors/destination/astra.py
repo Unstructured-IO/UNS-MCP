@@ -168,4 +168,3 @@ async def delete_astradb_destination(ctx: Context, destination_id: str) -> str:
         return f"AstraDB Destination Connector with ID {destination_id} deleted successfully"
     except Exception as e:
         return f"Error deleting AstraDB destination connector: {str(e)}" 
-    
