@@ -82,7 +82,7 @@ class MCPClient:
         ]
         self.available_tools = available_tools
 
-    async def process_query(self, query: str) -> None:
+    async def process_query(self, query: str, confirm_tool_use: bool = True) -> None:
         """Process a query using Claude and available tools"""
         self.history.append({"role": "user", "content": query})
 
@@ -113,11 +113,20 @@ class MCPClient:
                 tool_name = content_item.name
                 tool_args = content_item.input
 
-                if Confirm.ask(
-                    f"\n[bold cyan]TOOL CALL[/bold cyan]\nAccept execution of "
-                    f"{tool_name} with args {tool_args}?",
-                    default=True,
-                ):
+                if confirm_tool_use:
+                    should_execute_tool = Confirm.ask(
+                        f"\n[bold cyan]TOOL CALL[/bold cyan]\nAccept execution of "
+                        f"{tool_name} with args {tool_args}?",
+                        default=True,
+                    )
+                else:
+                    print(
+                        f"\n[bold cyan]TOOL CALL[/bold cyan]\n"
+                        f"Executing {tool_name} with args {tool_args}\n",
+                    )
+                    should_execute_tool = True
+
+                if should_execute_tool:
                     result = await self.session.call_tool(tool_name, tool_args)
                     logger.info(f"TOOL result: {result}")
 
@@ -159,7 +168,7 @@ class MCPClient:
             else:
                 logger.error(f"Unsupported content type: {content_item.type}")
 
-    async def chat_loop(self):
+    async def chat_loop(self, confirm_tool_use: bool = True) -> None:
         """Run an interactive chat loop"""
         logger.info("MCP Client Started!")
         logger.info("Type your queries or 'quit' to exit.")
@@ -173,7 +182,7 @@ class MCPClient:
                 if query.lower() in ["quit", "q"]:
                     break
 
-                await self.process_query(query)
+                await self.process_query(query, confirm_tool_use)
             except Exception as e:
                 logger.error(f"Error: {str(e)}")
 
@@ -190,7 +199,8 @@ async def main():
     client = MCPClient()
     try:
         await client.connect_to_server(sys.argv[1])
-        await client.chat_loop()
+        confirm_tool_use = os.getenv("CONFIRM_TOOL_USE").lower() == "true"
+        await client.chat_loop(confirm_tool_use=confirm_tool_use)
     finally:
         await client.cleanup()
 

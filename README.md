@@ -195,3 +195,13 @@ mcp dev server.py
 ```
 uv run python minimal_client/run.py server.py
 ```
+
+or
+
+```
+make local-client
+```
+
+Env variables to configure behavior of the client:
+- `LOG_LEVEL="ERROR"` # If you would like to hide outputs from the LLM and present clear messages for the user
+- `CONFIRM_TOOL_USE='false'` If you would like to disable the tool use confirmation before running it (True by default)
