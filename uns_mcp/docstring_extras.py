@@ -1,3 +1,4 @@
+# Source: https://docs.unstructured.io/api-reference/workflow/workflows#chunk-by-title-strategy
 custom_nodes_settings_documentation = """
 Custom workflow DAG nodes
 - If WorkflowType is set to custom, you must also specify the settings for the workflow’s
