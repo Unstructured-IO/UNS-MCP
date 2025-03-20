@@ -7,12 +7,15 @@ from dotenv import load_dotenv
 from mcp.server.fastmcp import Context, FastMCP
 from unstructured_client import UnstructuredClient
 from unstructured_client.models.operations import (
+    CancelJobRequest,
     CreateWorkflowRequest,
     DeleteWorkflowRequest,
     GetDestinationRequest,
+    GetJobRequest,
     GetSourceRequest,
     GetWorkflowRequest,
     ListDestinationsRequest,
+    ListJobsRequest,
     ListSourcesRequest,
     ListWorkflowsRequest,
     RunWorkflowRequest,
@@ -21,6 +24,7 @@ from unstructured_client.models.operations import (
 from unstructured_client.models.shared import (
     CreateWorkflow,
     DestinationConnectorType,
+    JobStatus,
     SourceConnectorType,
     UpdateWorkflow,
     WorkflowState,
@@ -113,53 +117,6 @@ async def list_sources(ctx: Context, source_type: Optional[str] = None) -> str:
 
 
 @mcp.tool()
-async def list_workflows(
-    ctx: Context,
-    destination_id: Optional[str] = None,
-    source_id: Optional[str] = None,
-    status: Optional[str] = None,
-) -> str:
-    """
-    List workflows from the Unstructured API.
-
-    Args:
-        destination_id: Optional destination connector ID to filter by
-        source_id: Optional source connector ID to filter by
-        status: Optional workflow status to filter by
-
-    Returns:
-        String containing the list of workflows
-    """
-    client = ctx.request_context.lifespan_context.client
-
-    request = ListWorkflowsRequest(destination_id=destination_id, source_id=source_id)
-
-    if status:
-        try:
-            request.status = WorkflowState[status]
-        except KeyError:
-            return f"Invalid workflow status: {status}"
-
-    response = await client.workflows.list_workflows_async(request=request)
-
-    # Sort workflows by name
-    sorted_workflows = sorted(
-        response.response_list_workflows,
-        key=lambda workflow: workflow.name.lower(),
-    )
-
-    if not sorted_workflows:
-        return "No workflows found"
-
-    # Format response
-    result = ["Available workflows:"]
-    for workflow in sorted_workflows:
-        result.append(f"- {workflow.name} (ID: {workflow.id})")
-
-    return "\n".join(result)
-
-
-@mcp.tool()
 async def get_source_info(ctx: Context, source_id: str) -> str:
     """Get detailed information about a specific source connector.
 
@@ -244,6 +201,53 @@ async def get_destination_info(ctx: Context, destination_id: str) -> str:
     result.append("Configuration:")
     for key, value in info.config:
         result.append(f"  {key}: {value}")
+
+    return "\n".join(result)
+
+
+@mcp.tool()
+async def list_workflows(
+    ctx: Context,
+    destination_id: Optional[str] = None,
+    source_id: Optional[str] = None,
+    status: Optional[str] = None,
+) -> str:
+    """
+    List workflows from the Unstructured API.
+
+    Args:
+        destination_id: Optional destination connector ID to filter by
+        source_id: Optional source connector ID to filter by
+        status: Optional workflow status to filter by
+
+    Returns:
+        String containing the list of workflows
+    """
+    client = ctx.request_context.lifespan_context.client
+
+    request = ListWorkflowsRequest(destination_id=destination_id, source_id=source_id)
+
+    if status:
+        try:
+            request.status = WorkflowState[status]
+        except KeyError:
+            return f"Invalid workflow status: {status}"
+
+    response = await client.workflows.list_workflows_async(request=request)
+
+    # Sort workflows by name
+    sorted_workflows = sorted(
+        response.response_list_workflows,
+        key=lambda workflow: workflow.name.lower(),
+    )
+
+    if not sorted_workflows:
+        return "No workflows found"
+
+    # Format response
+    result = ["Available workflows:"]
+    for workflow in sorted_workflows:
+        result.append(f"- {workflow.name} (ID: {workflow.id})")
 
     return "\n".join(result)
 
@@ -395,6 +399,101 @@ async def delete_workflow(ctx: Context, workflow_id: str) -> str:
         return f"Workflow deleted successfully: {response.raw_response}"
     except Exception as e:
         return f"Error deleting workflow: {str(e)}"
+
+
+@mcp.tool()
+async def list_jobs(
+    ctx: Context,
+    workflow_id: Optional[str] = None,
+    status: Optional[str] = None,
+) -> str:
+    """
+    List jobs via the Unstructured API.
+
+    Args:
+        workflow_id: Optional workflow ID to filter by
+        status: Optional workflow status to filter by
+
+    Returns:
+        String containing the list of jobs
+    """
+    client = ctx.request_context.lifespan_context.client
+
+    request = ListJobsRequest(workflow_id=workflow_id, status=status)
+
+    if status:
+        try:
+            request.status = JobStatus[status]
+        except KeyError:
+            return f"Invalid job status: {status}"
+
+    response = await client.jobs.list_jobs_async(request=request)
+
+    # Sort jobs by name
+    sorted_jobs = sorted(
+        response.response_list_jobs,
+        key=lambda job: job.name.lower(),
+    )
+
+    if not sorted_jobs:
+        return "No Jobs found"
+
+    # Format response
+    result = ["Available Jobs:"]
+    for job in sorted_jobs:
+        result.append(f"- {job.name} (ID: {job.id})")
+
+    return "\n".join(result)
+
+
+@mcp.tool()
+async def get_job_info(ctx: Context, job_id: str) -> str:
+    """Get detailed information about a specific job.
+
+    Args:
+        job_id: ID of the job to get information for
+
+    Returns:
+        String containing the job information
+    """
+    client = ctx.request_context.lifespan_context.client
+
+    response = await client.jobs.get_job_async(
+        request=GetJobRequest(job_id=job_id),
+    )
+
+    info = response.job_information
+
+    result = ["Job Information:"]
+    result.append(f"Created at: {info.created_at}")
+    result.append(f"ID: {info.id}")
+    result.append(f"Status: {info.status}")
+    result.append(f"Workflow name: {info.workflow_name}")
+    result.append(f"Workflow id: {info.workflow_id}")
+    result.append(f"Runtime: {info.runtime}")
+
+    return "\n".join(result)
+
+
+@mcp.tool()
+async def cancel_job(ctx: Context, job_id: str) -> str:
+    """Delete a specific job.
+
+    Args:
+        job_id: ID of the job to cancel
+
+    Returns:
+        String containing the response from the job cancellation
+    """
+    client = ctx.request_context.lifespan_context.client
+
+    try:
+        response = await client.jobs.cancel_job_async(
+            request=CancelJobRequest(job_id=job_id),
+        )
+        return f"Job canceled successfully: {response.raw_response}"
+    except Exception as e:
+        return f"Error canceling job: {str(e)}"
 
 
 if __name__ == "__main__":
