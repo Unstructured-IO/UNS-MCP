@@ -120,6 +120,7 @@ Delete a destination connector. Below is an example of `delete_s3_destination`:
 Parameters:
 - `destination_id`: ID of the destination connector to delete
 
+
 ### Workflows
 
 #### list_workflows
