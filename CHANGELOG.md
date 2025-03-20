@@ -12,7 +12,7 @@
 
 - ** Source connector adding**: azure, google drive
 
-- ** Destination connector adding**: weaviate
+- ** Destination connector adding**: weaviate, astradb
 
 ### Fixes
 
@@ -28,6 +28,5 @@
 ### Features
 
 - **Launch the initial version of `UNS-MCP`** that includes 14 tools and a minimal_client to interact with the server
-- ** Destination connector addition**: AstraDB
 
 ### Fixes

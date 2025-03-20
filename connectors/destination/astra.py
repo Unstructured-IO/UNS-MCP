@@ -27,8 +27,6 @@ def _prepare_astra_dest_config(
     """Prepare the AstraDB destination connector configuration."""
     token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
     api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
-    # Adding validation messages for the llm to see if any parameters were adjusted and respond accordingly
-    validation_message = ""
 
     # Validate required parameters
     if not token:
@@ -52,10 +50,10 @@ def _prepare_astra_dest_config(
         # Use default if batch_size is not positive
         if batch_size <= 0:
             batch_size = 20
-            validation_message += "\n (Note: Provided batch_size was invalid, using default value of 20)"
+            logging.info(f"\n Note: Provided batch_size was invalid, using default value of {batch_size}")
         config.batch_size = batch_size
     
-    return config, validation_message
+    return config
 
 
 async def create_astradb_destination(
@@ -71,7 +69,7 @@ async def create_astradb_destination(
         name: A unique name for this connector
         collection_name: The name of the collection to use 
         keyspace: The AstraDB keyspace 
-        batch_size: The batch size for inserting documents (default: 20)
+        batch_size: The batch size for inserting documents, must be positive (default: 20)
         
         Note: A collection in AstraDB is a schemaless document store optimized for NoSQL workloads, 
               equivalent to a table in traditional databases.
@@ -85,7 +83,7 @@ async def create_astradb_destination(
 
     # Prepare the configuration
     try:
-        config, validation_message = _prepare_astra_dest_config(
+        config = _prepare_astra_dest_config(
             collection_name=collection_name,
             keyspace=keyspace,
             batch_size=batch_size,
@@ -104,8 +102,7 @@ async def create_astradb_destination(
             response,
             connector_name="AstraDB",
             connector_type="Destination",
-            created_or_updated="Created",
-            validation_message=validation_message
+            created_or_updated="Created"
         )
         return result
     except Exception as e:
@@ -153,7 +150,7 @@ async def update_astradb_destination(
         batch_size = current_config["batch_size"]
 
     try:
-        config, validation_message = _prepare_astra_dest_config(
+        config = _prepare_astra_dest_config(
             collection_name=collection_name,
             keyspace=keyspace,
             batch_size=batch_size,
@@ -176,7 +173,6 @@ async def update_astradb_destination(
             connector_name="AstraDB",
             connector_type="Destination",
             created_or_updated="Updated",
-            validation_message=validation_message
         )
         return result
     except Exception as e:

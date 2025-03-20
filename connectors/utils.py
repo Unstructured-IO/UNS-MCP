@@ -6,7 +6,6 @@ def create_log_for_created_updated_connector(
     connector_name: str,
     connector_type: Literal["Source", "Destination"],
     created_or_updated: Literal["Created", "Updated"],
-    validation_message: str = "",
 ) -> str:
     if connector_type == "Source":
         info = response.source_connector_information
@@ -18,8 +17,6 @@ def create_log_for_created_updated_connector(
     if info:
         result.extend([f"Name: {info.name}", f"ID: {info.id}"])
 
-    if validation_message:
-        result.append(validation_message)
 
     # Note(tracy): let's not output creds config for now as different connectors come in
     # different creds name, logging them is not necessary anyway

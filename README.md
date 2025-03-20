@@ -120,12 +120,6 @@ Delete a destination connector. Below is an example of `delete_s3_destination`:
 Parameters:
 - `destination_id`: ID of the destination connector to delete
 
-### AstraDB Destination Connector
-
-- `create_astradb_destination(name, collection_name, keyspace, batch_size=20)`: Create a new AstraDB connector
-- `update_astradb_destination(destination_id, [collection_name], [keyspace], [batch_size])`: Update an existing connector
-- `delete_astradb_destination(destination_id)`: Delete a connector
-
 
 ### Workflows
 
