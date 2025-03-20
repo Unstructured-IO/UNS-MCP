@@ -1,6 +1,6 @@
 from typing import Optional
 import os
-
+import logging
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
     CreateDestinationRequest,
@@ -27,7 +27,9 @@ def _prepare_astra_dest_config(
     """Prepare the AstraDB destination connector configuration."""
     token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
     api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
-    
+    # Adding validation messages for the llm to see if any parameters were adjusted and respond accordingly
+    validation_message = ""
+
     # Validate required parameters
     if not token:
         return "Error: AstraDB application token is required. Set ASTRA_DB_APPLICATION_TOKEN environment variable."
@@ -47,12 +49,13 @@ def _prepare_astra_dest_config(
     
     # Set optional parameters if provided
     if batch_size is not None:
-        # Ensure batch_size is positive
+        # Use default if batch_size is not positive
         if batch_size <= 0:
-            raise ValueError("batch_size must be a positive integer")
+            batch_size = 20
+            validation_message += "\n (Note: Provided batch_size was invalid, using default value of 20)"
         config.batch_size = batch_size
     
-    return config
+    return config, validation_message
 
 
 async def create_astradb_destination(
@@ -81,11 +84,14 @@ async def create_astradb_destination(
     client = ctx.request_context.lifespan_context.client
 
     # Prepare the configuration
-    config = _prepare_astra_dest_config(
-        collection_name=collection_name,
-        keyspace=keyspace,
-        batch_size=batch_size,
-    )
+    try:
+        config, validation_message = _prepare_astra_dest_config(
+            collection_name=collection_name,
+            keyspace=keyspace,
+            batch_size=batch_size,
+        )
+    except ValueError as e:
+        return f"Error: {str(e)}"
 
     destination_connector = CreateDestinationConnector(name=name, type="astradb", config=config)
 
@@ -99,6 +105,7 @@ async def create_astradb_destination(
             connector_name="AstraDB",
             connector_type="Destination",
             created_or_updated="Created",
+            validation_message=validation_message
         )
         return result
     except Exception as e:
@@ -146,7 +153,7 @@ async def update_astradb_destination(
         batch_size = current_config["batch_size"]
 
     try:
-        config = _prepare_astra_dest_config(
+        config, validation_message = _prepare_astra_dest_config(
             collection_name=collection_name,
             keyspace=keyspace,
             batch_size=batch_size,
@@ -169,6 +176,7 @@ async def update_astradb_destination(
             connector_name="AstraDB",
             connector_type="Destination",
             created_or_updated="Updated",
+            validation_message=validation_message
         )
         return result
     except Exception as e:
