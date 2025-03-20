@@ -202,36 +202,6 @@ Delete an S3 destination connector.
 Parameters:
 - `destination_id`: ID of the destination connector to delete
 
-#### create_astradb_destination
-Create an AstraDB destination connector.
-
-Parameters:
-- `name`: Unique name for the connector
-- `collection_name`: The name of the collection to use
-- `keyspace`: The AstraDB keyspace
-- `batch_size` (optional): The batch size for inserting documents (default: 20)
-
-Note: Requires the following environment variables to be set:
-- `ASTRA_DB_APPLICATION_TOKEN`: The AstraDB application token
-- `ASTRA_DB_API_ENDPOINT`: The AstraDB API endpoint
-
-#### update_astradb_destination
-Update an existing AstraDB destination connector.
-
-Parameters:
-- `destination_id`: ID of the destination connector to update
-- `collection_name` (optional): Updated collection name
-- `keyspace` (optional): Updated AstraDB keyspace
-- `batch_size` (optional): Updated batch size for inserting documents
-
-Note: Uses the same environment variables as `create_astradb_destination`.
-
-#### delete_astradb_destination
-Delete an AstraDB destination connector.
-
-Parameters:
-- `destination_id`: ID of the destination connector to delete
-
 ### Workflows
 
 #### list_workflows
