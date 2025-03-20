@@ -432,16 +432,16 @@ async def list_jobs(
     # Sort jobs by name
     sorted_jobs = sorted(
         response.response_list_jobs,
-        key=lambda job: job.name.lower(),
+        key=lambda job: job.created_at,
     )
 
     if not sorted_jobs:
         return "No Jobs found"
 
     # Format response
-    result = ["Available Jobs:"]
+    result = ["Available Jobs by created time:"]
     for job in sorted_jobs:
-        result.append(f"- {job.name} (ID: {job.id})")
+        result.append(f"- JOB ID: {job.id})")
 
     return "\n".join(result)
 
