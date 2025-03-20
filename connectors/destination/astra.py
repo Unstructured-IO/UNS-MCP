@@ -13,6 +13,10 @@ from unstructured_client.models.shared import (
     UpdateDestinationConnector,
 )
 
+from connectors.utils import (
+    create_log_for_created_updated_connector,
+)
+
 
 async def create_astradb_destination(
     ctx: Context,
@@ -63,19 +67,13 @@ async def create_astradb_destination(
             request=CreateDestinationRequest(create_destination_connector=destination_connector),
         )
 
-        info = response.destination_connector_information
-
-        result = ["AstraDB Destination Connector created:"]
-        result.append(f"Name: {info.name}")
-        result.append(f"ID: {info.id}")
-        result.append("Configuration:")
-        for key, value in info.config:
-            # Don't print secrets in the output
-            if key == "token" and value:
-                value = "********"
-            result.append(f"  {key}: {value}")
-
-        return "\n".join(result)
+        result = create_log_for_created_updated_connector(
+            response,
+            connector_name="AstraDB",
+            connector_type="Destination",
+            created_or_updated="Created",
+        )
+        return result
     except Exception as e:
         return f"Error creating AstraDB destination connector: {str(e)}"
 
@@ -141,19 +139,13 @@ async def update_astradb_destination(
             ),
         )
 
-        info = response.destination_connector_information
-
-        result = ["AstraDB Destination Connector updated:"]
-        result.append(f"Name: {info.name}")
-        result.append(f"ID: {info.id}")
-        result.append("Configuration:")
-        for key, value in info.config:
-            # Don't print secrets in the output
-            if key == "token" and value:
-                value = "********"
-            result.append(f"  {key}: {value}")
-
-        return "\n".join(result)
+        result = create_log_for_created_updated_connector(
+            response,
+            connector_name="AstraDB",
+            connector_type="Destination",
+            created_or_updated="Updated",
+        )
+        return result
     except Exception as e:
         return f"Error updating AstraDB destination connector: {str(e)}"
 
