@@ -123,8 +123,8 @@ async def list_workflows(
     List workflows from the Unstructured API.
 
     Args:
-        destination_id: Optional destination connector ID to filter by
-        source_id: Optional source connector ID to filter by
+        destination_id: Optional destination connector ID to filter by, should be valid UUID
+        source_id: Optional source connector ID to filter by, should be valid UUID
         status: Optional workflow status to filter by
 
     Returns:
@@ -164,7 +164,7 @@ async def get_source_info(ctx: Context, source_id: str) -> str:
     """Get detailed information about a specific source connector.
 
     Args:
-        source_id: ID of the source connector to get information for
+        source_id: ID of the source connector to get information for, should be valid UUID
 
     Returns:
         String containing the source connector information
@@ -292,10 +292,10 @@ async def create_workflow(ctx: Context, workflow_config: CreateWorkflowTypedDict
     """Create a new workflow.
 
     Args:
-        workflow_config: A Typed Dictionary containing required fields (destination_id,
-        name, source_id, workflow_type) and non-required fields (schedule, and workflow_nodes)
-        Note workflow_nodes is only enabled when workflow_type is `custom` and
-        is a list of WorkflowNodeTypedDict: partition, prompter,chunk, embed
+        workflow_config: A Typed Dictionary containing required fields (destination_id - should be a
+        valid UUID, name, source_id - should be a valid UUID, workflow_type) and non-required fields
+        (schedule, and workflow_nodes). Note workflow_nodes is only enabled when workflow_type
+        is `custom` and is a list of WorkflowNodeTypedDict: partition, prompter,chunk, embed
         Below is an example of a partition workflow node:
             {
                 "name": "vlm-partition",

@@ -12,9 +12,11 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.server.fastmcp.utilities.logging import configure_logging, get_logger
 from rich import print
-from rich.prompt import Prompt
+from rich.prompt import Confirm, Prompt
 
-log_level = getattr(logging, os.getenv("LOG_LEVEL").upper(), logging.INFO)
+load_dotenv(verbose=True)
+
+log_level = getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO)
 configure_logging(log_level)
 
 logger = get_logger(__name__)
@@ -31,8 +33,6 @@ for logger_name in loggers_to_mute:
     logging.getLogger(logger_name).setLevel(
         max(logging.WARNING, log_level),  # Set error if error or higher
     )
-
-load_dotenv()  # load environment variables from .env
 
 
 class MCPClient:
@@ -92,10 +92,10 @@ class MCPClient:
             messages=self.history,
             tools=self.available_tools,
         )
-        logger.debug(f"ASSISTANT response: {response}")
+        logger.info(f"ASSISTANT response: {response}")
         content_to_process = response.content
 
-        max_model_calls = 5
+        max_model_calls = 10
         model_call = 1
 
         while content_to_process:
@@ -113,26 +113,37 @@ class MCPClient:
                 tool_name = content_item.name
                 tool_args = content_item.input
 
-                print(f"\n[bold cyan]TOOL CALL[/bold cyan]\n{tool_name} with args {tool_args}\n")
+                if Confirm.ask(
+                    f"\n[bold cyan]TOOL CALL[/bold cyan]\nAccept execution of "
+                    f"{tool_name} with args {tool_args}?",
+                    default=True,
+                ):
+                    result = await self.session.call_tool(tool_name, tool_args)
+                    logger.info(f"TOOL result: {result}")
 
-                result = await self.session.call_tool(tool_name, tool_args)
-                logger.debug(f"TOOL result: {result}")
+                    for result_item in result.content:
+                        print(f"\n[bold cyan]TOOL OUTPUT[/bold cyan]:\n{result_item.text}\n")
 
-                for result_item in result.content:
-                    print(f"\n[bold cyan]TOOL OUTPUT[/bold cyan]:\n{result_item.text}\n")
-
-                self.history.append(
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "tool_result",
-                                "tool_use_id": content_item.id,
-                                "content": result.content,
-                            },
-                        ],
-                    },
-                )
+                    self.history.append(
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "tool_result",
+                                    "tool_use_id": content_item.id,
+                                    "content": result.content,
+                                },
+                            ],
+                        },
+                    )
+                else:
+                    self.history.append(
+                        {
+                            "role": "user",
+                            "content": f"User declined execution of "
+                            f"{tool_name} with args {tool_args}",
+                        },
+                    )
 
                 response = self.anthropic.messages.create(
                     model="claude-3-5-sonnet-20241022",
@@ -142,7 +153,7 @@ class MCPClient:
                 )
                 model_call += 1
 
-                logger.debug(f"ASSISTANT response: {response}")
+                logger.info(f"ASSISTANT response: {response}")
 
                 content_to_process.extend(response.content)
             else:
@@ -155,11 +166,11 @@ class MCPClient:
 
         while True:
             try:
-                query = Prompt.ask("\n[bold green]Query[/bold green]")
+                query = Prompt.ask("\n[bold green]Query[/bold green] (q/quit to end chat)")
                 print()
                 query = query.strip()
 
-                if query.lower() == "quit":
+                if query.lower() in ["quit", "q"]:
                     break
 
                 await self.process_query(query)
