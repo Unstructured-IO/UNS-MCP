@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import AsyncIterator, Optional
 
+from docstring_extras import add_custom_node_examples  # relative import required by mcp
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context, FastMCP
 from unstructured_client import UnstructuredClient
@@ -27,7 +28,6 @@ from unstructured_client.models.shared import (
 )
 from unstructured_client.models.shared.createworkflow import CreateWorkflowTypedDict
 
-# Register connector tools
 from connectors import register_connectors
 
 
@@ -288,6 +288,7 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
+@add_custom_node_examples
 async def create_workflow(ctx: Context, workflow_config: CreateWorkflowTypedDict) -> str:
     """Create a new workflow.
 
@@ -347,6 +348,7 @@ async def run_workflow(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
+@add_custom_node_examples
 async def update_workflow(
     ctx: Context,
     workflow_id: str,

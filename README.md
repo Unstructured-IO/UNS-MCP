@@ -18,12 +18,12 @@ To test in local, any working key that pointing to prod env would work. However,
 ## Running the Server
 Using the MCP CLI:
 ```bash
-mcp run server.py
+mcp run uns_mcp/run.py
 ```
 
 or:
 ```bash
-uv run server.py
+uv run uns_mcp/run.py
 ```
 
 ## Available Tools
@@ -172,7 +172,7 @@ To install in Claude Desktop:
                 "--directory",
                 "ABSOLUTE/PATH/TO/UNS-MCP",
                 "run",
-                "server.py"
+                "run.py"
             ],
             "disabled": false
         }
@@ -188,12 +188,12 @@ To install in Claude Desktop:
 
 Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the following command to spin up a debugging UI. From there, you will be able to add environment variables (pointing to your local env) on the left pane. Include your personal API key there as env var. Go to `tools`, you can test out the capabilities you add to the MCP server.
 ```
-mcp dev server.py
+mcp dev uns_mcp/run.py
 ```
 
 ## Running locally minimal client
 ```
-uv run python minimal_client/run.py server.py
+uv run python minimal_client/run.py uns_mcp/run.py
 ```
 
 or
