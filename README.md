@@ -209,3 +209,7 @@ mcp dev server.py
 ```
 uv run python minimal_client/run.py server.py
 ```
+
+## CHANGELOG.md
+
+Any new developed features/fixes/enhancements will be added to CHANGELOG.md. 0.x.x-dev pre-release format is preferred before we bump to a stable version.
