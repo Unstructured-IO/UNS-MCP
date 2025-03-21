@@ -12,7 +12,7 @@ from mcp.server.fastmcp import Context
 from firecrawl import FirecrawlApp
 
 # Define job types
-JobType = Literal["crawlhtml", "llmfulltxt"]
+Firecrawl_JobType = Literal["crawlhtml", "llmfulltxt"]
 
 
 def _prepare_firecrawl_config() -> Union[str, Dict[str, str]]:
@@ -124,7 +124,7 @@ async def _invoke_firecrawl_job(
     ctx: Context,
     url: str,
     s3_uri: str,
-    job_type: JobType,
+    job_type: Firecrawl_JobType,
     job_params: Dict[str, Any],
 ) -> Dict[str, Any]:
     """Generic function to start a Firecrawl job (either HTML crawl or llmfull.txt generation).
@@ -228,7 +228,7 @@ async def check_llmtxt_status(
 async def _check_job_status(
     ctx: Context,
     job_id: str,
-    job_type: JobType,
+    job_type: Firecrawl_JobType,
 ) -> Dict[str, Any]:
     """Generic function to check the status of a Firecrawl job.
 
@@ -367,7 +367,7 @@ async def wait_for_job_completion(
     ctx: Context,
     job_id: str,
     s3_uri: str,
-    job_type: JobType,
+    job_type: Firecrawl_JobType,
     poll_interval: int = 30,
     timeout: int = 3600,
 ) -> Dict[str, Any]:
@@ -587,7 +587,7 @@ async def cancel_llmtxt_job(
 async def _cancel_job(
     ctx: Context,
     job_id: str,
-    job_type: JobType,
+    job_type: Firecrawl_JobType,
 ) -> Dict[str, Any]:
     """Generic function to cancel a Firecrawl job.
 

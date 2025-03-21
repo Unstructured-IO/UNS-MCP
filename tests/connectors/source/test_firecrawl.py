@@ -19,7 +19,7 @@ from connectors.source.firecrawl import (
     check_crawlhtml_status,
     invoke_firecrawl_llmtxt,
     check_llmtxt_status,
-    JobType,
+    Firecrawl_JobType,
     cancel_crawlhtml_job,
     cancel_llmtxt_job,
     _cancel_job
