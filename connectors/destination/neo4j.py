@@ -27,13 +27,16 @@ def _prepare_neo4j_dest_config(
 ) -> Neo4jDestinationConnectorConfigInput:
 
     """Prepare the Azure source connector configuration."""
-    return Neo4jDestinationConnectorConfigInput(
-        database=database,
-        uri=uri,
-        username=username,
-        batch_size=batch_size,
-        password=os.getenv("NEO4J_PASSWORD"),
-    )
+    if os.getenv("NEO4J_PASSWORD") is None:
+        raise ValueError("NEO4J_PASSWORD environment variable is not set")
+    else:
+        return Neo4jDestinationConnectorConfigInput(
+            database=database,
+            uri=uri,
+            username=username,
+            batch_size=batch_size,
+            password=os.getenv("NEO4J_PASSWORD"),
+        )
 
 
 async def create_neo4j_destination(
