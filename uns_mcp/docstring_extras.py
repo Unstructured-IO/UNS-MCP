@@ -21,6 +21,10 @@ The Destination node follows the last node in the array.
 
 Partitioner node
 A Partitioner node has a type of partition and a subtype of auto, vlm, hi_res, or fast.
+
+If the partitioner is not specified, configure by default 'vlm' with is_dynamic and allow_fast
+set to true.
+
 Examples:
 - auto strategy:
 {
@@ -28,8 +32,8 @@ Examples:
     "type": "partition",
     "subtype": "vlm",
     "settings": {
-        "provider": "anthropic",
-        "model": "claude-3-5-sonnet-20241022",
+        "provider": "anthropic", (required)
+        "model": "claude-3-5-sonnet-20241022", (required)
         "output_format": "text/html",
         "user_prompt": null,
         "format_html": true,
