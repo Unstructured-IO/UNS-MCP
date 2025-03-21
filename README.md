@@ -18,12 +18,12 @@ To test in local, any working key that pointing to prod env would work. However,
 ## Running the Server
 Using the MCP CLI:
 ```bash
-mcp run uns_mcp/run.py
+mcp run uns_mcp/server.py
 ```
 
 or:
 ```bash
-uv run uns_mcp/run.py
+uv run uns_mcp/server.py
 ```
 
 ## Available Tools
@@ -183,7 +183,7 @@ To install in Claude Desktop:
                 "--directory",
                 "ABSOLUTE/PATH/TO/UNS-MCP",
                 "run",
-                "run.py"
+                "server.py"
             ],
             "env":
             [
@@ -197,18 +197,18 @@ To install in Claude Desktop:
 3. Restart Claude Desktop.
 
 4. Example Issues seen from Claude Desktop.
-    - You will see `No destinations found` when you query for a list of destionation connectors. Check your API key in `.env` or in your config json, it needs to be your personal key in `https://platform.unstructured.io/app/account/api-keys`.
+    - You will see `No destinations found` when you query for a list of destination connectors. Check your API key in `.env` or in your config json, it needs to be your personal key in `https://platform.unstructured.io/app/account/api-keys`.
 
 ## Debugging tools
 
 Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the following command to spin up a debugging UI. From there, you will be able to add environment variables (pointing to your local env) on the left pane. Include your personal API key there as env var. Go to `tools`, you can test out the capabilities you add to the MCP server.
 ```
-mcp dev uns_mcp/run.py
+mcp dev uns_mcp/server.py
 ```
 
 ## Running locally minimal client
 ```
-uv run python minimal_client/run.py uns_mcp/run.py
+uv run python minimal_client/client.py uns_mcp/server.py
 ```
 
 or
