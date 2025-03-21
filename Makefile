@@ -10,4 +10,4 @@ dev:
 
 .PHONY: test-firecrawl
 test-firecrawl:
-	uv run pytest tests/connectors/source/test_firecrawl.py
+	uv run pytest tests/test_firecrawl.py

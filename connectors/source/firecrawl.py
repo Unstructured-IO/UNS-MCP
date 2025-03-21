@@ -4,9 +4,7 @@ import tempfile
 import asyncio
 import boto3
 import hashlib
-from typing import Dict, List, Optional, Any, Literal, Union
-
-from mcp.server.fastmcp import Context
+from typing import Dict, Any, Literal
 
 # Import the FirecrawlApp client
 from firecrawl import FirecrawlApp
@@ -15,16 +13,16 @@ from firecrawl import FirecrawlApp
 Firecrawl_JobType = Literal["crawlhtml", "llmfulltxt"]
 
 
-def _prepare_firecrawl_config() -> Union[str, Dict[str, str]]:
+def _prepare_firecrawl_config() -> Dict[str, str]:
     """Prepare the Firecrawl configuration by retrieving and validating the API key.
     
     Returns:
-        Either an API key dictionary if successful, or an error message string
+        A dictionary containing either an API key or an error message
     """
     api_key = os.getenv("FIRECRAWL_API_KEY")
     
     if not api_key:
-        return "Firecrawl API key is required. Set FIRECRAWL_API_KEY environment variable."
+        return {"error": "Firecrawl API key is required. Set FIRECRAWL_API_KEY environment variable."}
     
     return {"api_key": api_key}
 
@@ -55,7 +53,6 @@ def _ensure_valid_s3_uri(s3_uri: str) -> str:
 
 
 async def invoke_firecrawl_crawlhtml(
-    ctx: Context,
     url: str,
     s3_uri: str,
     limit: int = 100,
@@ -63,7 +60,6 @@ async def invoke_firecrawl_crawlhtml(
     """Start an asynchronous web crawl job using Firecrawl to retrieve HTML content.
 
     Args:
-        ctx: Context object
         url: URL to crawl
         s3_uri: S3 URI where results will be uploaded 
         limit: Maximum number of pages to crawl (default: 100)
@@ -80,7 +76,6 @@ async def invoke_firecrawl_crawlhtml(
     }
     
     return await _invoke_firecrawl_job(
-        ctx=ctx, 
         url=url, 
         s3_uri=s3_uri, 
         job_type="crawlhtml", 
@@ -89,15 +84,14 @@ async def invoke_firecrawl_crawlhtml(
 
 
 async def invoke_firecrawl_llmtxt(
-    ctx: Context,
     url: str,
     s3_uri: str,
     max_urls: int = 10,
 ) -> Dict[str, Any]:
-    """Start an asynchronous LLM-optimized text generation job using Firecrawl.
-
+    """Start an asynchronous llmfull.txt generation job using Firecrawl.
+    This file is a standardized markdown file containing information to help LLMs use a website at inference time. 
+    The llmstxt endpoint leverages Firecrawl to crawl your website and extracts data using gpt-4o-mini
     Args:
-        ctx: Context object
         url: URL to crawl
         s3_uri: S3 URI where results will be uploaded
         max_urls: Maximum number of pages to crawl (1-100, default: 10)
@@ -112,7 +106,6 @@ async def invoke_firecrawl_llmtxt(
     }
     
     return await _invoke_firecrawl_job(
-        ctx=ctx, 
         url=url, 
         s3_uri=s3_uri, 
         job_type="llmfulltxt", 
@@ -121,7 +114,6 @@ async def invoke_firecrawl_llmtxt(
 
 
 async def _invoke_firecrawl_job(
-    ctx: Context,
     url: str,
     s3_uri: str,
     job_type: Firecrawl_JobType,
@@ -130,7 +122,6 @@ async def _invoke_firecrawl_job(
     """Generic function to start a Firecrawl job (either HTML crawl or llmfull.txt generation).
 
     Args:
-        ctx: Context object
         url: URL to process
         s3_uri: S3 URI where results will be uploaded
         job_type: Type of job ('crawlhtml' or 'llmtxt')
@@ -142,9 +133,9 @@ async def _invoke_firecrawl_job(
     # Get configuration with API key
     config = _prepare_firecrawl_config()
     
-    # Check if config is an error message
-    if isinstance(config, str):
-        return {"error": config}
+    # Check if config contains an error
+    if "error" in config:
+        return {"error": config["error"]}
     
     # Validate and normalize S3 URI first - doing this outside the try block to handle validation errors specifically
     try:
@@ -171,7 +162,7 @@ async def _invoke_firecrawl_job(
             
             # Start background task without waiting for it
             asyncio.create_task(
-                wait_for_job_completion(ctx, job_id, validated_s3_uri, job_type)
+                wait_for_job_completion(job_id, validated_s3_uri, job_type)
             )
             
             # Prepare and return the response
@@ -194,46 +185,40 @@ async def _invoke_firecrawl_job(
 
 
 async def check_crawlhtml_status(
-    ctx: Context,
     crawl_id: str,
 ) -> Dict[str, Any]:
     """Check the status of an existing Firecrawl HTML crawl job.
 
     Args:
-        ctx: Context object
         crawl_id: ID of the crawl job to check
 
     Returns:
         Dictionary containing the current status of the crawl job
     """
-    return await _check_job_status(ctx, crawl_id, "crawlhtml")
+    return await _check_job_status(crawl_id, "crawlhtml")
 
 
 async def check_llmtxt_status(
-    ctx: Context,
     job_id: str,
 ) -> Dict[str, Any]:
     """Check the status of an existing llmfull.txt generation job.
 
     Args:
-        ctx: Context object
         job_id: ID of the llmfull.txt generation job to check
 
     Returns:
         Dictionary containing the current status of the job and text content if completed
     """
-    return await _check_job_status(ctx, job_id, "llmfulltxt")
+    return await _check_job_status(job_id, "llmfulltxt")
 
 
 async def _check_job_status(
-    ctx: Context,
     job_id: str,
     job_type: Firecrawl_JobType,
 ) -> Dict[str, Any]:
     """Generic function to check the status of a Firecrawl job.
 
     Args:
-        ctx: Context object
         job_id: ID of the job to check
         job_type: Type of job ('crawlhtml' or 'llmtxt')
 
@@ -243,9 +228,9 @@ async def _check_job_status(
     # Get configuration with API key
     config = _prepare_firecrawl_config()
     
-    # Check if config is an error message
-    if isinstance(config, str):
-        return {"error": config}
+    # Check if config contains an error
+    if "error" in config:
+        return {"error": config["error"]}
     
     try:
         # Initialize the Firecrawl client
@@ -342,7 +327,6 @@ def _upload_directory_to_s3(local_dir: str, s3_uri: str) -> Dict[str, Any]:
 
 
 async def wait_for_crawlhtml_completion(
-    ctx: Context,
     crawl_id: str,
     s3_uri: str,
     poll_interval: int = 30,
@@ -351,7 +335,6 @@ async def wait_for_crawlhtml_completion(
     """Poll a Firecrawl HTML crawl job until completion and upload results to S3.
 
     Args:
-        ctx: Context object
         crawl_id: ID of the crawl job to monitor
         s3_uri: S3 URI where results will be uploaded (already validated)
         poll_interval: How often to check job status in seconds (default: 30)
@@ -360,11 +343,10 @@ async def wait_for_crawlhtml_completion(
     Returns:
         Dictionary with information about the completed job and S3 URI
     """
-    return await wait_for_job_completion(ctx, crawl_id, s3_uri, "crawlhtml", poll_interval, timeout)
+    return await wait_for_job_completion(crawl_id, s3_uri, "crawlhtml", poll_interval, timeout)
 
 
 async def wait_for_job_completion(
-    ctx: Context,
     job_id: str,
     s3_uri: str,
     job_type: Firecrawl_JobType,
@@ -374,7 +356,6 @@ async def wait_for_job_completion(
     """Poll a Firecrawl job until completion and upload results to S3.
 
     Args:
-        ctx: Context object
         job_id: ID of the job to monitor
         s3_uri: S3 URI where results will be uploaded (already validated)
         job_type: Type of job ('crawlhtml' or 'llmtxt')
@@ -387,9 +368,9 @@ async def wait_for_job_completion(
     # Get configuration with API key
     config = _prepare_firecrawl_config()
     
-    # Check if config is an error message
-    if isinstance(config, str):
-        return {"error": config}
+    # Check if config contains an error
+    if "error" in config:
+        return {"error": config["error"]}
     
     try:
         # Initialize the Firecrawl client
@@ -430,9 +411,9 @@ async def wait_for_job_completion(
             
             # Process results based on job type
             if job_type == "crawlhtml":
-                file_count = await _process_crawlhtml_results(job_id, result, job_dir)
+                file_count = await _process_crawlhtml_results(result, job_dir)
             elif job_type == "llmfulltxt":
-                file_count = _process_llmtxt_results(job_id, result, job_dir)
+                file_count = _process_llmtxt_results(result, job_dir)
             else:
                 return {"error": f"Unknown job type: {job_type}", "id": job_id}
             
@@ -470,14 +451,12 @@ async def wait_for_job_completion(
 
 
 async def _process_crawlhtml_results(
-    crawl_id: str,
     crawl_result: Dict[str, Any],
     output_dir: str
 ) -> int:
     """Process HTML crawl results by saving HTML files.
     
     Args:
-        crawl_id: ID of the crawl job
         crawl_result: The result from the completed crawl
         output_dir: Directory where to save the files
         
@@ -498,18 +477,7 @@ async def _process_crawlhtml_results(
             content = page_data.get("html", f"<html><body>Content for {url}</body></html>")
             
             # Clean the URL to create a valid filename
-            filename = url.replace("https://", "").replace("http://", "")
-            filename = filename.replace("/", "_").replace("?", "_").replace("&", "_")
-            filename = filename.replace(":", "_")  # Additional character cleaning
-            
-            # Ensure the filename isn't too long
-            if len(filename) > 200:
-                # Use the domain and a hash of the full URL if too long
-                domain = filename.split('_')[0]
-                filename_hash = hashlib.md5(url.encode()).hexdigest()
-                filename = f"{domain}_{filename_hash}.html"
-            else:
-                filename = f"{filename}.html"
+            filename = _clean_url_to_filename(url)
             
             file_path = os.path.join(output_dir, filename)
             
@@ -521,15 +489,39 @@ async def _process_crawlhtml_results(
     return len(file_paths)
 
 
+def _clean_url_to_filename(url: str) -> str:
+    """Convert a URL to a valid filename.
+    
+    Args:
+        url: The URL to convert
+        
+    Returns:
+        A valid filename derived from the URL
+    """
+    # Remove protocol prefixes
+    filename = url.replace("https://", "").replace("http://", "")
+    
+    # Replace special characters with underscores
+    filename = filename.replace("/", "_").replace("?", "_").replace("&", "_")
+    filename = filename.replace(":", "_")  # Additional character cleaning
+    
+    # Ensure the filename isn't too long
+    if len(filename) > 200:
+        # Use the domain and a hash of the full URL if too long
+        domain = filename.split('_')[0]
+        filename_hash = hashlib.md5(url.encode()).hexdigest()
+        return f"{domain}_{filename_hash}.html"
+    else:
+        return f"{filename}.html"
+
+
 def _process_llmtxt_results(
-    job_id: str,
     result: Dict[str, Any],
     output_dir: str
 ) -> int:
     """Process llmfull.txt generation results by saving text files.
     
     Args:
-        job_id: ID of the llmfull.txt generation job
         result: The result from the completed job
         output_dir: Directory where to save the files
         
@@ -549,23 +541,20 @@ def _process_llmtxt_results(
 
 
 async def cancel_crawlhtml_job(
-    ctx: Context,
     crawl_id: str,
 ) -> Dict[str, Any]:
     """Cancel an in-progress Firecrawl HTML crawl job.
 
     Args:
-        ctx: Context object
         crawl_id: ID of the crawl job to cancel
 
     Returns:
         Dictionary containing the result of the cancellation
     """
-    return await _cancel_job(ctx, crawl_id, "crawlhtml")
+    return await _cancel_job(crawl_id, "crawlhtml")
 
 
 async def cancel_llmtxt_job(
-    ctx: Context,
     job_id: str,
 ) -> Dict[str, Any]:
     """Function to cancel an in-progress Firecrawl LLM text generation job.
@@ -575,24 +564,21 @@ async def cancel_llmtxt_job(
     cannot be cancelled once started and must run to completion.
 
     Args:
-        ctx: Context object
         job_id: ID of the LLM text generation job to cancel
 
     Returns:
         Dictionary containing an error message indicating the operation is not supported
     """
-    return await _cancel_job(ctx, job_id, "llmfulltxt")
+    return await _cancel_job(job_id, "llmfulltxt")
 
 
 async def _cancel_job(
-    ctx: Context,
     job_id: str,
     job_type: Firecrawl_JobType,
 ) -> Dict[str, Any]:
     """Generic function to cancel a Firecrawl job.
 
     Args:
-        ctx: Context object
         job_id: ID of the job to cancel
         job_type: Type of job ('crawlhtml' or 'llmtxt')
 
@@ -602,9 +588,9 @@ async def _cancel_job(
     # Get configuration with API key
     config = _prepare_firecrawl_config()
     
-    # Check if config is an error message
-    if isinstance(config, str):
-        return {"error": config}
+    # Check if config contains an error
+    if "error" in config:
+        return {"error": config["error"]}
     
     # Special case for LLM text generation jobs - not supported
     if job_type == "llmfulltxt":

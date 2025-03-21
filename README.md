@@ -91,6 +91,7 @@ How Firecrawl works:
 - Recursively traverses each link to discover all subpages
 - Gathers content from every visited page, handling JavaScript rendering and rate limits
 - Jobs can be cancelled with `cancel_crawlhtml_job` if needed
+- Use this if you require all the info extracted into raw HTML, Unstructured's workflow cleans it up really well  :smile: 
 
 **LLM Text Generation:**
 - After crawling, extracts clean, meaningful text content from the crawled pages
@@ -225,4 +226,16 @@ To install in Claude Desktop:
 
 ## Debugging tools
 
-Anthropic provides `MCP Inspector`
+Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the following command to spin up a debugging UI. From there, you will be able to add environment variables (pointing to your local env) on the left pane. Include your personal API key there as env var. Go to `tools`, you can test out the capabilities you add to the MCP server.
+```
+mcp dev server.py
+```
+
+## Running locally minimal client
+```
+uv run python minimal_client/run.py server.py
+```
+
+## CHANGELOG.md
+
+Any new developed features/fixes/enhancements will be added to CHANGELOG.md. 0.x.x-dev pre-release format is preferred before we bump to a stable version.
