@@ -6,7 +6,7 @@ local-client:
 
 .PHONY: dev
 dev:
-	mcp dev uns_mcp/run.py
+	mcp dev server.py
 
 .PHONY: test-firecrawl
 test-firecrawl:
