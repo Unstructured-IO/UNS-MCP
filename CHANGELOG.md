@@ -13,7 +13,7 @@
 
 - ** Source connector adding**: azure, google drive
 
-- ** Destination connector adding**: weaviate
+- ** Destination connector adding**: weaviate, astradb
 
 ### Fixes
 

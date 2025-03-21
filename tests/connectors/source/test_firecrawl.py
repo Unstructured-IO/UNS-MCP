@@ -19,7 +19,10 @@ from connectors.source.firecrawl import (
     check_crawlhtml_status,
     invoke_firecrawl_llmtxt,
     check_llmtxt_status,
-    JobType
+    JobType,
+    cancel_crawlhtml_job,
+    cancel_llmtxt_job,
+    _cancel_job
 )
 
 # Test _ensure_valid_s3_uri
@@ -645,4 +648,81 @@ def test_process_llmtxt_results():
         # Verify file contents
         with open(llmtxt_path, "r", encoding="utf-8") as f:
             content = f.read()
-            assert content == "This is generated text content for testing..." 
+            assert content == "This is generated text content for testing..."
+
+
+@pytest.mark.asyncio
+async def test_cancel_crawlhtml_job():
+    """Test function for cancelling a crawlhtml job."""
+    # Mock Context object
+    mock_ctx = MagicMock()
+    
+    # Mock environment variable
+    with patch.dict(os.environ, {'FIRECRAWL_API_KEY': 'test-key'}):
+        # Mock FirecrawlApp
+        with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+            mock_firecrawl = MagicMock()
+            # Use actual API response format
+            mock_firecrawl.cancel_crawl.return_value = {
+                "status": "cancelled"
+            }
+            MockFirecrawlApp.return_value = mock_firecrawl
+            
+            # Call the function
+            result = await cancel_crawlhtml_job(mock_ctx, "test-id")
+            
+            # Verify results
+            assert result["id"] == "test-id"
+            assert result["status"] == "cancelled"
+            assert "message" in result
+            
+            # Verify correct FirecrawlApp method was called
+            mock_firecrawl.cancel_crawl.assert_called_once_with("test-id")
+
+
+@pytest.mark.asyncio
+async def test_cancel_llmtxt_job():
+    """Test function for attempting to cancel an llmtxt job (which is not supported by the API)."""
+    # Mock Context object
+    mock_ctx = MagicMock()
+    
+    # Mock environment variable to ensure _prepare_firecrawl_config returns a config dict
+    with patch.dict(os.environ, {'FIRECRAWL_API_KEY': 'test-key'}):
+        # Call the function - no need to mock the FirecrawlApp since we should return early
+        result = await cancel_llmtxt_job(mock_ctx, "test-id")
+        
+        # Verify results show it's not supported
+        assert result["id"] == "test-id"
+        assert result["status"] == "error"
+        assert "not supported" in result["message"]
+        assert "must run to completion" in result["message"]
+
+
+@pytest.mark.asyncio
+async def test_cancel_job_failure():
+    """Test handling of failure when cancelling a job."""
+    # Mock Context object
+    mock_ctx = MagicMock()
+    
+    # Mock environment variable
+    with patch.dict(os.environ, {'FIRECRAWL_API_KEY': 'test-key'}):
+        # Mock FirecrawlApp
+        with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+            mock_firecrawl = MagicMock()
+            # Use a different status to simulate failure
+            mock_firecrawl.cancel_crawl.return_value = {
+                "status": "error",
+                "message": "Job not found"
+            }
+            MockFirecrawlApp.return_value = mock_firecrawl
+            
+            # Call the function
+            result = await _cancel_job(mock_ctx, "test-id", "crawlhtml")
+            
+            # Verify results
+            assert result["id"] == "test-id"
+            assert result["status"] == "error"
+            assert "Failed to cancel job" in result["message"]
+            
+            # Verify correct FirecrawlApp method was called
+            mock_firecrawl.cancel_crawl.assert_called_once_with("test-id") 

@@ -17,6 +17,7 @@ def create_log_for_created_updated_connector(
     if info:
         result.extend([f"Name: {info.name}", f"ID: {info.id}"])
 
+
     # Note(tracy): let's not output creds config for now as different connectors come in
     # different creds name, logging them is not necessary anyway
     # if config:

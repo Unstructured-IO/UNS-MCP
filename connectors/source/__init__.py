@@ -10,11 +10,20 @@ def register_source_connectors(mcp: FastMCP):
     mcp.tool()(delete_s3_source)
     
     # Register Firecrawl tools
-    from .firecrawl import invoke_firecrawl_crawlhtml, check_crawlhtml_status, invoke_firecrawl_llmtxt, check_llmtxt_status
+    from .firecrawl import (
+        invoke_firecrawl_crawlhtml, 
+        check_crawlhtml_status, 
+        invoke_firecrawl_llmtxt, 
+        check_llmtxt_status,
+        cancel_crawlhtml_job,
+        cancel_llmtxt_job
+    )
     mcp.tool()(invoke_firecrawl_crawlhtml)
     mcp.tool()(check_crawlhtml_status)
     mcp.tool()(invoke_firecrawl_llmtxt)
     mcp.tool()(check_llmtxt_status)
+    mcp.tool()(cancel_crawlhtml_job)
+    # mcp.tool()(cancel_llmtxt_job) # currently commented till firecrawl brings up a cancel feature
 
     from .azure import create_azure_source, delete_azure_source, update_azure_source
 

@@ -90,11 +90,13 @@ How Firecrawl works:
 - Uses the sitemap if available; otherwise follows links found on the website
 - Recursively traverses each link to discover all subpages
 - Gathers content from every visited page, handling JavaScript rendering and rate limits
+- Jobs can be cancelled with `cancel_crawlhtml_job` if needed
 
 **LLM Text Generation:**
 - After crawling, extracts clean, meaningful text content from the crawled pages
 - Generates optimized text formats specifically formatted for large language models
 - Results are automatically uploaded to the specified S3 location
+- Note: LLM text generation jobs cannot be cancelled once started. The `cancel_llmtxt_job` function is provided for consistency but is not currently supported by the Firecrawl API.
 
 Note: A `FIRECRAWL_API_KEY` environment variable must be set to use these functions.
 
@@ -141,6 +143,7 @@ Delete a destination connector. Below is an example of `delete_s3_destination`:
 
 Parameters:
 - `destination_id`: ID of the destination connector to delete
+
 
 ### Workflows
 

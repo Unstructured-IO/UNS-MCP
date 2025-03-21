@@ -4,7 +4,7 @@ import tempfile
 import asyncio
 import boto3
 import hashlib
-from typing import Dict, List, Optional, Any, Literal
+from typing import Dict, List, Optional, Any, Literal, Union
 
 from mcp.server.fastmcp import Context
 
@@ -13,6 +13,20 @@ from firecrawl import FirecrawlApp
 
 # Define job types
 JobType = Literal["crawlhtml", "llmfulltxt"]
+
+
+def _prepare_firecrawl_config() -> Union[str, Dict[str, str]]:
+    """Prepare the Firecrawl configuration by retrieving and validating the API key.
+    
+    Returns:
+        Either an API key dictionary if successful, or an error message string
+    """
+    api_key = os.getenv("FIRECRAWL_API_KEY")
+    
+    if not api_key:
+        return "Firecrawl API key is required. Set FIRECRAWL_API_KEY environment variable."
+    
+    return {"api_key": api_key}
 
 
 def _ensure_valid_s3_uri(s3_uri: str) -> str:
@@ -125,12 +139,12 @@ async def _invoke_firecrawl_job(
     Returns:
         Dictionary with job information including the job ID
     """
-    # Get the API key from environment variable
-    api_key = os.getenv("FIRECRAWL_API_KEY")
+    # Get configuration with API key
+    config = _prepare_firecrawl_config()
     
-    # Validate parameters
-    if not api_key:
-        return {"error": "Firecrawl API key is required. Set FIRECRAWL_API_KEY environment variable."}
+    # Check if config is an error message
+    if isinstance(config, str):
+        return {"error": config}
     
     # Validate and normalize S3 URI first - doing this outside the try block to handle validation errors specifically
     try:
@@ -140,7 +154,7 @@ async def _invoke_firecrawl_job(
     
     try:
         # Initialize the Firecrawl client
-        firecrawl = FirecrawlApp(api_key=api_key)
+        firecrawl = FirecrawlApp(api_key=config["api_key"])
         
         # Start the job based on job_type
         if job_type == "crawlhtml":
@@ -226,15 +240,16 @@ async def _check_job_status(
     Returns:
         Dictionary containing the current status of the job
     """
-    # Get the API key from environment variable
-    api_key = os.getenv("FIRECRAWL_API_KEY")
+    # Get configuration with API key
+    config = _prepare_firecrawl_config()
     
-    if not api_key:
-        return {"error": "Firecrawl API key is required. Set FIRECRAWL_API_KEY environment variable."}
+    # Check if config is an error message
+    if isinstance(config, str):
+        return {"error": config}
     
     try:
         # Initialize the Firecrawl client
-        firecrawl = FirecrawlApp(api_key=api_key)
+        firecrawl = FirecrawlApp(api_key=config["api_key"])
         
         # Check status based on job type
         if job_type == "crawlhtml":
@@ -369,15 +384,16 @@ async def wait_for_job_completion(
     Returns:
         Dictionary with information about the completed job and S3 URI
     """
-    # Get the API key from environment variable
-    api_key = os.getenv("FIRECRAWL_API_KEY")
+    # Get configuration with API key
+    config = _prepare_firecrawl_config()
     
-    if not api_key:
-        return {"error": "Firecrawl API key is required. Set FIRECRAWL_API_KEY environment variable."}
+    # Check if config is an error message
+    if isinstance(config, str):
+        return {"error": config}
     
     try:
         # Initialize the Firecrawl client
-        firecrawl = FirecrawlApp(api_key=api_key)
+        firecrawl = FirecrawlApp(api_key=config["api_key"])
         start_time = time.time()
         
         # Poll until completion or timeout
@@ -529,4 +545,92 @@ def _process_llmtxt_results(
             f.write(result["data"]["llmsfulltxt"])
         file_count += 1
             
-    return file_count 
+    return file_count
+
+
+async def cancel_crawlhtml_job(
+    ctx: Context,
+    crawl_id: str,
+) -> Dict[str, Any]:
+    """Cancel an in-progress Firecrawl HTML crawl job.
+
+    Args:
+        ctx: Context object
+        crawl_id: ID of the crawl job to cancel
+
+    Returns:
+        Dictionary containing the result of the cancellation
+    """
+    return await _cancel_job(ctx, crawl_id, "crawlhtml")
+
+
+async def cancel_llmtxt_job(
+    ctx: Context,
+    job_id: str,
+) -> Dict[str, Any]:
+    """Function to cancel an in-progress Firecrawl LLM text generation job.
+    
+    WARNING: This function is NOT SUPPORTED by the underlying Firecrawl API for LLM text generation jobs.
+    It is provided for API consistency only but will fail when called. LLM text generation jobs
+    cannot be cancelled once started and must run to completion.
+
+    Args:
+        ctx: Context object
+        job_id: ID of the LLM text generation job to cancel
+
+    Returns:
+        Dictionary containing an error message indicating the operation is not supported
+    """
+    return await _cancel_job(ctx, job_id, "llmfulltxt")
+
+
+async def _cancel_job(
+    ctx: Context,
+    job_id: str,
+    job_type: JobType,
+) -> Dict[str, Any]:
+    """Generic function to cancel a Firecrawl job.
+
+    Args:
+        ctx: Context object
+        job_id: ID of the job to cancel
+        job_type: Type of job ('crawlhtml' or 'llmtxt')
+
+    Returns:
+        Dictionary containing the result of the cancellation
+    """
+    # Get configuration with API key
+    config = _prepare_firecrawl_config()
+    
+    # Check if config is an error message
+    if isinstance(config, str):
+        return {"error": config}
+    
+    # Special case for LLM text generation jobs - not supported
+    if job_type == "llmfulltxt":
+        return {
+            "id": job_id,
+            "status": "error",
+            "message": "Cancelling LLM text generation jobs is not supported. These jobs must run to completion.",
+            "details": {"status": "error", "reason": "unsupported_operation"}
+        }
+    else:
+        try:
+            # Initialize the Firecrawl client
+            firecrawl = FirecrawlApp(api_key=config["api_key"])
+            
+            # Cancel the job
+            result = firecrawl.cancel_crawl(job_id)
+            
+            # Check if the cancellation was successful (result has 'status': 'cancelled')
+            is_successful = result.get("status") == "cancelled"
+            
+            # Return a user-friendly response
+            return {
+                "id": job_id,
+                "status": "cancelled" if is_successful else "error",
+                "message": f"Firecrawl {job_type} job cancelled successfully" if is_successful else "Failed to cancel job",
+                "details": result
+            }
+        except Exception as e:
+            return {"error": f"Error cancelling {job_type} job: {str(e)}"} 
