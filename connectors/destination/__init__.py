@@ -19,6 +19,8 @@ def register_destination_connectors(mcp: FastMCP):
     mcp.tool()(create_s3_destination)
     mcp.tool()(update_s3_destination)
     mcp.tool()(delete_s3_destination)
+    
+    # Register Weaviate destination connector tools
     mcp.tool()(create_weaviate_destination)
     mcp.tool()(update_weaviate_destination)
     mcp.tool()(delete_weaviate_destination)

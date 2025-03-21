@@ -416,7 +416,7 @@ async def list_jobs(
 
     Args:
         workflow_id: Optional workflow ID to filter by
-        status: Optional workflow status to filter by
+        status: Optional job status to filter by
 
     Returns:
         String containing the list of jobs

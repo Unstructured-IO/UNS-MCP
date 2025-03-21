@@ -13,6 +13,7 @@
 - add notebooks to demonstrate end-to-end capabilities of creating connectors, combining them info workflow and executing the workflow
 
 ### Features
+- Integrated firecrawl's /crawl and /llmstxt endpoint to generate and push HTML and llms.txt files to S3.
 
 - ** Source connector adding**: azure, google drive
 
