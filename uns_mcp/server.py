@@ -292,7 +292,8 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
-@add_custom_node_examples
+@add_custom_node_examples  # Note: This documentation is added due to lack of typing in
+# WorkflowNode.settings. It can be safely deleted when typing is added.
 async def create_workflow(ctx: Context, workflow_config: CreateWorkflowTypedDict) -> str:
     """Create a new workflow.
 
@@ -352,7 +353,8 @@ async def run_workflow(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
-@add_custom_node_examples
+@add_custom_node_examples  # Note: This documentation is added due to lack of typing in
+# WorkflowNode.settings. It can be safely deleted when typing is added.
 async def update_workflow(
     ctx: Context,
     workflow_id: str,
