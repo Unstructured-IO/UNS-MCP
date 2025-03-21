@@ -146,11 +146,18 @@ class MCPClient:
                         },
                     )
                 else:
+                    message = f"User declined execution of {tool_name} with args {tool_args}"
                     self.history.append(
                         {
                             "role": "user",
-                            "content": f"User declined execution of "
-                            f"{tool_name} with args {tool_args}",
+                            "content": [
+                                {
+                                    "type": "tool_result",
+                                    "tool_use_id": content_item.id,
+                                    "content": message,
+                                    "is_error": True,
+                                },
+                            ],
                         },
                     )
 
@@ -181,6 +188,9 @@ class MCPClient:
 
                 if query.lower() in ["quit", "q"]:
                     break
+
+                if not query:
+                    continue
 
                 await self.process_query(query, confirm_tool_use)
             except Exception as e:
