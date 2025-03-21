@@ -13,7 +13,7 @@ import time
 project_root = str(Path(__file__).parent.parent.absolute())
 sys.path.insert(0, project_root)
 
-from connectors.source.firecrawl import (
+from connectors.external.firecrawl import (
     _ensure_valid_s3_uri,
     _upload_directory_to_s3,
     _invoke_firecrawl_job, 
@@ -141,7 +141,7 @@ def test_upload_directory_to_s3_with_errors(mock_s3_client, mock_environment):
 async def test_check_crawlhtml_status(mock_environment):
     """Test checking the status of a Firecrawl HTML crawl job."""
     # Mock _check_job_status function
-    with patch('connectors.source.firecrawl._check_job_status') as mock_check_job:
+    with patch('connectors.external.firecrawl._check_job_status') as mock_check_job:
         mock_check_job.return_value = {
             "id": "test-id",
             "status": "completed",
@@ -166,7 +166,7 @@ async def test_check_crawlhtml_status(mock_environment):
 async def test_check_llmtxt_status(mock_environment):
     """Test checking the status of an LLM text generation job."""
     # Mock _check_job_status function
-    with patch('connectors.source.firecrawl._check_job_status') as mock_check_job:
+    with patch('connectors.external.firecrawl._check_job_status') as mock_check_job:
         mock_check_job.return_value = {
             "id": "test-id",
             "status": "completed",
@@ -189,7 +189,7 @@ async def test_check_llmtxt_status(mock_environment):
 async def test_check_job_status_crawlhtml(mock_environment):
     """Test generic function for checking job status - crawlhtml type."""
     # Mock FirecrawlApp
-    with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+    with patch('connectors.external.firecrawl.FirecrawlApp') as MockFirecrawlApp:
         mock_firecrawl = MagicMock()
         mock_firecrawl.check_crawl_status.return_value = {
             "status": "completed",
@@ -215,7 +215,7 @@ async def test_check_job_status_crawlhtml(mock_environment):
 async def test_check_job_status_llmtxt(mock_environment):
     """Test generic function for checking job status - llmtxt type."""
     # Mock FirecrawlApp
-    with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+    with patch('connectors.external.firecrawl.FirecrawlApp') as MockFirecrawlApp:
         mock_firecrawl = MagicMock()
         mock_firecrawl.check_generate_llms_text_status.return_value = {
             "status": "completed", 
@@ -254,7 +254,7 @@ async def test_check_job_status_invalid_type(mock_environment):
 async def test_invoke_firecrawl_crawlhtml(mock_environment):
     """Test invoking a Firecrawl HTML crawl job."""
     # Mock _invoke_firecrawl_job
-    with patch('connectors.source.firecrawl._invoke_firecrawl_job') as mock_invoke:
+    with patch('connectors.external.firecrawl._invoke_firecrawl_job') as mock_invoke:
         mock_invoke.return_value = {
             "id": "test-id",
             "status": "started",
@@ -287,7 +287,7 @@ async def test_invoke_firecrawl_crawlhtml(mock_environment):
 async def test_invoke_firecrawl_llmtxt(mock_environment):
     """Test invoking an LLM text generation job."""
     # Mock _invoke_firecrawl_job
-    with patch('connectors.source.firecrawl._invoke_firecrawl_job') as mock_invoke:
+    with patch('connectors.external.firecrawl._invoke_firecrawl_job') as mock_invoke:
         mock_invoke.return_value = {
             "id": "test-id",
             "status": "started",
@@ -322,7 +322,7 @@ async def test_invoke_firecrawl_llmtxt(mock_environment):
 async def test_invoke_firecrawl_job_crawlhtml(mock_environment):
     """Test generic function for invoking a Firecrawl job - crawlhtml type."""
     # Mock FirecrawlApp
-    with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+    with patch('connectors.external.firecrawl.FirecrawlApp') as MockFirecrawlApp:
         mock_firecrawl = MagicMock()
         mock_firecrawl.async_crawl_url.return_value = {
             "id": "test-id",
@@ -359,7 +359,7 @@ async def test_invoke_firecrawl_job_crawlhtml(mock_environment):
 async def test_invoke_firecrawl_job_llmtxt(mock_environment):
     """Test generic function for invoking a Firecrawl job - llmtxt type."""
     # Mock FirecrawlApp
-    with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+    with patch('connectors.external.firecrawl.FirecrawlApp') as MockFirecrawlApp:
         mock_firecrawl = MagicMock()
         mock_firecrawl.async_generate_llms_text.return_value = {
             "id": "test-id",
@@ -412,7 +412,7 @@ async def test_invoke_firecrawl_job_invalid_type(mock_environment):
 async def test_wait_for_crawlhtml_completion(mock_environment):
     """Test waiting for a Firecrawl HTML crawl job to complete."""
     # Mock wait_for_job_completion function
-    with patch('connectors.source.firecrawl.wait_for_job_completion') as mock_wait:
+    with patch('connectors.external.firecrawl.wait_for_job_completion') as mock_wait:
         mock_wait.return_value = {
             "id": "test-id",
             "status": "completed",
@@ -449,7 +449,7 @@ async def test_wait_for_crawlhtml_completion(mock_environment):
 async def test_wait_for_job_completion_crawlhtml(mock_environment):
     """Test waiting for a job to complete - crawlhtml type."""
     # Mock FirecrawlApp
-    with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+    with patch('connectors.external.firecrawl.FirecrawlApp') as MockFirecrawlApp:
         mock_firecrawl = MagicMock()
         mock_firecrawl.check_crawl_status.return_value = {
             "status": "completed",
@@ -469,11 +469,11 @@ async def test_wait_for_job_completion_crawlhtml(mock_environment):
         MockFirecrawlApp.return_value = mock_firecrawl
         
         # Mock _process_crawlhtml_results
-        with patch('connectors.source.firecrawl._process_crawlhtml_results') as mock_process:
+        with patch('connectors.external.firecrawl._process_crawlhtml_results') as mock_process:
             mock_process.return_value = 2
             
             # Mock _upload_directory_to_s3
-            with patch('connectors.source.firecrawl._upload_directory_to_s3') as mock_upload:
+            with patch('connectors.external.firecrawl._upload_directory_to_s3') as mock_upload:
                 mock_upload.return_value = {
                     "uploaded_files": 2,
                     "failed_files": 0,
@@ -508,7 +508,7 @@ async def test_wait_for_job_completion_crawlhtml(mock_environment):
 async def test_wait_for_job_completion_llmtxt(mock_environment):
     """Test waiting for a job to complete - llmtxt type."""
     # Mock FirecrawlApp
-    with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+    with patch('connectors.external.firecrawl.FirecrawlApp') as MockFirecrawlApp:
         mock_firecrawl = MagicMock()
         mock_firecrawl.check_generate_llms_text_status.return_value = {
             "status": "completed",
@@ -520,11 +520,11 @@ async def test_wait_for_job_completion_llmtxt(mock_environment):
         MockFirecrawlApp.return_value = mock_firecrawl
         
         # Mock _process_llmtxt_results
-        with patch('connectors.source.firecrawl._process_llmtxt_results') as mock_process:
+        with patch('connectors.external.firecrawl._process_llmtxt_results') as mock_process:
             mock_process.return_value = 1
             
             # Mock _upload_directory_to_s3
-            with patch('connectors.source.firecrawl._upload_directory_to_s3') as mock_upload:
+            with patch('connectors.external.firecrawl._upload_directory_to_s3') as mock_upload:
                 mock_upload.return_value = {
                     "uploaded_files": 1,
                     "failed_files": 0,
@@ -558,7 +558,7 @@ async def test_wait_for_job_completion_llmtxt(mock_environment):
 async def test_wait_for_job_completion_timeout(mock_environment):
     """Test timeout while waiting for a job to complete."""
     # Mock FirecrawlApp
-    with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+    with patch('connectors.external.firecrawl.FirecrawlApp') as MockFirecrawlApp:
         mock_firecrawl = MagicMock()
         # Return a non-completed status
         mock_firecrawl.check_crawl_status.return_value = {
@@ -597,7 +597,7 @@ async def test_wait_for_job_completion_timeout(mock_environment):
 async def test_cancel_crawlhtml_job(mock_environment):
     """Test cancelling a Firecrawl HTML crawl job."""
     # Mock _cancel_job function
-    with patch('connectors.source.firecrawl._cancel_job') as mock_cancel_job:
+    with patch('connectors.external.firecrawl._cancel_job') as mock_cancel_job:
         mock_cancel_job.return_value = {
             "id": "test-id",
             "status": "cancelled",
@@ -621,7 +621,7 @@ async def test_cancel_crawlhtml_job(mock_environment):
 async def test_cancel_llmtxt_job(mock_environment):
     """Test cancelling an LLM text generation job."""
     # Mock _cancel_job function
-    with patch('connectors.source.firecrawl._cancel_job') as mock_cancel_job:
+    with patch('connectors.external.firecrawl._cancel_job') as mock_cancel_job:
         mock_cancel_job.return_value = {
             "id": "test-id",
             "status": "error",
@@ -645,7 +645,7 @@ async def test_cancel_llmtxt_job(mock_environment):
 async def test_cancel_job_failure(mock_environment):
     """Test handling errors when cancelling a job."""
     # Mock FirecrawlApp to raise an exception
-    with patch('connectors.source.firecrawl.FirecrawlApp') as MockFirecrawlApp:
+    with patch('connectors.external.firecrawl.FirecrawlApp') as MockFirecrawlApp:
         mock_firecrawl = MagicMock()
         mock_firecrawl.cancel_crawl.side_effect = Exception("Test exception")
         MockFirecrawlApp.return_value = mock_firecrawl
