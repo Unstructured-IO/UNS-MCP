@@ -76,6 +76,31 @@ Delete a source connector. Below is an example of `delete_s3_source`:
 Parameters:
 - `source_id`: ID of the source connector to delete
 
+### Firecrawl Source 
+
+[Firecrawl](https://www.firecrawl.dev/) is a web crawling API that provides two main capabilities in our MCP:
+
+1. **HTML Content Retrieval**: Using `invoke_firecrawl_crawlhtml` to start crawl jobs and `check_crawlhtml_status` to monitor them
+2. **LLM-Optimized Text Generation**: Using `invoke_firecrawl_llmtxt` to generate text and `check_llmtxt_status` to retrieve results
+
+How Firecrawl works:
+
+**Web Crawling Process:**
+- Starts with a specified URL and analyzes it to identify links
+- Uses the sitemap if available; otherwise follows links found on the website
+- Recursively traverses each link to discover all subpages
+- Gathers content from every visited page, handling JavaScript rendering and rate limits
+- Jobs can be cancelled with `cancel_crawlhtml_job` if needed
+- Use this if you require all the info extracted into raw HTML, Unstructured's workflow cleans it up really well  :smile: 
+
+**LLM Text Generation:**
+- After crawling, extracts clean, meaningful text content from the crawled pages
+- Generates optimized text formats specifically formatted for large language models
+- Results are automatically uploaded to the specified S3 location
+- Note: LLM text generation jobs cannot be cancelled once started. The `cancel_llmtxt_job` function is provided for consistency but is not currently supported by the Firecrawl API.
+
+Note: A `FIRECRAWL_API_KEY` environment variable must be set to use these functions.
+
 ### Destinations
 
 #### list_destinations
