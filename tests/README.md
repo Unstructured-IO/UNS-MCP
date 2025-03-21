@@ -25,6 +25,11 @@ To run tests from a specific file:
 ```bash
 pytest tests/connectors/source/test_firecrawl.py
 ```
+You can run this test directly with 
+```bash
+make test-firecrawl 
+```
+Through the Makefile.
 
 ### Running Specific Test Functions
 
