@@ -1,3 +1,5 @@
+# Source of complete documentation:
+#  https://docs.unstructured.io/api-reference/workflow/workflows
 custom_nodes_settings_documentation = """
 Custom workflow DAG nodes
 - If WorkflowType is set to custom, you must also specify the settings for the workflow’s
@@ -6,19 +8,19 @@ directed acyclic graph (DAG) nodes. These nodes’ settings are specified in the
 workflow_nodes array.
 - A Destination node is automatically created when you specify the destination_id value outside
 of the workflow_nodes array.
-- You can specify Partitioner, Chunker, Enrichment, and Embedder nodes.
+- You can specify Partitioner, Chunker, Prompter, and Embedder nodes.
 - The order of the nodes in the workflow_nodes array will be the same order that these nodes appear
 in the DAG, with the first node in the array added directly after the Source node.
 The Destination node follows the last node in the array.
 - Be sure to specify nodes in the allowed order. The following DAG placements are all allowed:
-    - Partitioner,
-    - Partitioner -> Chunker,
-    - Partitioner -> Chunker -> Embedder,
-    - Partitioner -> Enrichment -> Chunker,
-    - Partitioner -> Enrichment -> Chunker -> Embedder
+    - Source -> Partitioner -> Destination,
+    - Source -> Partitioner -> Chunker -> Destination,
+    - Source -> Partitioner -> Chunker -> Embedder -> Destination,
+    - Source -> Partitioner -> Prompter -> Chunker -> Destination,
+    - Source -> Partitioner -> Prompter -> Chunker -> Embedder -> Destination
 
 Partitioner node
-A Partitioner node has a type of partition and a subtype of auto, vlm, hires, or fast.
+A Partitioner node has a type of partition and a subtype of auto, vlm, hi_res, or fast.
 Examples:
 - auto strategy:
 {
@@ -38,13 +40,12 @@ Examples:
 }
 
 - vlm strategy:
-    Allowed values for provider and model include:
+    Allowed values are provider and model. Below are examples:
+        - "provider": "anthropic" "model": "claude-3-5-sonnet-20241022",
+        - "provider": "openai" "model": "gpt-4o"
 
-    "provider": "anthropic" "model": "claude-3-5-sonnet-20241022"
-    "provider": "openai" "model": "gpt-4o"
 
-
-- hires strategy:
+- hi_res strategy:
 {
     "name": "Partitioner",
     "type": "partition",
@@ -136,8 +137,8 @@ set same as max_characters)
 }
 
 
-Enrichment node
-An Enrichment node has a type of prompter and subtype of:
+Prompter node
+An Prompter node has a type of prompter and subtype of:
 - openai_image_description,
 - anthropic_image_description,
 - bedrock_image_description,
@@ -151,7 +152,7 @@ An Enrichment node has a type of prompter and subtype of:
 
 Example:
 {
-    "name": "Enrichment",
+    "name": "Prompter",
     "type": "prompter",
     "subtype": "<subtype>",
     "settings": {}
