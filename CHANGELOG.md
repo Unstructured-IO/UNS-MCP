@@ -14,6 +14,8 @@
 
 - ** Destination connector adding**: weaviate, astradb
 
+- ** Add `list_jobs`, `get_job_info`, `cancel_job` tools
+
 ### Fixes
 
 - fix bugs for source connector config access
