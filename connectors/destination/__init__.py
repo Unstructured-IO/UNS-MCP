@@ -9,6 +9,11 @@ def register_destination_connectors(mcp: FastMCP):
         delete_weaviate_destination,
         update_weaviate_destination,
     )
+    from .astra import (
+        create_astradb_destination,
+        update_astradb_destination,
+        delete_astradb_destination,
+    )
 
     # Register S3 destination connector tools
     mcp.tool()(create_s3_destination)
@@ -17,3 +22,8 @@ def register_destination_connectors(mcp: FastMCP):
     mcp.tool()(create_weaviate_destination)
     mcp.tool()(update_weaviate_destination)
     mcp.tool()(delete_weaviate_destination)
+    
+    # Register AstraDB destination connector tools
+    mcp.tool()(create_astradb_destination)
+    mcp.tool()(update_astradb_destination)
+    mcp.tool()(delete_astradb_destination)
