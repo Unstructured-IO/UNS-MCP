@@ -17,7 +17,7 @@
 
 - ** Source connector adding**: azure, google drive
 
-- ** Destination connector adding**: weaviate, astradb
+- ** Destination connector adding**: weaviate, astradb, neo4j
 
 - ** Add `list_jobs`, `get_job_info`, `cancel_job` tools
 
