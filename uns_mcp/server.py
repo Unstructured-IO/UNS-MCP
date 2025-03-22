@@ -552,4 +552,3 @@ if __name__ == "__main__":
         starlette_app = create_starlette_app(mcp_server, debug=True)
 
         uvicorn.run(starlette_app, host=args.host, port=args.port)
-
