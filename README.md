@@ -282,7 +282,6 @@ python uns_mcp/server.py --host 127.0.0.1 --port 8080
 python minimal_client/client.py "http://127.0.0.1:8080/sse"
 ```
 
-
 ## CHANGELOG.md
 
 Any new developed features/fixes/enhancements will be added to CHANGELOG.md. 0.x.x-dev pre-release format is preferred before we bump to a stable version.

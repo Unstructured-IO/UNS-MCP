@@ -538,7 +538,7 @@ if __name__ == "__main__":
         mcp.run()
     else:
         # server is running as HTTP SSE server
-        # reference for running as HTTP SSE server: https://github.com/sidharthrajaram/mcp-sse
+        # reference: https://github.com/sidharthrajaram/mcp-sse
         mcp_server = mcp._mcp_server  # noqa: WPS437
 
         import argparse
