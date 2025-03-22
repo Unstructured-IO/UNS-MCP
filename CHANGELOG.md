@@ -1,4 +1,4 @@
-## 0.1.1-dev
+## 0.1.1
 
 ### Enhancements
 
@@ -7,6 +7,10 @@
 - add better docstring into tools so that client LLM can provide better guidance to users
 
 - enable logging capability for minimal_client and add memory history to minimal_client
+
+- add docstrings to guide LLM how to configure Nodes when creating custom DAG workflow
+
+- add notebooks to demonstrate end-to-end capabilities of creating connectors, combining them info workflow and executing the workflow
 
 ### Features
 - Integrated firecrawl's /crawl and /llmstxt endpoint to generate and push HTML and llms.txt files to S3.

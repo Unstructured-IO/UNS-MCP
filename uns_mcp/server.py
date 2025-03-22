@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import AsyncIterator, Optional
 
+from docstring_extras import add_custom_node_examples  # relative import required by mcp
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context, FastMCP
 from unstructured_client import UnstructuredClient
@@ -31,7 +32,6 @@ from unstructured_client.models.shared import (
 )
 from unstructured_client.models.shared.createworkflow import CreateWorkflowTypedDict
 
-# Register connector tools
 from connectors import register_connectors
 
 
@@ -121,7 +121,7 @@ async def get_source_info(ctx: Context, source_id: str) -> str:
     """Get detailed information about a specific source connector.
 
     Args:
-        source_id: ID of the source connector to get information for
+        source_id: ID of the source connector to get information for, should be valid UUID
 
     Returns:
         String containing the source connector information
@@ -292,14 +292,16 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
+@add_custom_node_examples  # Note: This documentation is added due to lack of typing in
+# WorkflowNode.settings. It can be safely deleted when typing is added.
 async def create_workflow(ctx: Context, workflow_config: CreateWorkflowTypedDict) -> str:
     """Create a new workflow.
 
     Args:
-        workflow_config: A Typed Dictionary containing required fields (destination_id,
-        name, source_id, workflow_type) and non-required fields (schedule, and workflow_nodes)
-        Note workflow_nodes is only enabled when workflow_type is `custom` and
-        is a list of WorkflowNodeTypedDict: partition, prompter,chunk, embed
+        workflow_config: A Typed Dictionary containing required fields (destination_id - should be a
+        valid UUID, name, source_id - should be a valid UUID, workflow_type) and non-required fields
+        (schedule, and workflow_nodes). Note workflow_nodes is only enabled when workflow_type
+        is `custom` and is a list of WorkflowNodeTypedDict: partition, prompter,chunk, embed
         Below is an example of a partition workflow node:
             {
                 "name": "vlm-partition",
@@ -351,6 +353,8 @@ async def run_workflow(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
+@add_custom_node_examples  # Note: This documentation is added due to lack of typing in
+# WorkflowNode.settings. It can be safely deleted when typing is added.
 async def update_workflow(
     ctx: Context,
     workflow_id: str,
@@ -412,7 +416,7 @@ async def list_jobs(
 
     Args:
         workflow_id: Optional workflow ID to filter by
-        status: Optional workflow status to filter by
+        status: Optional job status to filter by
 
     Returns:
         String containing the list of jobs
