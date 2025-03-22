@@ -10,8 +10,10 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
-    PineconeDestinationConnectorConfigInput,
     UpdateDestinationConnector,
+)
+from unstructured_client.models.shared.pineconedestinationconnectorconfiginput import (
+    PineconeDestinationConnectorConfigInput,
 )
 
 from connectors.utils import (
