@@ -18,12 +18,12 @@ To test in local, any working key that pointing to prod env would work. However,
 ## Running the Server
 Using the MCP CLI:
 ```bash
-mcp run server.py
+mcp run uns_mcp/server.py
 ```
 
 or:
 ```bash
-uv run server.py
+uv run uns_mcp/server.py
 ```
 
 ## Available Tools
@@ -76,7 +76,7 @@ Delete a source connector. Below is an example of `delete_s3_source`:
 Parameters:
 - `source_id`: ID of the source connector to delete
 
-### Firecrawl Source 
+### Firecrawl Source
 
 [Firecrawl](https://www.firecrawl.dev/) is a web crawling API that provides two main capabilities in our MCP:
 
@@ -91,7 +91,7 @@ How Firecrawl works:
 - Recursively traverses each link to discover all subpages
 - Gathers content from every visited page, handling JavaScript rendering and rate limits
 - Jobs can be cancelled with `cancel_crawlhtml_job` if needed
-- Use this if you require all the info extracted into raw HTML, Unstructured's workflow cleans it up really well  :smile: 
+- Use this if you require all the info extracted into raw HTML, Unstructured's workflow cleans it up really well  :smile:
 
 **LLM Text Generation:**
 - After crawling, extracts clean, meaningful text content from the crawled pages
@@ -190,6 +190,30 @@ Delete a specific workflow.
 Parameters:
 - `workflow_id`: ID of the workflow to delete
 
+
+### Jobs
+
+#### list_jobs
+
+Lists jobs for a specific workflow from the Unstructured API.
+
+Parameters:
+- `workflow_id` (optional): Filter by workflow ID
+- `status` (optional): Filter by job status
+
+#### get_job_info
+Get detailed information about a specific job.
+
+Parameters:
+- `job_id`: ID of the job to get information for
+
+#### cancel_job
+
+Delete a specific job.
+
+Parameters:
+- `job_id`: ID of the job to cancel
+
 ## Claude Desktop Integration
 
 To install in Claude Desktop:
@@ -222,19 +246,29 @@ To install in Claude Desktop:
 3. Restart Claude Desktop.
 
 4. Example Issues seen from Claude Desktop.
-    - You will see `No destinations found` when you query for a list of destionation connectors. Check your API key in `.env` or in your config json, it needs to be your personal key in `https://platform.unstructured.io/app/account/api-keys`.
+    - You will see `No destinations found` when you query for a list of destination connectors. Check your API key in `.env` or in your config json, it needs to be your personal key in `https://platform.unstructured.io/app/account/api-keys`.
 
 ## Debugging tools
 
 Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the following command to spin up a debugging UI. From there, you will be able to add environment variables (pointing to your local env) on the left pane. Include your personal API key there as env var. Go to `tools`, you can test out the capabilities you add to the MCP server.
 ```
-mcp dev server.py
+mcp dev uns_mcp/server.py
 ```
 
 ## Running locally minimal client
 ```
-uv run python minimal_client/run.py server.py
+uv run python minimal_client/client.py uns_mcp/server.py
 ```
+
+or
+
+```
+make local-client
+```
+
+Env variables to configure behavior of the client:
+- `LOG_LEVEL="ERROR"` # If you would like to hide outputs from the LLM and present clear messages for the user
+- `CONFIRM_TOOL_USE='false'` If you would like to disable the tool use confirmation before running it (True by default). **BE MINDFUL** about that option, as LLM can decide to purge all data from your account or run some expensive workflows; use only for development purposes.
 
 ## CHANGELOG.md
 
