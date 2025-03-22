@@ -25,7 +25,7 @@ def register_destination_connectors(mcp: FastMCP):
         update_weaviate_destination,
     )
 
-    # Register destination connector tools
+    # Register S3 destination connector tools
     mcp.tool()(create_s3_destination)
     mcp.tool()(update_s3_destination)
     mcp.tool()(delete_s3_destination)
@@ -39,6 +39,8 @@ def register_destination_connectors(mcp: FastMCP):
     mcp.tool()(create_astradb_destination)
     mcp.tool()(update_astradb_destination)
     mcp.tool()(delete_astradb_destination)
+
+    # Register Neo4j destination connector tools
     mcp.tool()(create_neo4j_destination)
     mcp.tool()(update_neo4j_destination)
     mcp.tool()(delete_neo4j_destination)
