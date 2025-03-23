@@ -1,3 +1,9 @@
+## 0.1.2-dev
+
+### Enhancements
+
+- Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
+
 ## 0.1.1
 
 ### Enhancements
