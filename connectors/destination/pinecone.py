@@ -10,10 +10,8 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
-    UpdateDestinationConnector,
-)
-from unstructured_client.models.shared.pineconedestinationconnectorconfiginput import (
     PineconeDestinationConnectorConfigInput,
+    UpdateDestinationConnector,
 )
 
 from connectors.utils import (
@@ -23,7 +21,7 @@ from connectors.utils import (
 
 def _prepare_pinecone_dest_config(
     index_name: str,
-    name_space: str = "default",
+    namespace: str = "default",
     batch_size: Optional[int] = 50,
 ) -> PineconeDestinationConnectorConfigInput:
 
@@ -33,7 +31,7 @@ def _prepare_pinecone_dest_config(
     else:
         return PineconeDestinationConnectorConfigInput(
             index_name=index_name,
-            name_space=name_space,
+            namespace=namespace,
             batch_size=batch_size,
             api_key=os.getenv("PINECONE_API_KEY"),
         )
@@ -43,7 +41,7 @@ async def create_pinecone_destination(
     ctx: Context,
     name: str,
     index_name: str,
-    name_space: Optional[str] = "default",
+    namespace: Optional[str] = "default",
     batch_size: Optional[int] = 100,
 ) -> str:
     """Create an pinecone destination connector.
@@ -52,7 +50,7 @@ async def create_pinecone_destination(
         name: A unique name for this connector
         index_name: The pinecone index name, used to insert vectors,
         query for similar vectors, and delete them.
-        name_space: The pinecone namespace, a folder inside the pinecone index
+        namespace: The pinecone namespace, a folder inside the pinecone index
         batch_size: The batch size refers to the number of vectors you upsert or delete
 
 
@@ -61,7 +59,7 @@ async def create_pinecone_destination(
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_pinecone_dest_config(index_name, name_space, batch_size)
+    config = _prepare_pinecone_dest_config(index_name, namespace, batch_size)
 
     destination_connector = CreateDestinationConnector(name=name, type="pinecone", config=config)
 
@@ -85,7 +83,7 @@ async def update_pinecone_destination(
     ctx: Context,
     destination_id: str,
     index_name: Optional[str] = None,
-    name_space: Optional[str] = None,
+    namespace: Optional[str] = None,
     batch_size: Optional[int] = None,
 ) -> str:
     """Update an Pinecone destination connector.
@@ -94,7 +92,7 @@ async def update_pinecone_destination(
         destination_id: ID of the destination connector to update
         index_name: The pinecone index name, used to insert vectors,
         query for similar vectors, and delete them.
-        name_space: The pinecone namespace, a folder inside the pinecone index
+        namespace: The pinecone namespace, a folder inside the pinecone index
 
         batch_size: The batch size refers to the number of vectors you upsert or delete
 
@@ -118,8 +116,8 @@ async def update_pinecone_destination(
 
     if index_name is not None:
         config["index_name"] = index_name
-    if name_space is not None:
-        config["name_space"] = name_space
+    if namespace is not None:
+        config["namespace"] = namespace
     if batch_size is not None:
         config["batch_size"] = batch_size
 
