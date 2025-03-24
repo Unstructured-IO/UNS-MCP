@@ -145,30 +145,24 @@ class MCPClient:
                     should_execute_tool = True
 
                 if should_execute_tool:
-                    try:
-                        result = await asyncio.wait_for(
-                            self.session.call_tool(tool_name, tool_args),
-                            timeout=10,
-                        )
-                        logger.info(f"TOOL result: {result}")
+                    result = await self.session.call_tool(tool_name, tool_args)
+                    logger.info(f"TOOL result: {result}")
 
-                        for result_item in result.content:
-                            print(f"\n[bold cyan]TOOL OUTPUT[/bold cyan]:\n{result_item.text}\n")
+                    for result_item in result.content:
+                        print(f"\n[bold cyan]TOOL OUTPUT[/bold cyan]:\n{result_item.text}\n")
 
-                        self.history.append(
-                            {
-                                "role": "user",
-                                "content": [
-                                    {
-                                        "type": "tool_result",
-                                        "tool_use_id": content_item.id,
-                                        "content": result.content,
-                                    },
-                                ],
-                            },
-                        )
-                    except asyncio.TimeoutError:
-                        logger.warning(f"Tool call timed out for {tool_name} with args {tool_args}")
+                    self.history.append(
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "tool_result",
+                                    "tool_use_id": content_item.id,
+                                    "content": result.content,
+                                },
+                            ],
+                        },
+                    )
                 else:
                     message = f"User declined execution of {tool_name} with args {tool_args}"
                     self.history.append(
