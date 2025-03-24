@@ -221,7 +221,7 @@ async def main():
     client = MCPClient()
     try:
         await client.connect_to_server(sys.argv[1])
-        confirm_tool_use = os.getenv("CONFIRM_TOOL_USE").lower() == "true"
+        confirm_tool_use = os.getenv("CONFIRM_TOOL_USE", "false").lower() == "true"
         await client.chat_loop(confirm_tool_use=confirm_tool_use)
     finally:
         await client.cleanup()
