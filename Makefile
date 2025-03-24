@@ -1,10 +1,14 @@
-.PHONY: local-client
-local-client:
-	uv run python minimal_client/client.py uns_mcp/server.py
-
 .PHONY: debug
 debug:
 	mcp dev uns_mcp/server.py
+
+.PHONY: sse-client
+sse-client:
+	uv run python minimal_client/client.py "http://127.0.0.1:8080/sse"
+
+.PHONY: sse-server
+sse-server:
+	uv run python uns_mcp/server.py --host 127.0.0.1 --port 8080
 
 .PHONY: test-firecrawl
 test-firecrawl:

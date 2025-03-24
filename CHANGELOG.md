@@ -1,3 +1,14 @@
+## 0.1.2-dev
+
+### Enhancements
+
+- Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
+
+### Fixes
+
+- avoid client startup error if env not defined
+
+
 ## 0.1.1
 
 ### Enhancements

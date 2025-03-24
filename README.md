@@ -270,6 +270,20 @@ Env variables to configure behavior of the client:
 - `LOG_LEVEL="ERROR"` # If you would like to hide outputs from the LLM and present clear messages for the user
 - `CONFIRM_TOOL_USE='false'` If you would like to disable the tool use confirmation before running it (True by default). **BE MINDFUL** about that option, as LLM can decide to purge all data from your account or run some expensive workflows; use only for development purposes.
 
+## Running locally minimal client, accessing local the MCP server over HTTP + SSE
+
+The main difference here is it becomes easier to set breakpoints on the server side during development -- the client and server are decoupled.
+
+```
+# in one terminal, run the server:
+python uns_mcp/server.py --host 127.0.0.1 --port 8080
+
+# in another terminal, run the client:
+python minimal_client/client.py "http://127.0.0.1:8080/sse"
+```
+
+Hint: `ctrl+c` out of the client first, then the server. Otherwise the server appears to hang.
+
 ## CHANGELOG.md
 
 Any new developed features/fixes/enhancements will be added to CHANGELOG.md. 0.x.x-dev pre-release format is preferred before we bump to a stable version.
