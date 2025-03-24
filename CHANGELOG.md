@@ -4,6 +4,8 @@
 
 - Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
 
+- ** Destination connector adding**: MongoDB
+
 ### Fixes
 
 - avoid client startup error if env not defined

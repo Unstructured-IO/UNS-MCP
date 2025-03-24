@@ -3,6 +3,12 @@ from mcp.server.fastmcp import FastMCP
 
 def register_destination_connectors(mcp: FastMCP):
     """Register all destination connector tools with the MCP server."""
+    from connectors.destination.mongo import (
+        create_mongodb_destination,
+        delete_mongodb_destination,
+        update_mongodb_destination,
+    )
+
     from .astra import (
         create_astradb_destination,
         delete_astradb_destination,
@@ -34,6 +40,13 @@ def register_destination_connectors(mcp: FastMCP):
     mcp.tool()(create_astradb_destination)
     mcp.tool()(update_astradb_destination)
     mcp.tool()(delete_astradb_destination)
+
+    # Register Neo4j destination connector tools
     mcp.tool()(create_neo4j_destination)
     mcp.tool()(update_neo4j_destination)
     mcp.tool()(delete_neo4j_destination)
+
+    # Register MongoDB destination connector tools
+    mcp.tool()(create_mongodb_destination)
+    mcp.tool()(update_mongodb_destination)
+    mcp.tool()(delete_mongodb_destination)
