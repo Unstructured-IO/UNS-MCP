@@ -53,10 +53,12 @@ class MCPClient:
         """
         # Check if the path is a URL
         is_url = server_script_path.startswith(("http://", "https://"))
-        
+
         if is_url:
             # Use SSE client for URL connections
-            sse_transport = await self.exit_stack.enter_async_context(sse_client(url=server_script_path))
+            sse_transport = await self.exit_stack.enter_async_context(
+                sse_client(url=server_script_path),
+            )
             self.session = await self.exit_stack.enter_async_context(
                 ClientSession(*sse_transport),
             )
@@ -66,10 +68,14 @@ class MCPClient:
             is_js = server_script_path.endswith(".js")
             if not (is_python or is_js):
                 raise ValueError("Server script must be a .py or .js file")
-    
+
             command = "python" if is_python else "node"
-            server_params = StdioServerParameters(command=command, args=[server_script_path], env=None)
-    
+            server_params = StdioServerParameters(
+                command=command,
+                args=[server_script_path],
+                env=None,
+            )
+
             stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
             self.stdio, self.write = stdio_transport
             self.session = await self.exit_stack.enter_async_context(
@@ -139,24 +145,30 @@ class MCPClient:
                     should_execute_tool = True
 
                 if should_execute_tool:
-                    result = await self.session.call_tool(tool_name, tool_args)
-                    logger.info(f"TOOL result: {result}")
+                    try:
+                        result = await asyncio.wait_for(
+                            self.session.call_tool(tool_name, tool_args),
+                            timeout=10,
+                        )
+                        logger.info(f"TOOL result: {result}")
 
-                    for result_item in result.content:
-                        print(f"\n[bold cyan]TOOL OUTPUT[/bold cyan]:\n{result_item.text}\n")
+                        for result_item in result.content:
+                            print(f"\n[bold cyan]TOOL OUTPUT[/bold cyan]:\n{result_item.text}\n")
 
-                    self.history.append(
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "tool_result",
-                                    "tool_use_id": content_item.id,
-                                    "content": result.content,
-                                },
-                            ],
-                        },
-                    )
+                        self.history.append(
+                            {
+                                "role": "user",
+                                "content": [
+                                    {
+                                        "type": "tool_result",
+                                        "tool_use_id": content_item.id,
+                                        "content": result.content,
+                                    },
+                                ],
+                            },
+                        )
+                    except asyncio.TimeoutError:
+                        logger.warning(f"Tool call timed out for {tool_name} with args {tool_args}")
                 else:
                     message = f"User declined execution of {tool_name} with args {tool_args}"
                     self.history.append(

@@ -10,7 +10,7 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
-    DatabricksVolumesConnectorConfigInput,
+    DatabricksVDTDestinationConnectorConfigInput,
     UpdateDestinationConnector,
 )
 
@@ -19,13 +19,13 @@ from connectors.utils import (
 )
 
 
-def _prepare_databricks_volumes_dest_config(
+def _prepare_databricks_delta_table_dest_config(
     catalog: str,
     volume: str,
     host: str,
     schema: str = "default",
     volume_path: str = "/",
-) -> DatabricksVolumesConnectorConfigInput:
+) -> DatabricksVDTDestinationConnectorConfigInput:
 
     """Prepare the Azure source connector configuration."""
     client_id = os.getenv("DATABRICKS_CLIENT_ID")
@@ -35,7 +35,7 @@ def _prepare_databricks_volumes_dest_config(
             "Both Databricks client id and client secret environment variable are needed",
         )
     else:
-        return DatabricksVolumesConnectorConfigInput(
+        return DatabricksVDTDestinationConnectorConfigInput(
             catalog=catalog,
             volume=volume,
             host=host,
@@ -46,7 +46,7 @@ def _prepare_databricks_volumes_dest_config(
         )
 
 
-async def create_databricks_volumes_destination(
+async def create_databricks_delta_table_destination(
     ctx: Context,
     name: str,
     catalog: str,
@@ -71,11 +71,11 @@ async def create_databricks_volumes_destination(
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_databricks_volumes_dest_config(catalog, host, volume, schema, volume_path)
+    config = _prepare_databricks_delta_table_dest_config(catalog, host, volume, schema, volume_path)
 
     destination_connector = CreateDestinationConnector(
         name=name,
-        type="databricks_volumes",
+        type="delta_table",
         config=config,
     )
 
@@ -86,16 +86,16 @@ async def create_databricks_volumes_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="Databricks Volumes",
+            connector_name="Databricks Volumes Delta Table",
             connector_type="Destination",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating databricks volumes destination connector: {str(e)}"
+        return f"Error creating databricks volumes Delta Table destination connector: {str(e)}"
 
 
-async def update_databricks_volumes_destination(
+async def update_databricks_delta_table_destination(
     ctx: Context,
     destination_id: str,
     catalog: Optional[str] = None,
@@ -159,16 +159,16 @@ async def update_databricks_volumes_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="Databricks Volumes",
+            connector_name="Databricks Volumes Delta Table",
             connector_type="Destination",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating databricks volumes destination connector: {str(e)}"
+        return f"Error updating databricks volumes Delta Table destination connector: {str(e)}"
 
 
-async def delete_databricks_volumes_destination(ctx: Context, destination_id: str) -> str:
+async def delete_databricks_delta_table_destination(ctx: Context, destination_id: str) -> str:
     """Delete an databricks volumes destination connector.
 
     Args:
@@ -183,7 +183,7 @@ async def delete_databricks_volumes_destination(ctx: Context, destination_id: st
         _ = await client.destinations.delete_destination_async(
             request=DeleteDestinationRequest(destination_id=destination_id),
         )
-        return f"Databricks volumes Destination Connector with ID {destination_id} \
+        return f"Databricks volumes Delta Table Destination Connector with ID {destination_id} \
             deleted successfully"
     except Exception as e:
-        return f"Error deleting Databricks volumes destination connector: {str(e)}"
+        return f"Error deleting Databricks volumes Delta Table destination connector: {str(e)}"
