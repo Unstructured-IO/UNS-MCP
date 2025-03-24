@@ -8,6 +8,11 @@ def register_destination_connectors(mcp: FastMCP):
         delete_astradb_destination,
         update_astradb_destination,
     )
+    from .databricksvolumes import (
+        create_databricks_destination,
+        delete_databricks_destination,
+        update_databricks_destination,
+    )
     from .neo4j import (
         create_neo4j_destination,
         delete_neo4j_destination,
@@ -34,6 +39,12 @@ def register_destination_connectors(mcp: FastMCP):
     mcp.tool()(create_astradb_destination)
     mcp.tool()(update_astradb_destination)
     mcp.tool()(delete_astradb_destination)
+    # Register Neo4j destination connector tools
     mcp.tool()(create_neo4j_destination)
     mcp.tool()(update_neo4j_destination)
     mcp.tool()(delete_neo4j_destination)
+
+    # Register databricks destination connector tools
+    mcp.tool()(create_databricks_destination)
+    mcp.tool()(update_databricks_destination)
+    mcp.tool()(delete_databricks_destination)
