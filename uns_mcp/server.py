@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from contextlib import asynccontextmanager
@@ -482,7 +483,8 @@ async def get_job_info(ctx: Context, job_id: str) -> str:
     result.append(f"Workflow name: {info.workflow_name}")
     result.append(f"Workflow id: {info.workflow_id}")
     result.append(f"Runtime: {info.runtime}")
-
+    result.append(f"Raw result: {json.dumps(json.loads(info.json()), indent=2)}")
+    
     return "\n".join(result)
 
 
