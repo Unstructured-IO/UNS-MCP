@@ -105,7 +105,7 @@ async def invoke_firecrawl_llmtxt(
         Dictionary with job information including the job ID
     """
     # Call the generic invoke function with llmfull.txt-specific parameters
-    params = {"maxUrls": max_urls, "showFullText": False}
+    params = {"maxUrls": max_urls, "showFullText": True}
 
     return await _invoke_firecrawl_job(
         url=url,
