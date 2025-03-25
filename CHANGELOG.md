@@ -6,7 +6,7 @@
 
 - ** Destination connector adding**: MongoDB
 
-- Capability to log calls to UnstructuredClient
+- Capability to log request parameters to UnstructuredClient's AsyncHttpClient, no error response is logged by this mechanism.
 
 ### Fixes
 

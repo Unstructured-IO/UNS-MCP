@@ -1,4 +1,5 @@
 from unstructured_client.httpclient import AsyncHttpClient
+from datetime import datetime
 import json
 import httpx
 import logging
@@ -78,7 +79,7 @@ class CustomHttpClient(AsyncHttpClient):
     def __init__(self, client: AsyncHttpClient):
         self.client = client
         self.log_file = os.path.abspath(
-            "unstructured_client.log"
+            f"unstructured-client-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.log"
         )  # Store absolute log path
         self.logger = logging.getLogger(__name__)  # Get logger for this module
         self.logger.setLevel(logging.INFO)  # Set default log level
