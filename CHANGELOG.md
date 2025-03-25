@@ -6,6 +6,8 @@
 
 - ** Destination connector adding**: MongoDB
 
+- List all the tools in a table.
+
 ### Fixes
 
 - avoid client startup error if env not defined
