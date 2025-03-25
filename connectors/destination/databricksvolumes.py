@@ -11,6 +11,7 @@ from unstructured_client.models.operations import (
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
     DatabricksVolumesConnectorConfigInput,
+    DestinationConnectorType,
     UpdateDestinationConnector,
 )
 
@@ -75,7 +76,7 @@ async def create_databricks_volumes_destination(
 
     destination_connector = CreateDestinationConnector(
         name=name,
-        type="databricks_volumes",
+        type=DestinationConnectorType.DATABRICKS_VOLUMES,
         config=config,
     )
 

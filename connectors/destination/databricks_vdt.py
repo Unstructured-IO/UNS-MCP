@@ -11,6 +11,7 @@ from unstructured_client.models.operations import (
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
     DatabricksVDTDestinationConnectorConfigInput,
+    DestinationConnectorType,
     UpdateDestinationConnector,
 )
 
@@ -20,10 +21,9 @@ from connectors.utils import (
 
 
 def _prepare_databricks_delta_table_dest_config(
-    catalog: str,
-    volume: str,
-    host: str,
-    schema: str = "default",
+    database: str,
+    http_path: str,
+    server_hostname: str,
     volume_path: str = "/",
 ) -> DatabricksVDTDestinationConnectorConfigInput:
 
@@ -36,10 +36,9 @@ def _prepare_databricks_delta_table_dest_config(
         )
     else:
         return DatabricksVDTDestinationConnectorConfigInput(
-            catalog=catalog,
-            volume=volume,
-            host=host,
-            schema_=schema,
+            database=database,
+            http_path=http_path,
+            server_hostname=server_hostname,
             volume_path=volume_path,
             client_id=os.getenv("DATABRICKS_CLIENT_ID"),
             client_secret=os.getenv("DATABRICKS_CLIENT_SECRET"),
@@ -49,33 +48,35 @@ def _prepare_databricks_delta_table_dest_config(
 async def create_databricks_delta_table_destination(
     ctx: Context,
     name: str,
-    catalog: str,
-    # client_id: str
-    # client_secret: str
-    volume: str,
-    host: str,
-    schema: str = "default",
+    database: str,
+    http_path: str,
+    server_hostname: str,
     volume_path: str = "/",
 ) -> str:
     """Create an databricks volume destination connector.
 
     Args:
         name: A unique name for this connector
-        catalog: Name of the catalog in the Databricks Unity Catalog service for the workspace.
-        host: The Databricks host URL for the Databricks workspace.
-        volume: Name of the volume associated with the schema.
-        schema: Name of the schema associated with the volume. The default value is "default".
+        database: The name of the schema (formerly known as a database)
+        in Unity Catalog for the target table
+        http_path: The cluster’s or SQL warehouse’s HTTP Path value
+        server_hostname: The Databricks cluster’s or SQL warehouse’s Server Hostname value
         volume_path: Any target folder path within the volume, starting from the root of the volume.
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_databricks_delta_table_dest_config(catalog, host, volume, schema, volume_path)
+    config = _prepare_databricks_delta_table_dest_config(
+        database,
+        http_path,
+        server_hostname,
+        volume_path,
+    )
 
     destination_connector = CreateDestinationConnector(
         name=name,
-        type="delta_table",
+        type=DestinationConnectorType.DATABRICKS_VOLUME_DELTA_TABLES,
         config=config,
     )
 
@@ -98,22 +99,19 @@ async def create_databricks_delta_table_destination(
 async def update_databricks_delta_table_destination(
     ctx: Context,
     destination_id: str,
-    catalog: Optional[str] = None,
-    volume: Optional[str] = None,
-    host: Optional[str] = None,
-    schema: Optional[str] = None,
+    database: Optional[str] = None,
+    http_path: Optional[str] = None,
+    server_hostname: Optional[str] = None,
     volume_path: Optional[str] = None,
 ) -> str:
     """Update an databricks volumes destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        catalog: Name of the catalog to update in the Databricks Unity Catalog
-        service for the workspace.
-        host: The Databricks host URL for the Databricks workspace to update.
-        volume: Name of the volume associated with the schema to update.
-        schema: Name of the schema associated with the volume to update.
-        The default value is "default".
+        database: The name of the schema (formerly known as a database)
+        in Unity Catalog for the target table
+        http_path: The cluster’s or SQL warehouse’s HTTP Path value
+        server_hostname: The Databricks cluster’s or SQL warehouse’s Server Hostname value
         volume_path: Any target folder path within the volume to update,
         starting from the root of the volume.
 
@@ -136,14 +134,12 @@ async def update_databricks_delta_table_destination(
     # Update configuration with new values
     config = dict(current_config)
 
-    if catalog is not None:
-        config["catalog"] = catalog
-    if host is not None:
-        config["host"] = host
-    if schema is not None:
-        config["schema"] = schema
-    if volume is not None:
-        config["volume"] = volume
+    if database is not None:
+        config["database"] = database
+    if server_hostname is not None:
+        config["server_hostname"] = server_hostname
+    if http_path is not None:
+        config["http_path"] = http_path
     if volume_path is not None:
         config["volume_path"] = volume_path
 
