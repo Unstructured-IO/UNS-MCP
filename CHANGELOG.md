@@ -9,6 +9,7 @@
 ### Fixes
 
 - avoid client startup error if env not defined
+- force server using env var from .env instead of fetching them from system first
 
 
 ## 0.1.1
