@@ -141,7 +141,7 @@ async def update_databricks_volumes_destination(
     if host is not None:
         config["host"] = host
     if schema is not None:
-        config["schema"] = schema
+        config["schema_"] = schema
     if volume is not None:
         config["volume"] = volume
     if volume_path is not None:
