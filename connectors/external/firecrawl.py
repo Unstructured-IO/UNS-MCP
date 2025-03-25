@@ -591,8 +591,9 @@ async def _cancel_job(
         return {
             "id": job_id,
             "status": "error",
-            "message": "Cancelling LLM text generation jobs is not supported."
-            " The job must complete.",
+            "message": (
+                "Cancelling LLM text generation jobs is not supported." " The job must complete."
+            ),
             "details": {"status": "error", "reason": "unsupported_operation"},
         }
     else:
