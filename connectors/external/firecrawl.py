@@ -171,8 +171,8 @@ async def _invoke_firecrawl_job(
                 "id": job_id,
                 "status": job_status.get("status", "started"),
                 "s3_uri": f"{validated_s3_uri}{job_id}/",
-                "message": f"Firecrawl {job_type} job started \
-                    and will be automatically processed when complete",
+                "message": f"Firecrawl {job_type} job started "
+                f"and will be auto-processed when complete",
             }
 
             return response
@@ -591,8 +591,8 @@ async def _cancel_job(
         return {
             "id": job_id,
             "status": "error",
-            "message": "Cancelling LLM text generation jobs is not supported. \
-                These jobs must run to completion.",
+            "message": "Cancelling LLM text generation jobs is not supported."
+            " The job must complete.",
             "details": {"status": "error", "reason": "unsupported_operation"},
         }
     else:
