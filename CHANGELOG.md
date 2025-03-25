@@ -6,6 +6,8 @@
 
 - ** Destination connector adding**: MongoDB
 
+- Capability to log calls to UnstructuredClient
+
 ### Fixes
 
 - avoid client startup error if env not defined
