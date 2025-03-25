@@ -5,10 +5,11 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import AsyncIterator, Optional
 
+import uvicorn
 from docstring_extras import add_custom_node_examples  # relative import required by mcp
 from dotenv import load_dotenv
-from mcp.server.fastmcp import Context, FastMCP
 from mcp.server import Server
+from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -38,7 +39,6 @@ from unstructured_client.models.shared import (
     WorkflowState,
 )
 from unstructured_client.models.shared.createworkflow import CreateWorkflowTypedDict
-import uvicorn
 
 from connectors import register_connectors
 
@@ -48,7 +48,7 @@ def load_environment_variables() -> None:
     Load environment variables from .env file.
     Raises an error if critical environment variables are missing.
     """
-    load_dotenv()
+    load_dotenv(override=True)
     required_vars = ["UNSTRUCTURED_API_KEY"]
 
     for var in required_vars:
@@ -460,7 +460,7 @@ async def list_jobs(
     # Format response
     result = ["Available Jobs by created time:"]
     for job in sorted_jobs:
-        result.append(f"- JOB ID: {job.id})")
+        result.append(f"- JOB ID: {job.id}")
 
     return "\n".join(result)
 
@@ -491,7 +491,7 @@ async def get_job_info(ctx: Context, job_id: str) -> str:
     result.append(f"Workflow id: {info.workflow_id}")
     result.append(f"Runtime: {info.runtime}")
     result.append(f"Raw result: {json.dumps(json.loads(info.json()), indent=2)}")
-    
+
     return "\n".join(result)
 
 
@@ -522,9 +522,9 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
 
     async def handle_sse(request: Request) -> None:
         async with sse.connect_sse(
-                request.scope,
-                request.receive,
-                request._send,  # noqa: SLF001
+            request.scope,
+            request.receive,
+            request._send,  # noqa: SLF001
         ) as (read_stream, write_stream):
             await mcp_server.run(
                 read_stream,
@@ -540,10 +540,11 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
         ],
     )
 
+
 if __name__ == "__main__":
     load_environment_variables()
     if len(sys.argv) < 2:
-        # server is directly being invoked from client 
+        # server is directly being invoked from client
         mcp.run()
     else:
         # server is running as HTTP SSE server
@@ -551,12 +552,12 @@ if __name__ == "__main__":
         mcp_server = mcp._mcp_server  # noqa: WPS437
 
         import argparse
-        
-        parser = argparse.ArgumentParser(description='Run MCP SSE-based server')
-        parser.add_argument('--host', default='127.0.0.1', help='Host to bind to')
-        parser.add_argument('--port', type=int, default=8080, help='Port to listen on')
+
+        parser = argparse.ArgumentParser(description="Run MCP SSE-based server")
+        parser.add_argument("--host", default="127.0.0.1", help="Host to bind to")
+        parser.add_argument("--port", type=int, default=8080, help="Port to listen on")
         args = parser.parse_args()
-        
+
         # Bind SSE request handling to MCP server
         starlette_app = create_starlette_app(mcp_server, debug=True)
 
