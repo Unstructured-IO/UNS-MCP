@@ -28,53 +28,28 @@ uv run uns_mcp/server.py
 
 ## Available Tools
 
-### Sources
+| Tool | Description |
+|------|-------------|
+| `list_sources` | Lists available sources from the Unstructured API. |
+| `get_source_info` | Get detailed information about a specific source connector. |
+| `create_[connector]_source` | Create a source connector. Currently, we have s3, google drive, azure connectors (more to come!) |
+| `update_[connector]_source` | Update an existing source connector by params. |
+| `delete_[connector]_source` | Delete a source connector by source id. |
+| `list_destinations` | Lists available destinations from the Unstructured API. |
+| `get_destination_info` | Get detailed info about a specific destination connector. Currently, we have s3/weaviate/neo4j/mongo DB (more to come!) |
+| `create_[connector]_destination` | Create a destination connector by params. |
+| `update_[connector]_destination` | Update an existing destination connector by destination id. |
+| `delete_[connector]_destination` | Delete a destination connector by destination id. |
+| `list_workflows` | Lists workflows from the Unstructured API. |
+| `get_workflow_info` | Get detailed information about a specific workflow. |
+| `create_workflow` | Create a new workflow with source, destination id, etc. |
+| `run_workflow` | Run a specific workflow with workflow id |
+| `update_workflow` | Update an existing workflow by params. |
+| `delete_workflow` | Delete a specific workflow by id. |
+| `list_jobs` | Lists jobs for a specific workflow from the Unstructured API. |
+| `get_job_info` | Get detailed information about a specific job by job id. |
+| `cancel_job` |Delete a specific job by id. |
 
-#### list_sources
-Lists available sources from the Unstructured API.
-
-Parameters:
-- `source_type` (optional): Filter sources by connector type
-
-#### get_source_info
-Get detailed information about a specific source connector.
-
-Parameters:
-- `source_id`: ID of the source connector to get information for
-
-#### create_[connector]_source
-Create a source connector. We plan on adding all the source connectors that are available in Unstructured Platform (https://platform.unstructured.io). Please refer to our CHANGELOG.md for new source connectors we are rapidly adding.
-
-Below is example for `create_s3_source`
-
-Parameters:
-- `name`: Unique name for the connector
-- `remote_url`: S3 URI to the bucket or folder (e.g., s3://my-bucket/)
-- `key` (optional): AWS access key ID (required if not using anonymous auth)
-- `secret` (optional): AWS secret access key (required if not using anonymous auth)
-- `token` (optional): AWS STS session token for temporary access
-- `anonymous` (optional): Whether to use anonymous authentication (default: false)
-- `endpoint_url` (optional): Custom URL if connecting to a non-AWS S3 bucket
-- `recursive` (optional): Whether to access subfolders within the bucket (default: false)
-
-#### update_[connector]_source
-Update an existing source connector. Below is an example of `update_s3_source`:
-
-Parameters:
-- `source_id`: ID of the source connector to update
-- `remote_url` (optional): Updated S3 URI to the bucket or folder
-- `key` (optional): Updated AWS access key ID
-- `secret` (optional): Updated AWS secret access key
-- `token` (optional): Updated AWS STS session token
-- `anonymous` (optional): Whether to use anonymous authentication
-- `endpoint_url` (optional): Updated custom URL
-- `recursive` (optional): Updated subfolder access setting
-
-#### delete_[connector]_source
-Delete a source connector. Below is an example of `delete_s3_source`:
-
-Parameters:
-- `source_id`: ID of the source connector to delete
 
 ### Firecrawl Source
 
@@ -101,118 +76,6 @@ How Firecrawl works:
 
 Note: A `FIRECRAWL_API_KEY` environment variable must be set to use these functions.
 
-### Destinations
-
-#### list_destinations
-Lists available destinations from the Unstructured API.
-
-Parameters:
-- `destination_type` (optional): Filter destinations by connector type
-
-#### get_destination_info
-Get detailed information about a specific destination connector.
-
-Parameters:
-- `destination_id`: ID of the destination connector to get information for
-
-#### create_[connector]_destination
-Create a destination connector. We plan on adding all the destination connectors that are available in Unstructured Platform (https://platform.unstructured.io). Please refer to our CHANGELOG.md for new destination connectors we are rapidly adding.
-
-Below is an example of `create_s3_destination`:
-
-Parameters:
-- `name`: Unique name for the connector
-- `remote_url`: S3 URI to the bucket or folder (e.g., s3://my-bucket/)
-- `key`: AWS access key ID
-- `secret`: AWS secret access key
-- `token` (optional): AWS STS session token for temporary access
-- `endpoint_url` (optional): Custom URL if connecting to a non-AWS S3 bucket
-
-#### update_[connector]_destination
-Update an existing destination connector. Below is an example of `update_s3_destination`:
-
-Parameters:
-- `destination_id`: ID of the destination connector to update
-- `remote_url` (optional): Updated S3 URI to the bucket or folder
-- `key` (optional): Updated AWS access key ID
-- `secret` (optional): Updated AWS secret access key
-- `token` (optional): Updated AWS STS session token
-- `endpoint_url` (optional): Updated custom URL
-
-#### delete_[connector]_destination
-Delete a destination connector. Below is an example of `delete_s3_destination`:
-
-Parameters:
-- `destination_id`: ID of the destination connector to delete
-
-
-### Workflows
-
-#### list_workflows
-Lists workflows from the Unstructured API.
-
-Parameters:
-- `destination_id` (optional): Filter by destination connector ID
-- `source_id` (optional): Filter by source connector ID
-- `status` (optional): Filter by workflow status
-
-#### get_workflow_info
-Get detailed information about a specific workflow.
-
-Parameters:
-- `workflow_id`: ID of the workflow to get information for
-
-#### create_workflow
-Create a new workflow.
-
-Parameters:
-- `workflow_config`: Dictionary containing the workflow configuration (must include required fields as per CreateWorkflow model). It
-
-#### run_workflow
-Run a specific workflow.
-
-Parameters:
-- `workflow_id`: ID of the workflow to run
-
-#### update_workflow
-Update an existing workflow.
-
-Parameters:
-- `workflow_id`: ID of the workflow to update
-- `workflow_config`:
-    A dictionary containing the updated workflow configuration (must include required fields as per UpdateWorkflow model).
-    More specifically, it's a `CreateWorkflowTypedDict` that one can refer its params [here](https://github.com/Unstructured-IO/unstructured-python-client/blob/main/src/unstructured_client/models/shared/createworkflow.py#L33).
-
-
-#### delete_workflow
-Delete a specific workflow.
-
-Parameters:
-- `workflow_id`: ID of the workflow to delete
-
-
-### Jobs
-
-#### list_jobs
-
-Lists jobs for a specific workflow from the Unstructured API.
-
-Parameters:
-- `workflow_id` (optional): Filter by workflow ID
-- `status` (optional): Filter by job status
-
-#### get_job_info
-Get detailed information about a specific job.
-
-Parameters:
-- `job_id`: ID of the job to get information for
-
-#### cancel_job
-
-Delete a specific job.
-
-Parameters:
-- `job_id`: ID of the job to cancel
 
 ## Claude Desktop Integration
 
