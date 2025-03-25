@@ -453,7 +453,7 @@ async def list_jobs(
     # Format response
     result = ["Available Jobs by created time:"]
     for job in sorted_jobs:
-        result.append(f"- JOB ID: {job.id})")
+        result.append(f"- JOB ID: {job.id}")
 
     return "\n".join(result)
 
