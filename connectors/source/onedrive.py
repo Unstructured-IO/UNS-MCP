@@ -24,7 +24,6 @@ def _prepare_onedrive_source_config(
     user_pname: str,
     recursive: Optional[bool] = False,
     authority_url: Optional[str] = None,
-    tenant: Optional[str] = None,
 ) -> OneDriveSourceConnectorConfigInput:
     """Prepare the OneDrive source connector configuration."""
     config = OneDriveSourceConnectorConfigInput(
@@ -33,11 +32,10 @@ def _prepare_onedrive_source_config(
         recursive=recursive,
         client_id=os.getenv("ONEDRIVE_CLIENT_ID"),
         client_cred=os.getenv("ONEDRIVE_CLIENT_CRED"),
+        tenant=os.getenv("ONEDRIVE_TENANT_ID"),
     )
     if authority_url:
         config.authority_url = authority_url
-    if tenant:
-        config.tenant = tenant
     return config
 
 
@@ -47,8 +45,7 @@ async def create_onedrive_source(
     path: str,
     user_pname: str,
     recursive: bool = False,
-    authority_url: Optional[str] = None,
-    tenant: Optional[str] = None,
+    authority_url: Optional[str] = "https://login.microsoftonline.com",
 ) -> str:
     """Create a OneDrive source connector.
 
@@ -64,7 +61,7 @@ async def create_onedrive_source(
         String containing the created source connector information
     """
     client = ctx.request_context.lifespan_context.client
-    config = _prepare_onedrive_source_config(path, user_pname, recursive, authority_url, tenant)
+    config = _prepare_onedrive_source_config(path, user_pname, recursive, authority_url)
     source_connector = CreateSourceConnector(name=name, type="onedrive", config=config)
 
     try:
