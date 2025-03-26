@@ -32,7 +32,7 @@ uv run uns_mcp/server.py
 |------|-------------|
 | `list_sources` | Lists available sources from the Unstructured API. |
 | `get_source_info` | Get detailed information about a specific source connector. |
-| `create_[connector]_source` | Create a source connector. Currently, we have s3, google drive, azure connectors (more to come!) |
+| `create_[connector]_source` | Create a source connector. Currently, we have s3/google drive/azure connectors (more to come!) |
 | `update_[connector]_source` | Update an existing source connector by params. |
 | `delete_[connector]_source` | Delete a source connector by source id. |
 | `list_destinations` | Lists available destinations from the Unstructured API. |

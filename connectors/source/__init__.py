@@ -4,6 +4,7 @@ from mcp.server.fastmcp import FastMCP
 def register_source_connectors(mcp: FastMCP):
     """Register all source connector tools with the MCP server."""
     from .s3 import create_s3_source, delete_s3_source, update_s3_source
+
     # Register S3 source connector tools
     mcp.tool()(create_s3_source)
     mcp.tool()(update_s3_source)
@@ -20,3 +21,13 @@ def register_source_connectors(mcp: FastMCP):
     mcp.tool()(create_gdrive_source)
     mcp.tool()(update_gdrive_source)
     mcp.tool()(delete_gdrive_source)
+
+    from .databricksvolumes import (
+        create_databricks_volume_source,
+        delete_databricks_volume_source,
+        update_databricks_volume_source,
+    )
+
+    mcp.tool()(create_databricks_volume_source)
+    mcp.tool()(update_databricks_volume_source)
+    mcp.tool()(delete_databricks_volume_source)
