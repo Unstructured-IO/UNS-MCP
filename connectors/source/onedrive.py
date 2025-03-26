@@ -54,11 +54,13 @@ async def create_onedrive_source(
 
     Args:
         name: A unique name for this connector
-        path: The path to the OneDrive folder
-        user_pname: OneDrive user principal name
+        path: The path to the target folder in the OneDrive account,
+            starting with the account’s root folder
+        user_pname: The User Principal Name (UPN) for the OneDrive user account in Entra ID.
+            This is typically the user’s email address.
         recursive: Whether to access subfolders
-        authority_url: Authority URL for authentication
-        tenant: Tenant ID for authentication
+        authority_url: The authentication token provider URL for the Entra ID app registration.
+            The default is https://login.microsoftonline.com.
 
     Returns:
         String containing the created source connector information
@@ -90,16 +92,22 @@ async def update_onedrive_source(
     recursive: Optional[bool] = None,
     authority_url: Optional[str] = None,
     tenant: Optional[str] = None,
+    client_id: Optional[str] = None,
 ) -> str:
     """Update a OneDrive source connector.
 
     Args:
         source_id: ID of the source connector to update
-        path: The path to the OneDrive folder
-        user_pname: OneDrive user principal name
+        path: The path to the target folder in the OneDrive account,
+            starting with the account’s root folder
+        user_pname: The User Principal Name (UPN) for the OneDrive user account in Entra ID.
+            This is typically the user’s email address.
         recursive: Whether to access subfolders
-        authority_url: Authority URL for authentication
-        tenant: Tenant ID for authentication
+        authority_url: The authentication token provider URL for the Entra ID app registration.
+            The default is https://login.microsoftonline.com.
+        tenant: The directory (tenant) ID of the Entra ID app registration.
+        client_id: The application (client) ID of the Microsoft Entra ID app registration
+            that has access to the OneDrive account.
 
     Returns:
         String containing the updated source connector information
@@ -126,6 +134,8 @@ async def update_onedrive_source(
         config["authority_url"] = authority_url
     if tenant is not None:
         config["tenant"] = tenant
+    if client_id is not None:
+        config["client_id"] = client_id
 
     source_connector = UpdateSourceConnector(config=config)
 
