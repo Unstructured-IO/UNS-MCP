@@ -51,8 +51,6 @@ async def create_databricks_volumes_destination(
     ctx: Context,
     name: str,
     catalog: str,
-    # client_id: str
-    # client_secret: str
     volume: str,
     host: str,
     schema: str = "default",
@@ -72,7 +70,7 @@ async def create_databricks_volumes_destination(
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_databricks_volumes_dest_config(catalog, host, volume, schema, volume_path)
+    config = _prepare_databricks_volumes_dest_config(catalog, volume, host, schema, volume_path)
 
     destination_connector = CreateDestinationConnector(
         name=name,

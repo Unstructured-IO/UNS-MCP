@@ -1,7 +1,8 @@
 import os
-from typing import Optional
+from typing import Annotated, Optional
 
 from mcp.server.fastmcp import Context
+from pydantic import Field
 from unstructured_client.models.operations import (
     CreateDestinationRequest,
     DeleteDestinationRequest,
@@ -10,9 +11,15 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
+    DatabricksVDTDestinationConnectorConfig,
     DatabricksVDTDestinationConnectorConfigInput,
     DestinationConnectorType,
     UpdateDestinationConnector,
+)
+from unstructured_client.types import (
+    UNSET,
+    BaseModel,
+    OptionalNullable,
 )
 
 from connectors.utils import (
@@ -20,12 +27,63 @@ from connectors.utils import (
 )
 
 
+class DatabricksVDTDestinationConnectorConfigFused(BaseModel):
+    # From DatabricksVDTDestinationConnectorConfigInput
+    http_path: str
+    server_hostname: str
+    client_id: OptionalNullable[str] = UNSET
+    client_secret: OptionalNullable[str] = UNSET
+    token: OptionalNullable[str] = UNSET
+
+    # From DatabricksVDTDestinationConnectorConfig
+    catalog: str
+    database: str  # This exists in both classes
+    table_name: str
+    volume: str
+    schema_: Annotated[OptionalNullable[str], Field(alias="schema")] = UNSET
+
+    # Common to both (with the same type and default)
+    volume_path: OptionalNullable[str] = UNSET
+
+    class Config:
+        populate_by_name = True
+
+    @classmethod
+    def from_input_and_config(
+        cls,
+        input_config: DatabricksVDTDestinationConnectorConfigInput,
+        dest_config: DatabricksVDTDestinationConnectorConfig,
+    ) -> "DatabricksVDTDestinationConnectorConfigFused":
+        """
+        Create a fused config by combining input config and destination config.
+
+        Args:
+            input_config: The input connector configuration
+            dest_config: The destination connector configuration
+
+        Returns:
+            A new fused configuration instance
+        """
+
+        # turn the input config to dictionary
+        input_dict = input_config.model_dump()
+        dest_dict = dest_config.model_dump()
+
+        # merge the two dictionaries
+        merged = {**dest_dict, **input_dict}
+        return cls(**merged)
+
+
 def _prepare_databricks_delta_table_dest_config(
     database: str,
     http_path: str,
     server_hostname: str,
+    catalog: str,
+    table_name: str,
+    volume: str,
+    schema: str = "default",
     volume_path: str = "/",
-) -> DatabricksVDTDestinationConnectorConfigInput:
+) -> DatabricksVDTDestinationConnectorConfigFused:
 
     """Prepare the Azure source connector configuration."""
     client_id = os.getenv("DATABRICKS_CLIENT_ID")
@@ -35,11 +93,15 @@ def _prepare_databricks_delta_table_dest_config(
             "Both Databricks client id and client secret environment variable are needed",
         )
     else:
-        return DatabricksVDTDestinationConnectorConfigInput(
-            database=database,
+        return DatabricksVDTDestinationConnectorConfigFused(
             http_path=http_path,
             server_hostname=server_hostname,
+            catalog=catalog,
+            database=database,
+            schema_=schema,
+            volume=volume,
             volume_path=volume_path,
+            table_name=table_name,
             client_id=os.getenv("DATABRICKS_CLIENT_ID"),
             client_secret=os.getenv("DATABRICKS_CLIENT_SECRET"),
         )
@@ -51,6 +113,10 @@ async def create_databricks_delta_table_destination(
     database: str,
     http_path: str,
     server_hostname: str,
+    catalog: str,
+    table_name: str,
+    volume: str,
+    schema: str = "default",
     volume_path: str = "/",
 ) -> str:
     """Create an databricks volume destination connector.
@@ -61,6 +127,10 @@ async def create_databricks_delta_table_destination(
         in Unity Catalog for the target table
         http_path: The cluster’s or SQL warehouse’s HTTP Path value
         server_hostname: The Databricks cluster’s or SQL warehouse’s Server Hostname value
+        catalog: Name of the catalog in the Databricks Unity Catalog service for the workspace.
+        table_name: The name of the table in the schema
+        volume: Name of the volume associated with the schema.
+        schema: Name of the schema associated with the volume. The default value is "default".
         volume_path: Any target folder path within the volume, starting from the root of the volume.
     Returns:
         String containing the created destination connector information
@@ -71,6 +141,10 @@ async def create_databricks_delta_table_destination(
         database,
         http_path,
         server_hostname,
+        catalog,
+        table_name,
+        volume,
+        schema,
         volume_path,
     )
 
