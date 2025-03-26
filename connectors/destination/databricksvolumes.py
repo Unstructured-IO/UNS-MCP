@@ -25,7 +25,7 @@ def _prepare_databricks_volumes_dest_config(
     volume: str,
     host: str,
     schema: str = "default",
-    volume_path: Optional[str] = None,
+    volume_path: str = "/",
 ) -> DatabricksVolumesConnectorConfigInput:
 
     """Prepare the Azure source connector configuration."""
@@ -54,7 +54,7 @@ async def create_databricks_volumes_destination(
     volume: str,
     host: str,
     schema: str = "default",
-    volume_path: Optional[str] = None,
+    volume_path: str = "/",
 ) -> str:
     """Create an databricks volume destination connector.
 
