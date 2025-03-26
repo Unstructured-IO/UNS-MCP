@@ -6,7 +6,7 @@
 
 - ** Destination connector adding**: MongoDB
 
-- ** Source connector addding**: OneDrive
+- ** Source connector adding**: OneDrive
 
 - List all the tools in a table.
 
