@@ -10,6 +10,8 @@
 
 - List all the tools in a table.
 
+- Capability to only log request parameters to UnstructuredClient's AsyncHttpClient, no error response is logged by this mechanism.
+
 ### Fixes
 
 - avoid client startup error if env not defined
