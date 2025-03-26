@@ -118,6 +118,9 @@ Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the f
 mcp dev uns_mcp/server.py
 ```
 
+If you need to log request call parameters to `UnstructuredClient`, set the environment variable `DEBUG_API_REQUESTS=false`.
+The logs are stored in a file with the format `unstructured-client-{date}.log`, which can be examined to debug request call parameters to `UnstructuredClient` functions.
+
 ## Running locally minimal client
 ```
 uv run python minimal_client/client.py uns_mcp/server.py
