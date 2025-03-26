@@ -4,7 +4,9 @@
 
 - Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
 
-- ** Destination connector adding**: MongoDB
+- ** Destination connector adding**: MongoDB,
+
+- ** Source connector adding**: Salesforce
 
 - List all the tools in a table.
 
