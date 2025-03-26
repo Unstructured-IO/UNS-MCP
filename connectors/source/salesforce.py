@@ -45,7 +45,9 @@ async def create_salesforce_source(
     Args:
         name: A unique name for this connector
         username: The Salesforce username
-        domain: Optional Salesforce domain
+        domain: Optional Salesforce domain,the names of the Salesforce categories (objects)
+        that you want to access, specified as a comma-separated list.
+        Available categories include Account, Campaign, Case, EmailMessage, and Lead.
 
     Returns:
         String containing the created source connector information
@@ -80,7 +82,9 @@ async def update_salesforce_source(
     Args:
         source_id: ID of the source connector to update
         username: The Salesforce username
-        domain: Optional Salesforce domain
+        domain: Optional Salesforce domain,the names of the Salesforce categories (objects)
+        that you want to access, specified as a comma-separated list.
+        Available categories include Account, Campaign, Case, EmailMessage, and Lead.
 
     Returns:
         String containing the updated source connector information
