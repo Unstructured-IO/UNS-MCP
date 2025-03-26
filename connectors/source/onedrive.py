@@ -30,8 +30,11 @@ def _prepare_onedrive_source_config(
         path=path,
         user_pname=user_pname,
         recursive=recursive,
-        client_id=os.getenv("ONEDRIVE_CLIENT_ID"),
         client_cred=os.getenv("ONEDRIVE_CLIENT_CRED"),
+        # client id and tenant id are not strictly sensitive
+        # but they are cumbersome to pass in as arguments
+        # so made them env vars
+        client_id=os.getenv("ONEDRIVE_CLIENT_ID"),
         tenant=os.getenv("ONEDRIVE_TENANT_ID"),
     )
     if authority_url:
