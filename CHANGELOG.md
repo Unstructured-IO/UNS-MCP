@@ -4,7 +4,9 @@
 
 - Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
 
-- ** Destination connector adding**: MongoDB,
+### Features
+
+- ** Destination connector adding**: MongoDB, Databricks Volumes,
 
 - ** Source connector adding**: Salesforce
 
