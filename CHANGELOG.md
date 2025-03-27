@@ -8,9 +8,9 @@
 
 ### Features
 
-- ** Destination connector adding**: MongoDB, Databricks Volumes
+- ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table
 
-- ** Source connector adding**: OneDrive, Databricks Volumes
+- ** Source connector adding**: OneDrive,
 
 - List all the tools in a table.
 
