@@ -1,5 +1,4 @@
 version = 1
-revision = 1
 requires-python = ">=3.12"
 
 [[package]]
@@ -1842,13 +1841,12 @@ requires-dist = [
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-asyncio", specifier = ">=0.25.3" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "unstructured-client", specifier = ">=0.31.3" },
+    { name = "unstructured-client", specifier = ">=0.31.6" },
 ]
-provides-extras = ["dev"]
 
 [[package]]
 name = "unstructured-client"
-version = "0.31.3"
+version = "0.31.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -1862,9 +1860,9 @@ dependencies = [
     { name = "requests-toolbelt" },
     { name = "typing-inspection" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/39/c5/df55f7b668b63f491dcaef79a60116dd7614a842f85465083af4ded31a6a/unstructured_client-0.31.3.tar.gz", hash = "sha256:a7ec0aa0f2e35ba013ad1fd937508c38d02a2c57e130bf2e3a506b7c06b45a1b", size = 78150 }
+sdist = { url = "https://files.pythonhosted.org/packages/0b/42/13656872e0417f453c50d9c29b9ac839ef84289c1da9df6ba19b9fe1ac65/unstructured_client-0.31.6.tar.gz", hash = "sha256:75ccc248b0fbbabbb536bea13667e4b16b5a90353fe88a6d0a72d3e9d30c2de2", size = 78358 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ca/24/3ecf517c3e675d1bd944de3a18ada1bfa068c2a975c9d3967131904de57d/unstructured_client-0.31.3-py3-none-any.whl", hash = "sha256:fa383b90c501f8865833f43964e9523fad5e8ea6250065c56e68229e08885f19", size = 175761 },
+    { url = "https://files.pythonhosted.org/packages/b1/3a/2933648530cfa9374f8b261aaba9cfa1eaf08d9848b8310664e5140ba25a/unstructured_client-0.31.6-py3-none-any.whl", hash = "sha256:8fb4a81b9451e61b0455f07a7915410464a195745b6359c7dbe9d022668b26a3", size = 177547 },
 ]
 
 [[package]]

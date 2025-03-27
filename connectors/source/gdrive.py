@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, List
 
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
@@ -22,7 +22,7 @@ from connectors.utils import (
 def _prepare_gdrive_source_config(
     drive_id: str,
     recursive: Optional[bool],
-    extensions: Optional[str],
+    extensions: Optional[List[str]],
 ) -> GoogleDriveSourceConnectorConfigInput:
     """Prepare the Azure source connector configuration."""
     return GoogleDriveSourceConnectorConfigInput(
@@ -38,7 +38,7 @@ async def create_gdrive_source(
     name: str,
     drive_id: str,
     recursive: bool = False,
-    extensions: Optional[str] = None,
+    extensions: Optional[List[str]] = None,
 ) -> str:
     """Create an gdrive source connector.
 
@@ -74,7 +74,7 @@ async def update_gdrive_source(
     source_id: str,
     drive_id: Optional[str] = None,
     recursive: Optional[bool] = None,
-    extensions: Optional[str] = None,
+    extensions: Optional[List[str]] = None,
 ) -> str:
     """Update an gdrive source connector.
 
