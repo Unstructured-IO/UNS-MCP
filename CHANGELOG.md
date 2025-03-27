@@ -8,6 +8,8 @@
 
 - ** Destination connector adding**: MongoDB, Databricks Volumes
 
+- ** Source connector adding**: OneDrive
+
 - List all the tools in a table.
 
 - Capability to only log request parameters to UnstructuredClient's AsyncHttpClient, no error response is logged by this mechanism.
