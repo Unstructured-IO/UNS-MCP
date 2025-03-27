@@ -64,13 +64,10 @@ class MCPClient:
         else:
             # Use stdio client for local script files
             is_python = server_script_path.endswith(".py")
-            is_js = server_script_path.endswith(".js") | server_script_path.endswith(".ts")
-            is_python_module = not (is_python or is_js)
+            is_js = not is_python
 
             command = "npx" if is_js else "python"
             args = [server_script_path]
-            if is_python_module:
-                args = ["-m", server_script_path]
 
             server_params = StdioServerParameters(
                 command=command,

@@ -1725,19 +1725,6 @@ wheels = [
 ]
 
 [[package]]
-name = "terminal-controller"
-version = "0.1.7"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "httpx" },
-    { name = "mcp", extra = ["cli"] },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/72/f0/9ac190205336bb491b8b4537f4d3b0577ee089a736794a9769085d96da63/terminal_controller-0.1.7.tar.gz", hash = "sha256:6f6bbe1574fd2355af92f4229618356a1b6ad2c866df20f1d0dbdcc93ab606ff", size = 19374 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/cd/38/e5a1c26299fb90f77bc62936d6a372a092cd11e7c394965bfbb3de4ac331/terminal_controller-0.1.7-py3-none-any.whl", hash = "sha256:d46acdc1de6dfe8608e6434d3317557577fdc6b70037f11cd86cf7c3e533e5a9", size = 7220 },
-]
-
-[[package]]
 name = "tinycss2"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1835,7 +1822,6 @@ dependencies = [
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "python-dotenv" },
-    { name = "terminal-controller" },
     { name = "unstructured-client" },
 ]
 
@@ -1856,7 +1842,6 @@ requires-dist = [
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-asyncio", specifier = ">=0.25.3" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "terminal-controller", specifier = ">=0.1.7" },
     { name = "unstructured-client", specifier = ">=0.31.3" },
 ]
 provides-extras = ["dev"]

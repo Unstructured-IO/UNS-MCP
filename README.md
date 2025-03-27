@@ -122,6 +122,13 @@ If you need to log request call parameters to `UnstructuredClient`, set the envi
 The logs are stored in a file with the format `unstructured-client-{date}.log`, which can be examined to debug request call parameters to `UnstructuredClient` functions.
 
 ## Running locally minimal client
+Run
+```bash
+npx @wonderwhy-er/desktop-commander setup
+```
+To install terminal tool
+
+
 ```
 uv run python minimal_client/client.py uns_mcp/server.py
 ```
