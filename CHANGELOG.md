@@ -6,7 +6,11 @@
 
 ### Features
 
+### Features
+
 - ** Destination connector adding**: MongoDB, Databricks Volumes
+
+- ** Source connector adding**: OneDrive, Databricks Volumes
 
 - List all the tools in a table.
 
