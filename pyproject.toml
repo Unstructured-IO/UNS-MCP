@@ -13,7 +13,8 @@ dependencies = [
     "notebook>=7.3.3",
     "python-dotenv>=1.0.1",
     "unstructured-client>=0.31.3",
-    "pip"
+    "pip",
+    "terminal-controller>=0.1.7",
 ]
 
 [build-system]

@@ -4,7 +4,6 @@ import asyncio
 import logging
 import os
 from contextlib import AsyncExitStack
-from typing import Optional
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
@@ -39,7 +38,7 @@ for logger_name in loggers_to_mute:
 class MCPClient:
     def __init__(self):
         # Initialize session and client objects
-        self.session: Optional[ClientSession] = None
+        self.tool_name_to_session: dict[str, ClientSession] = {}
         self.exit_stack = AsyncExitStack()
         self.anthropic = Anthropic()
         self.history = []
@@ -59,38 +58,42 @@ class MCPClient:
             sse_transport = await self.exit_stack.enter_async_context(
                 sse_client(url=server_script_path),
             )
-            self.session = await self.exit_stack.enter_async_context(
+            local_session = await self.exit_stack.enter_async_context(
                 ClientSession(*sse_transport),
             )
         else:
             # Use stdio client for local script files
             is_python = server_script_path.endswith(".py")
-            is_js = server_script_path.endswith(".js")
-            if not (is_python or is_js):
-                raise ValueError("Server script must be a .py or .js file")
+            is_js = server_script_path.endswith(".js") | server_script_path.endswith(".ts")
+            is_python_module = not (is_python or is_js)
 
-            command = "python" if is_python else "node"
+            command = "npx" if is_js else "python"
+            args = [server_script_path]
+            if is_python_module:
+                args = ["-m", server_script_path]
+
             server_params = StdioServerParameters(
                 command=command,
-                args=[server_script_path],
+                args=args,
                 env=None,
             )
 
             stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
             self.stdio, self.write = stdio_transport
-            self.session = await self.exit_stack.enter_async_context(
+            local_session = await self.exit_stack.enter_async_context(
                 ClientSession(self.stdio, self.write),
             )
 
-        await self.session.initialize()
+        await local_session.initialize()
 
         # List available tools
-        response = await self.session.list_tools()
+        response = await local_session.list_tools()
         tools = response.tools
+        for tool in tools:
+            self.tool_name_to_session[tool.name] = local_session
         logger.info(f"Connected to server with tools: {[tool.name for tool in tools]}")
 
-        response = await self.session.list_tools()
-        available_tools = [
+        current_session_tools = [
             {
                 "name": tool.name,
                 "description": tool.description,
@@ -98,7 +101,7 @@ class MCPClient:
             }
             for tool in response.tools
         ]
-        self.available_tools = available_tools
+        self.available_tools.extend(current_session_tools)
 
     async def process_query(self, query: str, confirm_tool_use: bool = True) -> None:
         """Process a query using Claude and available tools"""
@@ -145,7 +148,8 @@ class MCPClient:
                     should_execute_tool = True
 
                 if should_execute_tool:
-                    result = await self.session.call_tool(tool_name, tool_args)
+                    selected_session = self.tool_name_to_session.get(tool_name)
+                    result = await selected_session.call_tool(tool_name, tool_args)
                     logger.info(f"TOOL result: {result}")
 
                     for result_item in result.content:
@@ -226,7 +230,8 @@ async def main():
 
     client = MCPClient()
     try:
-        await client.connect_to_server(sys.argv[1])
+        for server_script_path in sys.argv[1:]:
+            await client.connect_to_server(server_script_path)
         confirm_tool_use = os.getenv("CONFIRM_TOOL_USE", "false").lower() == "true"
         await client.chat_loop(confirm_tool_use=confirm_tool_use)
     finally:
