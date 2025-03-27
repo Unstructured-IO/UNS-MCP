@@ -10,7 +10,7 @@
 
 - ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table
 
-- ** Source connector adding**: OneDrive,
+- ** Source connector adding**: OneDrive
 
 - List all the tools in a table.
 
