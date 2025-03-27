@@ -24,7 +24,7 @@ def _prepare_gdrive_source_config(
     recursive: Optional[bool],
     extensions: Optional[List[str]],
 ) -> GoogleDriveSourceConnectorConfigInput:
-    """Prepare the Azure source connector configuration."""
+    """Prepare the gdrive source connector configuration."""
     return GoogleDriveSourceConnectorConfigInput(
         drive_id=drive_id,
         recursive=recursive,
@@ -40,7 +40,7 @@ async def create_gdrive_source(
     recursive: bool = False,
     extensions: Optional[List[str]] = None,
 ) -> str:
-    """Create an gdrive source connector.
+    """Create a gdrive source connector.
 
     Args:
         name: A unique name for this connector
