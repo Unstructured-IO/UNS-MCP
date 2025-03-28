@@ -164,13 +164,14 @@ The main difference here is it becomes easier to set breakpoints on the server s
 
 ```
 # in one terminal, run the server:
-python uns_mcp/server.py --host 127.0.0.1 --port 8080
+uv run python uns_mcp/server.py --host 127.0.0.1 --port 8080
 
 or
 make sse-server
 
 # in another terminal, run the client:
-python minimal_client/client.py "http://127.0.0.1:8080/sse"
+uv run python minimal_client/client.py "http://127.0.0.1:8080/sse"
+
 or
 make sse-client
 ```
