@@ -56,18 +56,18 @@ To use the tool that creates/updates/deletes a connector, you would need to stor
 | CRED_NAME | Description |
 |------|-------------|
 | `ANTHROPIC_API_KEY` | required to run the `minimal_client` to interact with our server. |
-| `AWS_KEY`, `AWS_SECRET`| required to create S3 connector via uns-mcp server, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/sources/s3) and [here](https://docs.unstructured.io/api-reference/workflow/destinations/s3) |
+| `AWS_KEY`, `AWS_SECRET`| required to create S3 connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/sources/s3) and [here](https://docs.unstructured.io/api-reference/workflow/destinations/s3) |
 | `WEAVIATE_CLOUD_API_KEY` | required to create Weaviate vector db connector, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/destinations/weaviate) |
-| `FIRECRAWL_API_KEY` | required to use Firecrawl tools in `external/firecrawl.py`, sign up on Firecrawl and get an API key. |
-| `ASTRA_DB_APPLICATION_TOKEN`, `ASTRA_DB_API_ENDPOINT` | required to create Astradb connector via uns-mcp server, see how in [documentation](https://docs.unstructured.io/ui/destinations/astradb)|
-| `AZURE_CONNECTION_STRING`| required option 1 to create Azure connector via uns-mcp server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
-| `AZURE_ACCOUNT_NAME`+`AZURE_ACCOUNT_KEY`| required option 2 to create Azure connector via uns-mcp server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage)|
-| `AZURE_ACCOUNT_NAME`+`AZURE_SAS_TOKEN` | required option 3 to create Azure connector via uns-mcp server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
-| `NEO4J_PASSWORD` | required to create Neo4j connector via uns-mcp server, see how in [documentation](https://docs.unstructured.io/ui/destinations/neo4j) |
-| `MONGO_DB_CONNECTION_STRING` | required to create Mongodb connector via uns-mcp server, see how in [documentation](https://docs.unstructured.io/ui/destinations/mongodb) |
+| `FIRECRAWL_API_KEY` | required to use Firecrawl tools in `external/firecrawl.py`, sign up on [Firecrawl](https://www.firecrawl.dev/) and get an API key. |
+| `ASTRA_DB_APPLICATION_TOKEN`, `ASTRA_DB_API_ENDPOINT` | required to create Astradb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/astradb)|
+| `AZURE_CONNECTION_STRING`| required option 1 to create Azure connector via ``uns-mcp`` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
+| `AZURE_ACCOUNT_NAME`+`AZURE_ACCOUNT_KEY`| required option 2 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage)|
+| `AZURE_ACCOUNT_NAME`+`AZURE_SAS_TOKEN` | required option 3 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
+| `NEO4J_PASSWORD` | required to create Neo4j connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/neo4j) |
+| `MONGO_DB_CONNECTION_STRING` | required to create Mongodb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/mongodb) |
 | `GOOGLEDRIVE_SERVICE_ACCOUNT_KEY` | a string value. The original server account key (follow [documentation](https://docs.unstructured.io/ui/sources/google-drive)) is in json file, run `cat /path/to/google_service_account_key.json | base64` in terminal to get the string value  |
-| `DATABRICKS_CLIENT_ID`,`DATABRICKS_CLIENT_SECRET` | required to create Databricks volume/delta table connector via uns-mcp server, see how in [documentation](https://docs.unstructured.io/ui/destinations/databricks-volumes) and [here](https://docs.unstructured.io/ui/destinations/databricks-delta-table) |
-| `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_CRED`,`ONEDRIVE_TENANT_ID`| required to create One Drive connector via uns-mcp server, see how in [documentation](https://docs.unstructured.io/ui/destinations/onedrive) |
+| `DATABRICKS_CLIENT_ID`,`DATABRICKS_CLIENT_SECRET` | required to create Databricks volume/delta table connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/databricks-volumes) and [here](https://docs.unstructured.io/ui/destinations/databricks-delta-table) |
+| `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_CRED`,`ONEDRIVE_TENANT_ID`| required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/onedrive) |
 | `LOG_LEVEL` | Used to set logging level for our `minimal_client`, e.g. set to ERROR to get everything  |
 | `CONFIRM_TOOL_USE` | set to true so that `minimal_client` can confirm execution before each tool call |
 | `DEBUG_API_REQUESTS` | set to true so that `uns_mcp/server.py` can output request parameters for better debugging |
