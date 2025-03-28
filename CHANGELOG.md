@@ -3,6 +3,8 @@
 ### Enhancements
 
 - Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
+- Neo4j Username is now ENV variable instead of being tool argument
+- Added notebook with example workflow having Azure source and Neo4j destination
 
 ### Features
 
