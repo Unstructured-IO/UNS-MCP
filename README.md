@@ -53,7 +53,7 @@ uv run uns_mcp/server.py
 
 To use the tool that creates/updates/deletes a connector, you would need to store `creds` for the specific connector. Below is the list of `creds` for the connectors we support:
 
-| CRED_NAME | Description |
+| Credential Name | Description |
 |------|-------------|
 | `ANTHROPIC_API_KEY` | required to run the `minimal_client` to interact with our server. |
 | `AWS_KEY`, `AWS_SECRET`| required to create S3 connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/sources/s3) and [here](https://docs.unstructured.io/api-reference/workflow/destinations/s3) |
