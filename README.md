@@ -51,7 +51,7 @@ uv run uns_mcp/server.py
 | `get_job_info` | Get detailed information about a specific job by job id. |
 | `cancel_job` |Delete a specific job by id. |
 
-To use the tool that creates/updates/deletes a connector, the credentials for that specific connector must be defined in your .env file. Below is the list of `creds` for the connectors we support:
+To use the tool that creates/updates/deletes a connector, the credentials for that specific connector must be defined in your .env file. Below is the list of `credentials` for the connectors we support:
 
 | Credential Name | Description |
 |------|-------------|
@@ -115,7 +115,7 @@ To install in Claude Desktop:
             "args":
             [
                 "--directory",
-                "ABSOLUTE/PATH/TO/FOLDER_CONTAINS_SERVER.PY",
+                "ABSOLUTE/PATH/TO/YOUR-UNS-MCP-REPO/uns_mcp",
                 "run",
                 "server.py"
             ],
