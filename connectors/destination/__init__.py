@@ -14,6 +14,11 @@ def register_destination_connectors(mcp: FastMCP):
         delete_astradb_destination,
         update_astradb_destination,
     )
+    from .databricks_vdt import (
+        create_databricks_delta_table_destination,
+        delete_databricks_delta_table_destination,
+        update_databricks_delta_table_destination,
+    )
     from .databricksvolumes import (
         create_databricks_volumes_destination,
         delete_databricks_volumes_destination,
@@ -60,3 +65,8 @@ def register_destination_connectors(mcp: FastMCP):
     mcp.tool()(create_databricks_volumes_destination)
     mcp.tool()(update_databricks_volumes_destination)
     mcp.tool()(delete_databricks_volumes_destination)
+
+    # Register databricks delta table destination connector tools
+    mcp.tool()(create_databricks_delta_table_destination)
+    mcp.tool()(update_databricks_delta_table_destination)
+    mcp.tool()(delete_databricks_delta_table_destination)
