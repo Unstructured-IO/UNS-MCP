@@ -21,7 +21,6 @@ from connectors.utils import (
 
 def _prepare_sharepoint_source_config(
     site: str,
-    tenant: str,
     user_pname: str,
     path: Optional[str],
     recursive: Optional[bool],
@@ -46,7 +45,6 @@ async def create_sharepoint_source(
     ctx: Context,
     name: str,
     site: str,
-    tenant: str,
     user_pname: str,
     path: Optional[str] = None,
     recursive: bool = False,
@@ -57,7 +55,6 @@ async def create_sharepoint_source(
     Args:
         name: A unique name for this connector
         site: The SharePoint site to connect to
-        tenant: The tenant ID for the SharePoint site
         user_pname: The username for the SharePoint site
         path: The path within the SharePoint site
         recursive: Whether to access subfolders within the site
@@ -68,7 +65,7 @@ async def create_sharepoint_source(
     """
     client = ctx.request_context.lifespan_context.client
     config = _prepare_sharepoint_source_config(
-        site, tenant, user_pname, path, recursive, authority_url
+        site, user_pname, path, recursive, authority_url
     )
     source_connector = CreateSourceConnector(name=name, type="sharepoint", config=config)
 
@@ -91,7 +88,6 @@ async def update_sharepoint_source(
     ctx: Context,
     source_id: str,
     site: Optional[str] = None,
-    tenant: Optional[str] = None,
     user_pname: Optional[str] = None,
     path: Optional[str] = None,
     recursive: Optional[bool] = None,
@@ -102,7 +98,6 @@ async def update_sharepoint_source(
     Args:
         source_id: ID of the source connector to update
         site: The SharePoint site to connect to
-        tenant: The tenant ID for the SharePoint site
         user_pname: The username for the SharePoint site
         path: The path within the SharePoint site
         recursive: Whether to access subfolders within the site
@@ -127,8 +122,6 @@ async def update_sharepoint_source(
 
     if site is not None:
         config["site"] = site
-    if tenant is not None:
-        config["tenant"] = tenant
     if user_pname is not None:
         config["user_pname"] = user_pname
     if path is not None:
