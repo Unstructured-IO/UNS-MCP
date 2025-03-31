@@ -13,6 +13,7 @@ or use `uv sync`.
 2. Set your Unstructured API key as an environment variable.
    - Create a `.env` file in the root directory, and add a line with your key: `UNSTRUCTURED_API_KEY="YOUR_KEY"`
 
+
 To test in local, any working key that pointing to prod env would work. However, to be able to return valid results from client's side (e.g, Claude for Desktop), your personal key that is fetched from `https://platform.unstructured.io/app/account/api-keys` is needed.
 
 ## Running the Server
@@ -49,6 +50,27 @@ uv run uns_mcp/server.py
 | `list_jobs` | Lists jobs for a specific workflow from the Unstructured API. |
 | `get_job_info` | Get detailed information about a specific job by job id. |
 | `cancel_job` |Delete a specific job by id. |
+
+To use the tool that creates/updates/deletes a connector, the credentials for that specific connector must be defined in your .env file. Below is the list of `credentials` for the connectors we support:
+
+| Credential Name | Description |
+|------|-------------|
+| `ANTHROPIC_API_KEY` | required to run the `minimal_client` to interact with our server. |
+| `AWS_KEY`, `AWS_SECRET`| required to create S3 connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/sources/s3) and [here](https://docs.unstructured.io/api-reference/workflow/destinations/s3) |
+| `WEAVIATE_CLOUD_API_KEY` | required to create Weaviate vector db connector, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/destinations/weaviate) |
+| `FIRECRAWL_API_KEY` | required to use Firecrawl tools in `external/firecrawl.py`, sign up on [Firecrawl](https://www.firecrawl.dev/) and get an API key. |
+| `ASTRA_DB_APPLICATION_TOKEN`, `ASTRA_DB_API_ENDPOINT` | required to create Astradb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/astradb)|
+| `AZURE_CONNECTION_STRING`| required option 1 to create Azure connector via ``uns-mcp`` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
+| `AZURE_ACCOUNT_NAME`+`AZURE_ACCOUNT_KEY`| required option 2 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage)|
+| `AZURE_ACCOUNT_NAME`+`AZURE_SAS_TOKEN` | required option 3 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
+| `NEO4J_PASSWORD` | required to create Neo4j connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/neo4j) |
+| `MONGO_DB_CONNECTION_STRING` | required to create Mongodb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/mongodb) |
+| `GOOGLEDRIVE_SERVICE_ACCOUNT_KEY` | a string value. The original server account key (follow [documentation](https://docs.unstructured.io/ui/sources/google-drive)) is in json file, run `cat /path/to/google_service_account_key.json | base64` in terminal to get the string value  |
+| `DATABRICKS_CLIENT_ID`,`DATABRICKS_CLIENT_SECRET` | required to create Databricks volume/delta table connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/databricks-volumes) and [here](https://docs.unstructured.io/ui/destinations/databricks-delta-table) |
+| `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_CRED`,`ONEDRIVE_TENANT_ID`| required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/onedrive) |
+| `LOG_LEVEL` | Used to set logging level for our `minimal_client`, e.g. set to ERROR to get everything  |
+| `CONFIRM_TOOL_USE` | set to true so that `minimal_client` can confirm execution before each tool call |
+| `DEBUG_API_REQUESTS` | set to true so that `uns_mcp/server.py` can output request parameters for better debugging |
 
 
 ### Firecrawl Source
@@ -93,7 +115,7 @@ To install in Claude Desktop:
             "args":
             [
                 "--directory",
-                "ABSOLUTE/PATH/TO/UNS-MCP",
+                "ABSOLUTE/PATH/TO/YOUR-UNS-MCP-REPO/uns_mcp",
                 "run",
                 "server.py"
             ],
@@ -142,13 +164,14 @@ The main difference here is it becomes easier to set breakpoints on the server s
 
 ```
 # in one terminal, run the server:
-python uns_mcp/server.py --host 127.0.0.1 --port 8080
+uv run python uns_mcp/server.py --host 127.0.0.1 --port 8080
 
 or
 make sse-server
 
 # in another terminal, run the client:
-python minimal_client/client.py "http://127.0.0.1:8080/sse"
+uv run python minimal_client/client.py "http://127.0.0.1:8080/sse"
+
 or
 make sse-client
 ```
