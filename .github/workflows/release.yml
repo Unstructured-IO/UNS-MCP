@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PYTHONVERSION: "3.12"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Set up Python ${{ env.PYTHONVERSION }}
+        run: |
+          uv python install ${{ env.PYTHONVERSION }}
+          uv venv
+      - name: Install dependencies
+        run: uv pip install .
+      - name: release
+        env:
+          TWINE_USERNAME: "__token__"
+          TWINE_PASSWORD: ${{ secrets.MYTOKEN }} # TODO Fix valid token
+        run: |
+          uv run python -m build --sdist
+          uv run twine upload -r testpypi dist/*

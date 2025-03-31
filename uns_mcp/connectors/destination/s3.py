@@ -10,60 +10,59 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
-    Neo4jDestinationConnectorConfigInput,
+    DestinationConnectorType,
+    S3DestinationConnectorConfigInput,
     UpdateDestinationConnector,
 )
 
-from connectors.utils import (
+from uns_mcp.connectors.utils import (
     create_log_for_created_updated_connector,
 )
 
 
-def _prepare_neo4j_dest_config(
-    database: str,
-    uri: str,
-    username: str,
-    batch_size: Optional[int] = None,
-) -> Neo4jDestinationConnectorConfigInput:
-
-    """Prepare the Azure source connector configuration."""
-    if os.getenv("NEO4J_PASSWORD") is None:
-        raise ValueError("NEO4J_PASSWORD environment variable is not set")
-    else:
-        return Neo4jDestinationConnectorConfigInput(
-            database=database,
-            uri=uri,
-            username=username,
-            batch_size=batch_size,
-            password=os.getenv("NEO4J_PASSWORD"),
-        )
+def _prepare_s3_dest_config(
+    remote_url: Optional[str],
+) -> S3DestinationConnectorConfigInput:
+    """Prepare the S3 destination connector configuration."""
+    config = S3DestinationConnectorConfigInput(
+        remote_url=remote_url,
+        key=os.getenv("AWS_KEY"),
+        secret=os.getenv("AWS_SECRET"),
+    )
+    if os.getenv("TOKEN"):
+        config.token = os.getenv("TOKEN")
+    if os.getenv("ENDPOINT_URL"):
+        config.endpoint_url = os.getenv("ENDPOINT_URL")
+    return config
 
 
-async def create_neo4j_destination(
+async def create_s3_destination(
     ctx: Context,
     name: str,
-    database: str,
-    uri: str,
-    username: str,
-    batch_size: Optional[int] = 100,
+    remote_url: str,
 ) -> str:
-    """Create an neo4j destination connector.
+    """Create an S3 destination connector.
 
     Args:
         name: A unique name for this connector
-        database: The neo4j database, e.g. "neo4j"
-        uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
-        username: The neo4j username
-
+        remote_url: The S3 URI to the bucket or folder
+        key: The AWS access key ID
+        secret: The AWS secret access key
+        token: The AWS STS session token for temporary access (optional)
+        endpoint_url: Custom URL if connecting to a non-AWS S3 bucket
 
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_neo4j_dest_config(database, uri, username, batch_size)
+    config = _prepare_s3_dest_config(remote_url)
 
-    destination_connector = CreateDestinationConnector(name=name, type="neo4j", config=config)
+    destination_connector = CreateDestinationConnector(
+        name=name,
+        type=DestinationConnectorType.S3,
+        config=config,
+    )
 
     try:
         response = await client.destinations.create_destination_async(
@@ -72,31 +71,26 @@ async def create_neo4j_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="neo4j",
+            connector_name="S3",
             connector_type="Destination",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating neo4j destination connector: {str(e)}"
+        return f"Error creating S3 destination connector: {str(e)}"
 
 
-async def update_neo4j_destination(
+async def update_s3_destination(
     ctx: Context,
     destination_id: str,
-    database: Optional[str] = None,
-    uri: Optional[str] = None,
-    username: Optional[str] = None,
-    batch_size: Optional[int] = None,
+    remote_url: Optional[str] = None,
+    recursive: Optional[bool] = None,
 ) -> str:
-    """Update an neo4j destination connector.
+    """Update an S3 destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        database: The neo4j database, e.g. "neo4j"
-        uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
-        username: The neo4j username
-
+        remote_url: The S3 URI to the bucket or folder
 
     Returns:
         String containing the updated destination connector information
@@ -115,14 +109,10 @@ async def update_neo4j_destination(
     # Update configuration with new values
     config = dict(current_config)
 
-    if database is not None:
-        config["database"] = database
-    if uri is not None:
-        config["uri"] = uri
-    if username is not None:
-        config["username"] = username
-    if batch_size is not None:
-        config["batch_size"] = batch_size
+    if remote_url is not None:
+        config["remote_url"] = remote_url
+    if recursive is not None:
+        config["recursive"] = recursive
 
     destination_connector = UpdateDestinationConnector(config=config)
 
@@ -136,17 +126,17 @@ async def update_neo4j_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="neo4j",
+            connector_name="S3",
             connector_type="Destination",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating neo4j destination connector: {str(e)}"
+        return f"Error updating S3 destination connector: {str(e)}"
 
 
-async def delete_neo4j_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an neo4j destination connector.
+async def delete_s3_destination(ctx: Context, destination_id: str) -> str:
+    """Delete an S3 destination connector.
 
     Args:
         destination_id: ID of the destination connector to delete
@@ -160,6 +150,6 @@ async def delete_neo4j_destination(ctx: Context, destination_id: str) -> str:
         _ = await client.destinations.delete_destination_async(
             request=DeleteDestinationRequest(destination_id=destination_id),
         )
-        return f"neo4j Destination Connector with ID {destination_id} deleted successfully"
+        return f"S3 Destination Connector with ID {destination_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting neo4j destination connector: {str(e)}"
+        return f"Error deleting S3 destination connector: {str(e)}"

@@ -5,17 +5,19 @@ This package contains connectors to external services and APIs.
 
 from mcp.server.fastmcp import FastMCP
 
+
 def register_external_connectors(mcp: FastMCP):
     """Register all external connector tools with the MCP server."""
     # Register Firecrawl tools
     from .firecrawl import (
-        invoke_firecrawl_crawlhtml, 
-        check_crawlhtml_status, 
-        invoke_firecrawl_llmtxt, 
-        check_llmtxt_status,
         cancel_crawlhtml_job,
-        cancel_llmtxt_job
+        # cancel_llmtxt_job,
+        check_crawlhtml_status,
+        check_llmtxt_status,
+        invoke_firecrawl_crawlhtml,
+        invoke_firecrawl_llmtxt,
     )
+
     mcp.tool()(invoke_firecrawl_crawlhtml)
     mcp.tool()(check_crawlhtml_status)
     mcp.tool()(invoke_firecrawl_llmtxt)

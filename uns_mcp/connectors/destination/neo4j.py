@@ -10,53 +10,60 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
-    DestinationConnectorType,
-    MongoDBConnectorConfigInput,
+    Neo4jDestinationConnectorConfigInput,
     UpdateDestinationConnector,
 )
 
-from connectors.utils import (
+from uns_mcp.connectors.utils import (
     create_log_for_created_updated_connector,
 )
 
 
-def _prepare_mongodb_dest_config(
+def _prepare_neo4j_dest_config(
     database: str,
-    collection: str,
-) -> MongoDBConnectorConfigInput:
-    """Prepare the MongoDB destination connector configuration."""
-    config = MongoDBConnectorConfigInput(
-        database=database,
-        collection=collection,
-        uri=os.getenv("MONGO_DB_CONNECTION_STRING"),
-    )
-    return config
+    uri: str,
+    username: str,
+    batch_size: Optional[int] = None,
+) -> Neo4jDestinationConnectorConfigInput:
+
+    """Prepare the Azure source connector configuration."""
+    if os.getenv("NEO4J_PASSWORD") is None:
+        raise ValueError("NEO4J_PASSWORD environment variable is not set")
+    else:
+        return Neo4jDestinationConnectorConfigInput(
+            database=database,
+            uri=uri,
+            username=username,
+            batch_size=batch_size,
+            password=os.getenv("NEO4J_PASSWORD"),
+        )
 
 
-async def create_mongodb_destination(
+async def create_neo4j_destination(
     ctx: Context,
     name: str,
     database: str,
-    collection: str,
+    uri: str,
+    username: str,
+    batch_size: Optional[int] = 100,
 ) -> str:
-    """Create an MongoDB destination connector.
+    """Create an neo4j destination connector.
 
     Args:
         name: A unique name for this connector
-        database: The name of the database to connect to.
-        collection: The name of the target MongoDB collection
+        database: The neo4j database, e.g. "neo4j"
+        uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
+        username: The neo4j username
+
+
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_mongodb_dest_config(database=database, collection=collection)
+    config = _prepare_neo4j_dest_config(database, uri, username, batch_size)
 
-    destination_connector = CreateDestinationConnector(
-        name=name,
-        type=DestinationConnectorType.MONGODB,
-        config=config,
-    )
+    destination_connector = CreateDestinationConnector(name=name, type="neo4j", config=config)
 
     try:
         response = await client.destinations.create_destination_async(
@@ -65,27 +72,31 @@ async def create_mongodb_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="MongoDB",
+            connector_name="neo4j",
             connector_type="Destination",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating MongoDB destination connector: {str(e)}"
+        return f"Error creating neo4j destination connector: {str(e)}"
 
 
-async def update_mongodb_destination(
+async def update_neo4j_destination(
     ctx: Context,
     destination_id: str,
     database: Optional[str] = None,
-    collection: Optional[str] = None,
+    uri: Optional[str] = None,
+    username: Optional[str] = None,
+    batch_size: Optional[int] = None,
 ) -> str:
-    """Update an MongoDB destination connector.
+    """Update an neo4j destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        database: The name of the database to connect to.
-        collection: The name of the target MongoDB collection
+        database: The neo4j database, e.g. "neo4j"
+        uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
+        username: The neo4j username
+
 
     Returns:
         String containing the updated destination connector information
@@ -101,11 +112,17 @@ async def update_mongodb_destination(
     except Exception as e:
         return f"Error retrieving destination connector: {str(e)}"
 
-    input_config = MongoDBConnectorConfigInput(**current_config.model_dump())
-    config: MongoDBConnectorConfigInput = _prepare_mongodb_dest_config(
-        database=database or input_config.database,
-        collection=collection or input_config.collection,
-    )
+    # Update configuration with new values
+    config = dict(current_config)
+
+    if database is not None:
+        config["database"] = database
+    if uri is not None:
+        config["uri"] = uri
+    if username is not None:
+        config["username"] = username
+    if batch_size is not None:
+        config["batch_size"] = batch_size
 
     destination_connector = UpdateDestinationConnector(config=config)
 
@@ -119,17 +136,17 @@ async def update_mongodb_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="MongoDB",
+            connector_name="neo4j",
             connector_type="Destination",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating MongoDB destination connector: {str(e)}"
+        return f"Error updating neo4j destination connector: {str(e)}"
 
 
-async def delete_mongodb_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an MongoDB destination connector.
+async def delete_neo4j_destination(ctx: Context, destination_id: str) -> str:
+    """Delete an neo4j destination connector.
 
     Args:
         destination_id: ID of the destination connector to delete
@@ -143,6 +160,6 @@ async def delete_mongodb_destination(ctx: Context, destination_id: str) -> str:
         _ = await client.destinations.delete_destination_async(
             request=DeleteDestinationRequest(destination_id=destination_id),
         )
-        return f"MongoDB Destination Connector with ID {destination_id} deleted successfully"
+        return f"neo4j Destination Connector with ID {destination_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting MongoDB destination connector: {str(e)}"
+        return f"Error deleting neo4j destination connector: {str(e)}"
