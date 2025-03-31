@@ -42,7 +42,7 @@ async def create_pinecone_destination(
     name: str,
     index_name: str,
     namespace: Optional[str] = "default",
-    batch_size: Optional[int] = 100,
+    batch_size: Optional[int] = 50,
 ) -> str:
     """Create an pinecone destination connector.
 
@@ -84,7 +84,7 @@ async def update_pinecone_destination(
     destination_id: str,
     index_name: Optional[str] = None,
     namespace: Optional[str] = None,
-    batch_size: Optional[int] = None,
+    batch_size: Optional[int] = 50,
 ) -> str:
     """Update an Pinecone destination connector.
 
