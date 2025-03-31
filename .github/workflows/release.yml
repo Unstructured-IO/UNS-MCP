@@ -22,11 +22,13 @@ jobs:
           uv python install ${{ env.PYTHONVERSION }}
           uv venv
       - name: Install dependencies
-        run: uv pip install .
+        run: |
+          uv pip install .
+          uv pip install twine build
       - name: release
         env:
           TWINE_USERNAME: "__token__"
           TWINE_PASSWORD: ${{ secrets.MYTOKEN }} # TODO Fix valid token
-        run: |
+        run: | # TODO set valid repository
           uv run python -m build --sdist
           uv run twine upload -r testpypi dist/*
