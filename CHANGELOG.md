@@ -6,13 +6,9 @@
 
 ### Features
 
-### Features
-
 - ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table
 
-- ** Source connector adding**: OneDrive,
-
-- ** Source connector adding**: Salesforce
+- ** Source connector adding**: OneDrive, Salesforce
 
 - List all the tools in a table.
 

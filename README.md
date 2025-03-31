@@ -68,6 +68,7 @@ To use the tool that creates/updates/deletes a connector, the credentials for th
 | `GOOGLEDRIVE_SERVICE_ACCOUNT_KEY` | a string value. The original server account key (follow [documentation](https://docs.unstructured.io/ui/sources/google-drive)) is in json file, run `cat /path/to/google_service_account_key.json | base64` in terminal to get the string value  |
 | `DATABRICKS_CLIENT_ID`,`DATABRICKS_CLIENT_SECRET` | required to create Databricks volume/delta table connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/databricks-volumes) and [here](https://docs.unstructured.io/ui/destinations/databricks-delta-table) |
 | `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_CRED`,`ONEDRIVE_TENANT_ID`| required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/onedrive) |
+| `SALESFORCE_PASSWORD`,`SALESFORCE_SECURITY_TOKEN` | required to create salesforce source connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ingestion/source-connectors/salesforce)|
 | `LOG_LEVEL` | Used to set logging level for our `minimal_client`, e.g. set to ERROR to get everything  |
 | `CONFIRM_TOOL_USE` | set to true so that `minimal_client` can confirm execution before each tool call |
 | `DEBUG_API_REQUESTS` | set to true so that `uns_mcp/server.py` can output request parameters for better debugging |

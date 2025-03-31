@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import List, Optional
 
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
@@ -21,16 +21,20 @@ from connectors.utils import (
 
 def _prepare_salesforce_source_config(
     username: str,
-    domain: Optional[str] = None,
+    categories: Optional[List[str]] = None,
 ) -> SalesforceSourceConnectorConfigInput:
     """Prepare the Salesforce source connector configuration."""
+    if os.getenv("SALESFORCE_CONSUMER_KEY") is None or os.getenv("SALESFORCE_PRIVATE_KEY") is None:
+        raise ValueError(
+            "SALESFORCE_CONSUMER_KEY or SALESFORCE_PRIVATE_KEY environment variables are not set",
+        )
     config = SalesforceSourceConnectorConfigInput(
         username=username,
-        password=os.getenv("SALESFORCE_PASSWORD"),
-        security_token=os.getenv("SALESFORCE_SECURITY_TOKEN"),
+        consumer_key=os.getenv("SALESFORCE_CONSUMER_KEY"),
+        private_key=os.getenv("SALESFORCE_PRIVATE_KEY"),
+        categories=categories,
     )
-    if domain:
-        config.domain = domain
+
     return config
 
 
@@ -38,14 +42,14 @@ async def create_salesforce_source(
     ctx: Context,
     name: str,
     username: str,
-    domain: Optional[str] = None,
+    categories: Optional[List[str]] = None,
 ) -> str:
     """Create a Salesforce source connector.
 
     Args:
         name: A unique name for this connector
         username: The Salesforce username
-        domain: Optional Salesforce domain,the names of the Salesforce categories (objects)
+        categories: Optional Salesforce domain,the names of the Salesforce categories (objects)
         that you want to access, specified as a comma-separated list.
         Available categories include Account, Campaign, Case, EmailMessage, and Lead.
 
@@ -53,7 +57,7 @@ async def create_salesforce_source(
         String containing the created source connector information
     """
     client = ctx.request_context.lifespan_context.client
-    config = _prepare_salesforce_source_config(username, domain)
+    config = _prepare_salesforce_source_config(username, categories)
     source_connector = CreateSourceConnector(name=name, type="salesforce", config=config)
 
     try:
@@ -75,14 +79,14 @@ async def update_salesforce_source(
     ctx: Context,
     source_id: str,
     username: Optional[str] = None,
-    domain: Optional[str] = None,
+    categories: Optional[List[str]] = None,
 ) -> str:
     """Update a Salesforce source connector.
 
     Args:
         source_id: ID of the source connector to update
         username: The Salesforce username
-        domain: Optional Salesforce domain,the names of the Salesforce categories (objects)
+        categories: Optional Salesforce domain,the names of the Salesforce categories (objects)
         that you want to access, specified as a comma-separated list.
         Available categories include Account, Campaign, Case, EmailMessage, and Lead.
 
@@ -106,8 +110,8 @@ async def update_salesforce_source(
     if username is not None:
         config["username"] = username
 
-    if domain is not None:
-        config["domain"] = domain
+    if categories is not None:
+        config["categories"] = categories
 
     source_connector = UpdateSourceConnector(config=config)
 
