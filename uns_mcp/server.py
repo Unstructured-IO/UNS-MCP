@@ -1,11 +1,19 @@
+import json
 import os
+import sys
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import AsyncIterator, Optional
 
+import uvicorn
 from docstring_extras import add_custom_node_examples  # relative import required by mcp
 from dotenv import load_dotenv
+from mcp.server import Server
 from mcp.server.fastmcp import Context, FastMCP
+from mcp.server.sse import SseServerTransport
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.routing import Mount, Route
 from unstructured_client import UnstructuredClient
 from unstructured_client.models.operations import (
     CancelJobRequest,
@@ -40,7 +48,7 @@ def load_environment_variables() -> None:
     Load environment variables from .env file.
     Raises an error if critical environment variables are missing.
     """
-    load_dotenv()
+    load_dotenv(override=True)
     required_vars = ["UNSTRUCTURED_API_KEY"]
 
     for var in required_vars:
@@ -60,7 +68,14 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     if not api_key:
         raise ValueError("UNSTRUCTURED_API_KEY environment variable is required")
 
-    client = UnstructuredClient(api_key_auth=api_key)
+    DEBUG_API_REQUESTS = os.environ.get("DEBUG_API_REQUESTS", "False").lower() == "true" #get env variable
+    if DEBUG_API_REQUESTS:
+        from custom_http_client import CustomHttpClient
+        import httpx
+        client = UnstructuredClient(api_key_auth=api_key, async_client=CustomHttpClient(httpx.AsyncClient()))
+    else:
+        client = UnstructuredClient(api_key_auth=api_key)
+    
     try:
         yield AppContext(client=client)
     finally:
@@ -445,7 +460,7 @@ async def list_jobs(
     # Format response
     result = ["Available Jobs by created time:"]
     for job in sorted_jobs:
-        result.append(f"- JOB ID: {job.id})")
+        result.append(f"- JOB ID: {job.id}")
 
     return "\n".join(result)
 
@@ -475,6 +490,7 @@ async def get_job_info(ctx: Context, job_id: str) -> str:
     result.append(f"Workflow name: {info.workflow_name}")
     result.append(f"Workflow id: {info.workflow_id}")
     result.append(f"Runtime: {info.runtime}")
+    result.append(f"Raw result: {json.dumps(json.loads(info.json()), indent=2)}")
 
     return "\n".join(result)
 
@@ -500,6 +516,49 @@ async def cancel_job(ctx: Context, job_id: str) -> str:
         return f"Error canceling job: {str(e)}"
 
 
+def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlette:
+    """Create a Starlette application that can server the provied mcp server with SSE."""
+    sse = SseServerTransport("/messages/")
+
+    async def handle_sse(request: Request) -> None:
+        async with sse.connect_sse(
+            request.scope,
+            request.receive,
+            request._send,  # noqa: SLF001
+        ) as (read_stream, write_stream):
+            await mcp_server.run(
+                read_stream,
+                write_stream,
+                mcp_server.create_initialization_options(),
+            )
+
+    return Starlette(
+        debug=debug,
+        routes=[
+            Route("/sse", endpoint=handle_sse),
+            Mount("/messages/", app=sse.handle_post_message),
+        ],
+    )
+
+
 if __name__ == "__main__":
     load_environment_variables()
-    mcp.run()
+    if len(sys.argv) < 2:
+        # server is directly being invoked from client
+        mcp.run()
+    else:
+        # server is running as HTTP SSE server
+        # reference: https://github.com/sidharthrajaram/mcp-sse
+        mcp_server = mcp._mcp_server  # noqa: WPS437
+
+        import argparse
+
+        parser = argparse.ArgumentParser(description="Run MCP SSE-based server")
+        parser.add_argument("--host", default="127.0.0.1", help="Host to bind to")
+        parser.add_argument("--port", type=int, default=8080, help="Port to listen on")
+        args = parser.parse_args()
+
+        # Bind SSE request handling to MCP server
+        starlette_app = create_starlette_app(mcp_server, debug=True)
+
+        uvicorn.run(starlette_app, host=args.host, port=args.port)

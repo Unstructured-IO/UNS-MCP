@@ -2,6 +2,28 @@
 
 ### Enhancements
 
+- Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
+
+### Features
+
+- ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table, Pine Cone
+
+- ** Source connector adding**: OneDrive
+
+- List all the tools in a table.
+
+- Capability to only log request parameters to UnstructuredClient's AsyncHttpClient, no error response is logged by this mechanism.
+
+### Fixes
+
+- avoid client startup error if env not defined
+- force server using env var from .env instead of fetching them from system first
+
+
+## 0.1.2-dev
+
+### Enhancements
+
 ### Features
 
 - ** Destination connector adding**: Pinecone
