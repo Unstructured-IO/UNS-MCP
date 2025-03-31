@@ -10,6 +10,7 @@ def register_external_connectors(mcp: FastMCP):
     # Register Firecrawl tools
     from .firecrawl import (
         invoke_firecrawl_crawlhtml, 
+        invoke_firecrawl_crawlhtmltomd, 
         check_crawlhtml_status, 
         invoke_firecrawl_llmtxt, 
         check_llmtxt_status,
@@ -17,6 +18,7 @@ def register_external_connectors(mcp: FastMCP):
         cancel_llmtxt_job
     )
     mcp.tool()(invoke_firecrawl_crawlhtml)
+    mcp.tool()(invoke_firecrawl_crawlhtmltomd)
     mcp.tool()(check_crawlhtml_status)
     mcp.tool()(invoke_firecrawl_llmtxt)
     mcp.tool()(check_llmtxt_status)

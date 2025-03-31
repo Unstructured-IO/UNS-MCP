@@ -3,6 +3,7 @@ import hashlib
 import os
 import tempfile
 import time
+import html2text
 from typing import Any, Dict, Literal
 
 import boto3
@@ -11,7 +12,7 @@ import boto3
 from firecrawl import FirecrawlApp
 
 # Define job types
-Firecrawl_JobType = Literal["crawlhtml", "llmfulltxt"]
+Firecrawl_JobType = Literal["crawlhtml", "llmfulltxt", "crawlhtmltomd"]
 
 
 def _prepare_firecrawl_config() -> Dict[str, str]:
@@ -86,6 +87,36 @@ async def invoke_firecrawl_crawlhtml(
     )
 
 
+async def invoke_firecrawl_crawlhtmltomd(
+    url: str,
+    s3_uri: str,
+    limit: int = 100,
+) -> Dict[str, Any]:
+    """Start an asynchronous web crawl job using Firecrawl to retrieve HTML content which is converted into markdown for downstream use.
+
+    Args:
+        url: URL to crawl
+        s3_uri: S3 URI where results will be uploaded
+        limit: Maximum number of pages to crawl (default: 100)
+
+    Returns:
+        Dictionary with crawl job information including the job ID
+    """
+    # Call the generic invoke function with crawl-specific parameters
+    params = {
+        "limit": limit,
+        "scrapeOptions": {
+            "formats": ["html"],  # Only use HTML format TODO: Bring in other features of this API
+        },
+    }
+
+    return await _invoke_firecrawl_job(
+        url=url,
+        s3_uri=s3_uri,
+        job_type="crawlhtmltomd",
+        job_params=params,
+    )
+
 async def invoke_firecrawl_llmtxt(
     url: str,
     s3_uri: str,
@@ -151,7 +182,7 @@ async def _invoke_firecrawl_job(
         firecrawl = FirecrawlApp(api_key=config["api_key"])
 
         # Start the job based on job_type
-        if job_type == "crawlhtml":
+        if job_type == "crawlhtml" or job_type == "crawlhtmltomd":
             job_status = firecrawl.async_crawl_url(url, params=job_params)
 
         elif job_type == "llmfulltxt":
@@ -375,7 +406,7 @@ async def wait_for_job_completion(
         # Poll until completion or timeout
         while True:
             # Check status based on job type
-            if job_type == "crawlhtml":
+            if job_type == "crawlhtml" or job_type == "crawlhtmltomd":
                 result = firecrawl.check_crawl_status(job_id)
             elif job_type == "llmfulltxt":
                 result = firecrawl.check_generate_llms_text_status(job_id)
@@ -407,6 +438,8 @@ async def wait_for_job_completion(
             # Process results based on job type
             if job_type == "crawlhtml":
                 file_count = await _process_crawlhtml_results(result, job_dir)
+            elif job_type == "crawlhtmltomd":
+                file_count = await _process_crawlhtmltomd_results(result, job_dir) 
             elif job_type == "llmfulltxt":
                 file_count = _process_llmtxt_results(result, job_dir)
             else:
@@ -429,7 +462,7 @@ async def wait_for_job_completion(
             }
 
             # Add job-type specific information
-            if job_type == "crawlhtml":
+            if job_type == "crawlhtml" or job_type == "crawlhtmltomd":
                 response.update(
                     {
                         "completed_urls": result.get("completed", 0),
@@ -482,6 +515,43 @@ async def _process_crawlhtml_results(crawl_result: Dict[str, Any], output_dir: s
                 f.write(content)
             file_paths.append(file_path)
 
+    return len(file_paths)
+
+
+async def _process_crawlhtmltomd_results(crawl_result: Dict[str, Any], output_dir: str) -> int:
+    """Process crawl results by converting HTML to Markdown and saving as .md files.
+
+    Args:
+        crawl_result: The result from the completed crawl
+        output_dir: Directory where to save the files
+
+    Returns:
+        Number of files created
+    """
+    file_paths = []
+    converter = html2text.HTML2Text()
+    converter.ignore_links = False  # adjust options as needed
+
+    if "data" in crawl_result and isinstance(crawl_result["data"], list):
+        for i, page_data in enumerate(crawl_result["data"]):
+            if "html" not in page_data:
+                continue
+
+            url = page_data.get("metadata", {}).get("url", f"page-{i}")
+            html_content = page_data.get("html", f"<html><body>Content for {url}</body></html>")
+            
+            # Convert HTML content to Markdown
+            markdown_content = converter.handle(html_content)
+            
+            # Create a valid filename and change its extension to .md
+            filename = _clean_url_to_filename(url)
+            md_filename = f"{os.path.splitext(filename)[0]}.md"
+            file_path = os.path.join(output_dir, md_filename)
+            
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(markdown_content)
+            file_paths.append(file_path)
+    
     return len(file_paths)
 
 
