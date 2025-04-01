@@ -146,13 +146,6 @@ If you need to log request call parameters to `UnstructuredClient`, set the envi
 The logs are stored in a file with the format `unstructured-client-{date}.log`, which can be examined to debug request call parameters to `UnstructuredClient` functions.
 
 ## Running locally minimal client
-Run
-```bash
-npx @wonderwhy-er/desktop-commander setup
-```
-To install terminal tool
-
-
 ```
 uv run python minimal_client/client.py uns_mcp/server.py
 ```
@@ -186,6 +179,22 @@ make sse-client
 ```
 
 Hint: `ctrl+c` out of the client first, then the server. Otherwise the server appears to hang.
+
+## Add terminal access to minimal client
+We are going to use [@wonderwhy-er/desktop-commander](https://github.com/wonderwhy-er/DesktopCommanderMCP) to add terminal access to the minimal client. It is built on the MCP Filesystem Server. Be careful, as the server runs on the user's terminal and **has access to private files.**
+
+Execute the following command to install the package:
+```bash
+npx @wonderwhy-er/desktop-commander setup
+```
+
+Then start client with extra parameter:
+
+```bash
+uv run python minimal_client/client.py "http://127.0.0.1:8080/sse" "@wonderwhy-er/desktop-commander"
+# or
+make sse-client-terminal
+```
 
 ## CHANGELOG.md
 
