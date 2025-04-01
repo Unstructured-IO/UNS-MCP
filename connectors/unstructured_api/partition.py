@@ -33,7 +33,7 @@ async def partition_local_file(
     strategy: Strategy = Strategy.VLM,
     vlm_model: VLMModel = VLMModel.CLAUDE_3_5_SONNET_20241022,
     vlm_model_provider: VLMModelProvider = VLMModelProvider.ANTHROPIC,
-    output_file_path: str = "output",
+    output_file_dir: str | None = "output",
 ) -> str:
     """
     Transform a local file into structured data using the Unstructured API
@@ -48,7 +48,9 @@ async def partition_local_file(
                 auto - automatically choose the best strategy based on the input file
         vlm_model: The VLM model to use for the transformation
         vlm_model_provider: The VLM model provider to use for the transformation
-        output_file_path: The absolute path to the output file
+        output_file_dir:
+            The absolute path to the directory where output file should be saved.
+            If None output is returned as string.
 
     Returns:
         A string containing the structured data or a message indicating the output
@@ -70,6 +72,12 @@ async def partition_local_file(
     except Exception as e:
         return str(e)
 
-    Path.mkdir(Path(output_file_path).parent, parents=True, exist_ok=True)
-    Path(output_file_path).write_text(response)
-    return f"Partition file {input_file_path} to {output_file_path} successfully"
+    if output_file_dir is None:
+        return f"Partition file {input_file_path} to string successfully:\n{response}"
+
+    output_dir_path = Path(output_file_dir)
+    output_dir_path.mkdir(parents=True, exist_ok=True)
+    output_file = output_dir_path / Path(input_file_path).with_suffix(".json").name
+    output_file.write_text(response)
+
+    return f"Partition file {input_file_path} to {output_file_dir} successfully"

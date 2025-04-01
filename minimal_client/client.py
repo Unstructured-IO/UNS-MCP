@@ -50,6 +50,28 @@ class MCPClient:
         Args:
             server_script_path: Path to the server script (.py or .js)
         """
+        session = await self.connect_using_mcp(server_script_path)
+
+        # Get tools from session and add to available tools
+        response = await session.list_tools()
+        tools = response.tools
+
+        for tool in tools:
+            # Remember which server has to be connected when using the tool
+            self.tool_name_to_session[tool.name] = session
+            # Add tool to available tools
+            self.available_tools.append(
+                {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "input_schema": tool.inputSchema,
+                },
+            )
+
+        new_tool_names = [tool.name for tool in tools]
+        logger.info(f"Connected to server with tools: {new_tool_names}")
+
+    async def connect_using_mcp(self, server_script_path: str) -> ClientSession:
         # Check if the path is a URL
         is_url = server_script_path.startswith(("http://", "https://"))
 
@@ -58,7 +80,7 @@ class MCPClient:
             sse_transport = await self.exit_stack.enter_async_context(
                 sse_client(url=server_script_path),
             )
-            local_session = await self.exit_stack.enter_async_context(
+            session = await self.exit_stack.enter_async_context(
                 ClientSession(*sse_transport),
             )
         else:
@@ -77,28 +99,12 @@ class MCPClient:
 
             stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
             self.stdio, self.write = stdio_transport
-            local_session = await self.exit_stack.enter_async_context(
+            session = await self.exit_stack.enter_async_context(
                 ClientSession(self.stdio, self.write),
             )
 
-        await local_session.initialize()
-
-        # List available tools
-        response = await local_session.list_tools()
-        tools = response.tools
-        for tool in tools:
-            self.tool_name_to_session[tool.name] = local_session
-        logger.info(f"Connected to server with tools: {[tool.name for tool in tools]}")
-
-        current_session_tools = [
-            {
-                "name": tool.name,
-                "description": tool.description,
-                "input_schema": tool.inputSchema,
-            }
-            for tool in response.tools
-        ]
-        self.available_tools.extend(current_session_tools)
+        await session.initialize()
+        return session
 
     async def process_query(self, query: str, confirm_tool_use: bool = True) -> None:
         """Process a query using Claude and available tools"""
