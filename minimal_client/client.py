@@ -98,9 +98,8 @@ class MCPClient:
             )
 
             stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
-            self.stdio, self.write = stdio_transport
             session = await self.exit_stack.enter_async_context(
-                ClientSession(self.stdio, self.write),
+                ClientSession(*stdio_transport),
             )
 
         await session.initialize()

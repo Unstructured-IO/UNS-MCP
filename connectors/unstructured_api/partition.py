@@ -15,7 +15,7 @@ from unstructured_client.models.shared import (
 client = unstructured_client.UnstructuredClient(api_key_auth=os.getenv("UNSTRUCTURED_API_KEY"))
 
 
-async def call_api(partition_params: PartitionParameters) -> str:
+async def call_api(partition_params: PartitionParameters) -> list[dict]:
     partition_params.split_pdf_page = True
     partition_params.split_pdf_allow_failed = True
     partition_params.split_pdf_concurrency_level = 15
@@ -23,9 +23,7 @@ async def call_api(partition_params: PartitionParameters) -> str:
     request = PartitionRequest(partition_parameters=partition_params)
 
     res = await client.general.partition_async(request=request)
-    json_elements = json.dumps(res.elements, indent=2)
-
-    return json_elements
+    return res.elements
 
 
 async def partition_local_file(
@@ -33,7 +31,7 @@ async def partition_local_file(
     strategy: Strategy = Strategy.VLM,
     vlm_model: VLMModel = VLMModel.CLAUDE_3_5_SONNET_20241022,
     vlm_model_provider: VLMModelProvider = VLMModelProvider.ANTHROPIC,
-    output_file_dir: str | None = "output",
+    output_file_dir: str | None = None,
 ) -> str:
     """
     Transform a local file into structured data using the Unstructured API
@@ -50,7 +48,7 @@ async def partition_local_file(
         vlm_model_provider: The VLM model provider to use for the transformation
         output_file_dir:
             The absolute path to the directory where output file should be saved.
-            If None output is returned as string.
+            If None output is returned as markdown.
 
     Returns:
         A string containing the structured data or a message indicating the output
@@ -73,11 +71,27 @@ async def partition_local_file(
         return str(e)
 
     if output_file_dir is None:
-        return f"Partition file {input_file_path} to string successfully:\n{response}"
+        markdown = f"# {Path(input_file_path).name}\n\n"
 
-    output_dir_path = Path(output_file_dir)
-    output_dir_path.mkdir(parents=True, exist_ok=True)
-    output_file = output_dir_path / Path(input_file_path).with_suffix(".json").name
-    output_file.write_text(response)
+        for element in response:
+            if element.get("type") == "Table":
+                text_as_html = element.get("metadata", {}).get("text_as_html", "<></>")
+                markdown += f"{text_as_html}\n\n"
+            elif element.get("type") == "Header":
+                text = element.get("text", "")
+                markdown += f"## {text}\n\n"
+            else:
+                text = element.get("text", "")
+                markdown += f"{text}\n\n"
 
-    return f"Partition file {input_file_path} to {output_file_dir} successfully"
+        return f"Partition file {input_file_path} to string: \n{markdown}"
+    else:
+        json_elements_as_str = json.dumps(response, indent=2)
+
+        output_dir_path = Path(output_file_dir)
+        output_dir_path.mkdir(parents=True, exist_ok=True)
+        output_file = output_dir_path / Path(input_file_path).with_suffix(".json").name
+
+        output_file.write_text(json_elements_as_str)
+
+        return f"Partition file {input_file_path} to {str(output_file)} successfully"
