@@ -6,7 +6,7 @@
 
 ### Features
 
-- ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table, Pine Cone
+- ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table, Pinecone
 
 - ** Source connector adding**: OneDrive
 
