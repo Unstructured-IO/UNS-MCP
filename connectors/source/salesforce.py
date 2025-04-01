@@ -1,8 +1,7 @@
 import os
-from typing import Optional, List
+from typing import List, Optional
 
 from mcp.server.fastmcp import Context
-from unstructured_client import UNSET, OptionalNullable
 from unstructured_client.models.operations import (
     CreateSourceRequest,
     DeleteSourceRequest,
@@ -11,7 +10,7 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateSourceConnector,
-    GoogleDriveSourceConnectorConfigInput,
+    SalesforceSourceConnectorConfigInput,
     UpdateSourceConnector,
 )
 
@@ -20,40 +19,46 @@ from connectors.utils import (
 )
 
 
-def _prepare_gdrive_source_config(
-    drive_id: str,
-    recursive: Optional[bool],
-    extensions: OptionalNullable[List[str]] = UNSET,
-) -> GoogleDriveSourceConnectorConfigInput:
-    """Prepare the gdrive source connector configuration."""
-    return GoogleDriveSourceConnectorConfigInput(
-        drive_id=drive_id,
-        recursive=recursive,
-        extensions=extensions,
-        service_account_key=os.getenv("GOOGLEDRIVE_SERVICE_ACCOUNT_KEY"),
+def _prepare_salesforce_source_config(
+    username: str,
+    categories: Optional[List[str]] = None,
+) -> SalesforceSourceConnectorConfigInput:
+    """Prepare the Salesforce source connector configuration."""
+    if os.getenv("SALESFORCE_CONSUMER_KEY") is None or os.getenv("SALESFORCE_PRIVATE_KEY") is None:
+        raise ValueError(
+            "SALESFORCE_CONSUMER_KEY or SALESFORCE_PRIVATE_KEY environment variables are not set",
+        )
+    config = SalesforceSourceConnectorConfigInput(
+        username=username,
+        consumer_key=os.getenv("SALESFORCE_CONSUMER_KEY"),
+        private_key=os.getenv("SALESFORCE_PRIVATE_KEY"),
+        categories=categories,
     )
 
+    return config
 
-async def create_gdrive_source(
+
+async def create_salesforce_source(
     ctx: Context,
     name: str,
-    drive_id: str,
-    recursive: bool = False,
-    extensions: OptionalNullable[List[str]] = UNSET,
+    username: str,
+    categories: Optional[List[str]] = None,
 ) -> str:
-    """Create a gdrive source connector.
+    """Create a Salesforce source connector.
 
     Args:
         name: A unique name for this connector
-        remote_url: The gdrive URI to the bucket or folder (e.g., gdrive://my-bucket/)
-        recursive: Whether to access subfolders within the bucket
+        username: The Salesforce username
+        categories: Optional Salesforce domain,the names of the Salesforce categories (objects)
+        that you want to access, specified as a comma-separated list.
+        Available categories include Account, Campaign, Case, EmailMessage, and Lead.
 
     Returns:
         String containing the created source connector information
     """
     client = ctx.request_context.lifespan_context.client
-    config = _prepare_gdrive_source_config(drive_id, recursive, extensions)
-    source_connector = CreateSourceConnector(name=name, type="google_drive", config=config)
+    config = _prepare_salesforce_source_config(username, categories)
+    source_connector = CreateSourceConnector(name=name, type="salesforce", config=config)
 
     try:
         response = await client.sources.create_source_async(
@@ -61,28 +66,29 @@ async def create_gdrive_source(
         )
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="GoogleDrive",
+            connector_name="Salesforce",
             connector_type="Source",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating gdrive source connector: {str(e)}"
+        return f"Error creating Salesforce source connector: {str(e)}"
 
 
-async def update_gdrive_source(
+async def update_salesforce_source(
     ctx: Context,
     source_id: str,
-    drive_id: Optional[str] = None,
-    recursive: Optional[bool] = None,
-    extensions: OptionalNullable[List[str]] = UNSET,
+    username: Optional[str] = None,
+    categories: Optional[List[str]] = None,
 ) -> str:
-    """Update an gdrive source connector.
+    """Update a Salesforce source connector.
 
     Args:
         source_id: ID of the source connector to update
-        remote_url: The gdrive URI to the bucket or folder
-        recursive: Whether to access subfolders within the bucket
+        username: The Salesforce username
+        categories: Optional Salesforce domain,the names of the Salesforce categories (objects)
+        that you want to access, specified as a comma-separated list.
+        Available categories include Account, Campaign, Case, EmailMessage, and Lead.
 
     Returns:
         String containing the updated source connector information
@@ -101,14 +107,11 @@ async def update_gdrive_source(
     # Update configuration with new values
     config = dict(current_config)
 
-    if drive_id is not None:
-        config["drive_id"] = drive_id
+    if username is not None:
+        config["username"] = username
 
-    if recursive is not None:
-        config["recursive"] = recursive
-
-    if extensions is not None:
-        config["extensions"] = extensions
+    if categories is not None:
+        config["categories"] = categories
 
     source_connector = UpdateSourceConnector(config=config)
 
@@ -121,17 +124,17 @@ async def update_gdrive_source(
         )
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="GoogleDrive",
+            connector_name="Salesforce",
             connector_type="Source",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating gdrive source connector: {str(e)}"
+        return f"Error updating Salesforce source connector: {str(e)}"
 
 
-async def delete_gdrive_source(ctx: Context, source_id: str) -> str:
-    """Delete an gdrive source connector.
+async def delete_salesforce_source(ctx: Context, source_id: str) -> str:
+    """Delete a Salesforce source connector.
 
     Args:
         source_id: ID of the source connector to delete
@@ -145,6 +148,6 @@ async def delete_gdrive_source(ctx: Context, source_id: str) -> str:
         _ = await client.sources.delete_source_async(
             request=DeleteSourceRequest(source_id=source_id),
         )
-        return f"gdrive Source Connector with ID {source_id} deleted successfully"
+        return f"Salesforce Source Connector with ID {source_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting gdrive source connector: {str(e)}"
+        return f"Error deleting Salesforce source connector: {str(e)}"
