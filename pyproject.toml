@@ -1,6 +1,6 @@
 [project]
 name = "uns-mcp"
-version = "0.1.1.0"
+version = "0.1.1"
 description = "MCP server implementation providing structured tools for interacting with the Unstructured API, managing sources, destinations, workflows, and jobs"
 requires-python = ">=3.12"
 dependencies = [
