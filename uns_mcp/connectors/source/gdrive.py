@@ -1,7 +1,8 @@
 import os
-from typing import Optional
+from typing import List, Optional
 
 from mcp.server.fastmcp import Context
+from unstructured_client import UNSET, OptionalNullable
 from unstructured_client.models.operations import (
     CreateSourceRequest,
     DeleteSourceRequest,
@@ -22,9 +23,9 @@ from uns_mcp.connectors.utils import (
 def _prepare_gdrive_source_config(
     drive_id: str,
     recursive: Optional[bool],
-    extensions: Optional[str],
+    extensions: OptionalNullable[List[str]] = UNSET,
 ) -> GoogleDriveSourceConnectorConfigInput:
-    """Prepare the Azure source connector configuration."""
+    """Prepare the gdrive source connector configuration."""
     return GoogleDriveSourceConnectorConfigInput(
         drive_id=drive_id,
         recursive=recursive,
@@ -38,9 +39,9 @@ async def create_gdrive_source(
     name: str,
     drive_id: str,
     recursive: bool = False,
-    extensions: Optional[str] = None,
+    extensions: OptionalNullable[List[str]] = UNSET,
 ) -> str:
-    """Create an gdrive source connector.
+    """Create a gdrive source connector.
 
     Args:
         name: A unique name for this connector
@@ -74,7 +75,7 @@ async def update_gdrive_source(
     source_id: str,
     drive_id: Optional[str] = None,
     recursive: Optional[bool] = None,
-    extensions: Optional[str] = None,
+    extensions: OptionalNullable[List[str]] = UNSET,
 ) -> str:
     """Update an gdrive source connector.
 

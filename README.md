@@ -96,83 +96,24 @@ For integration with Claude Desktop, add the following content to your `claude_d
 **Using `uvx` Command:**
 ```json
 {
-  "mcpServers": {
-    "UNS_MCP": {
-      "command": "uvx",
-      "args": ["uns_mcp"],
-      "env": {
-        "UNSTRUCTURED_API_KEY": "<your_key>"
-      }
-    }
-  }
-}
-```
-
-**Alternatively, Using Python Package:**
-```json
-{
-  "mcpServers": {
-    "UNS_MCP": {
-      "command": "python",
-      "args": ["-m", "uns_mcp"],
-      "env": {
-        "UNSTRUCTURED_API_KEY": "<your_key>"
-      }
-    }
-  }
-}
-```
-
-### Using Source Code
-1. Clone the repository.
-
-2. Install dependencies:
-   ```bash
-   uv sync
-   ```
-
-3. Set your Unstructured API key as an environment variable:
-   Create a `.env` file in the root directory with the following content:
-   ```
-      UNSTRUCTURED_API_KEY="YOUR_KEY"
-   ```
-
-You can now run the server using one of the following methods:
-
-#### Using Editable Package Installation
-Install as an editable package:
-```bash
-uvx install -e .
-```
-
-Update your Claude Desktop config:
-```json
-{
-  "mcpServers": {
-    "UNS_MCP": {
-      "command": "uvx",
-      "args": ["uns_mcp"]
-    }
-  }
-}
-```
-
-#### Using Stdio: Client Command
-Configure Claude Desktop to use stdio:
-```json
-{
-  "mcpServers": {
-    "UNS_MCP": {
-      "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
-      "args": [
-        "--directory",
-        "ABSOLUTE/PATH/TO/YOUR-UNS-MCP-REPO/uns_mcp",
-        "run",
-        "server.py"
-      ],
-      "env": {
-        "UNSTRUCTURED_API_KEY":"<your_key>"
-      }
+    "mcpServers":
+    {
+        "UNS_MCP":
+        {
+            "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
+            "args":
+            [
+                "--directory",
+                "ABSOLUTE/PATH/TO/YOUR-UNS-MCP-REPO/uns_mcp",
+                "run",
+                "server.py"
+            ],
+            "env":
+            [
+            "UNSTRUCTURED_API_KEY":"<your key>"
+            ],
+            "disabled": false
+        }
     }
   }
 }
