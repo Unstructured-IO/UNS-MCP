@@ -1819,11 +1819,15 @@ dependencies = [
     { name = "mcp", extra = ["cli"] },
     { name = "notebook" },
     { name = "pip" },
-    { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "python-dotenv" },
     { name = "unstructured-client" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pre-commit" },
 ]
 
 [package.metadata]
@@ -1834,12 +1838,13 @@ requires-dist = [
     { name = "mcp", extras = ["cli"], specifier = ">=1.3.0" },
     { name = "notebook", specifier = ">=7.3.3" },
     { name = "pip" },
-    { name = "pre-commit" },
+    { name = "pre-commit", marker = "extra == 'dev'" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-asyncio", specifier = ">=0.25.3" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "unstructured-client", specifier = ">=0.32.0" },
 ]
+provides-extras = ["dev"]
 
 [[package]]
 name = "unstructured-client"
