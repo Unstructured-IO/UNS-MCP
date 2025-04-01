@@ -38,7 +38,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync
+          uv sync --dev
 
       - name: Run tests
         run: make test-firecrawl
