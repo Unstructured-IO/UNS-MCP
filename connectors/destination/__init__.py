@@ -29,6 +29,11 @@ def register_destination_connectors(mcp: FastMCP):
         delete_neo4j_destination,
         update_neo4j_destination,
     )
+    from .pinecone import (
+        create_pinecone_destination,
+        delete_pinecone_destination,
+        update_pinecone_destination,
+    )
     from .s3 import create_s3_destination, delete_s3_destination, update_s3_destination
     from .weaviate import (
         create_weaviate_destination,
@@ -36,7 +41,7 @@ def register_destination_connectors(mcp: FastMCP):
         update_weaviate_destination,
     )
 
-    # Register destination connector tools
+    # Register S3 destination connector tools
     mcp.tool()(create_s3_destination)
     mcp.tool()(update_s3_destination)
     mcp.tool()(delete_s3_destination)
@@ -70,3 +75,9 @@ def register_destination_connectors(mcp: FastMCP):
     mcp.tool()(create_databricks_delta_table_destination)
     mcp.tool()(update_databricks_delta_table_destination)
     mcp.tool()(delete_databricks_delta_table_destination)
+
+    # Register Pinecone destination connector tools
+
+    mcp.tool()(create_pinecone_destination)
+    mcp.tool()(update_pinecone_destination)
+    mcp.tool()(delete_pinecone_destination)

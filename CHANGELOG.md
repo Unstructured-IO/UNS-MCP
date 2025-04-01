@@ -6,9 +6,7 @@
 
 ### Features
 
-### Features
-
-- ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table
+- ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table, Pinecone
 
 - ** Source connector adding**: OneDrive
 
@@ -20,6 +18,17 @@
 
 - avoid client startup error if env not defined
 - force server using env var from .env instead of fetching them from system first
+
+
+## 0.1.2-dev
+
+### Enhancements
+
+### Features
+
+- ** Destination connector adding**: Pinecone
+
+### Fixes
 
 
 ## 0.1.1
@@ -37,6 +46,7 @@
 - add notebooks to demonstrate end-to-end capabilities of creating connectors, combining them info workflow and executing the workflow
 
 ### Features
+
 - Integrated firecrawl's /crawl and /llmstxt endpoint to generate and push HTML and llms.txt files to S3.
 
 - ** Source connector adding**: azure, google drive
