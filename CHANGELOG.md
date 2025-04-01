@@ -4,11 +4,9 @@
 
 - Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
 
-### Features
-
 - ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table, Pinecone
 
-- ** Source connector adding**: OneDrive
+- ** Source connector adding**: OneDrive, Salesforce
 
 - List all the tools in a table.
 
