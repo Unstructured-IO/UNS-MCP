@@ -2,29 +2,6 @@
 
 An MCP server implementation for interacting with the Unstructured API. This server provides tools to list sources and workflows.
 
-## Setup
-
-1. Install dependencies:
-- `uv pip install '.[dev]'`
-
-or use `uv sync --extra=dev`.
-
-2. Set your Unstructured API key as an environment variable.
-   - Create a `.env` file in the root directory, and add a line with your key: `UNSTRUCTURED_API_KEY="YOUR_KEY"`
-
-To test in local, any working key that pointing to prod env would work. However, to be able to return valid results from client's side (e.g, Claude for Desktop), your personal key that is fetched from `https://platform.unstructured.io/app/account/api-keys` is needed.
-
-## Running the Server
-Using the MCP CLI:
-```bash
-mcp run uns_mcp/server.py
-```
-
-or:
-```bash
-uv run uns_mcp/server.py
-```
-
 ## Available Tools
 
 | Tool | Description |
@@ -48,6 +25,27 @@ uv run uns_mcp/server.py
 | `list_jobs` | Lists jobs for a specific workflow from the Unstructured API. |
 | `get_job_info` | Get detailed information about a specific job by job id. |
 | `cancel_job` |Delete a specific job by id. |
+
+To use the tool that creates/updates/deletes a connector, the credentials for that specific connector must be defined in your .env file. Below is the list of `credentials` for the connectors we support:
+
+| Credential Name | Description |
+|------|-------------|
+| `ANTHROPIC_API_KEY` | required to run the `minimal_client` to interact with our server. |
+| `AWS_KEY`, `AWS_SECRET`| required to create S3 connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/sources/s3) and [here](https://docs.unstructured.io/api-reference/workflow/destinations/s3) |
+| `WEAVIATE_CLOUD_API_KEY` | required to create Weaviate vector db connector, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/destinations/weaviate) |
+| `FIRECRAWL_API_KEY` | required to use Firecrawl tools in `external/firecrawl.py`, sign up on [Firecrawl](https://www.firecrawl.dev/) and get an API key. |
+| `ASTRA_DB_APPLICATION_TOKEN`, `ASTRA_DB_API_ENDPOINT` | required to create Astradb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/astradb)|
+| `AZURE_CONNECTION_STRING`| required option 1 to create Azure connector via ``uns-mcp`` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
+| `AZURE_ACCOUNT_NAME`+`AZURE_ACCOUNT_KEY`| required option 2 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage)|
+| `AZURE_ACCOUNT_NAME`+`AZURE_SAS_TOKEN` | required option 3 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
+| `NEO4J_PASSWORD` | required to create Neo4j connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/neo4j) |
+| `MONGO_DB_CONNECTION_STRING` | required to create Mongodb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/mongodb) |
+| `GOOGLEDRIVE_SERVICE_ACCOUNT_KEY` | a string value. The original server account key (follow [documentation](https://docs.unstructured.io/ui/sources/google-drive)) is in json file, run `cat /path/to/google_service_account_key.json | base64` in terminal to get the string value  |
+| `DATABRICKS_CLIENT_ID`,`DATABRICKS_CLIENT_SECRET` | required to create Databricks volume/delta table connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/databricks-volumes) and [here](https://docs.unstructured.io/ui/destinations/databricks-delta-table) |
+| `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_CRED`,`ONEDRIVE_TENANT_ID`| required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/onedrive) |
+| `LOG_LEVEL` | Used to set logging level for our `minimal_client`, e.g. set to ERROR to get everything  |
+| `CONFIRM_TOOL_USE` | set to true so that `minimal_client` can confirm execution before each tool call |
+| `DEBUG_API_REQUESTS` | set to true so that `uns_mcp/server.py` can output request parameters for better debugging |
 
 
 ### Firecrawl Source
@@ -75,42 +73,142 @@ How Firecrawl works:
 
 Note: A `FIRECRAWL_API_KEY` environment variable must be set to use these functions.
 
+## Installation && Configuration
 
-## Claude Desktop Integration
+This guide provides step-by-step instructions to set up and configure the UNS_MCP server using Python 3.12 and the `uv` tool.
 
-To install in Claude Desktop:
+## Prerequisites
+- Python 3.12+
+- `uv` for environment management
+- An API key from Unstructured. You can sign up and obtain your API key [here](https://platform.unstructured.io/app/account/api-keys).
+-
+### Using `uv` (Recommended)
 
-1. Go to `~/Library/Application Support/Claude/` and create a `claude_desktop_config.json`.
-2. In that file add:
+No additional installation is required when using `uvx` as it handles execution. However, if you prefer to install the package directly:
 ```bash
+uv pip install uns_mcp
+```
+
+#### Configure Claude Desktop
+For integration with Claude Desktop, add the following content to your `claude_desktop_config.json`:
+**Note:** The file is located in the `~/Library/Application Support/Claude/` directory.
+
+**Using `uvx` Command:**
+```json
 {
-    "mcpServers":
-    {
-        "UNS_MCP":
-        {
-            "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
-            "args":
-            [
-                "--directory",
-                "ABSOLUTE/PATH/TO/UNS-MCP",
-                "run",
-                "server.py"
-            ],
-            "env":
-            [
-            "UNSTRUCTURED_API_KEY":"<your key>"
-            ],
-            "disabled": false
-        }
+  "mcpServers": {
+    "UNS_MCP": {
+      "command": "uvx",
+      "args": ["uns_mcp"],
+      "env": {
+        "UNSTRUCTURED_API_KEY": "<your_key>"
+      }
     }
+  }
 }
 ```
-3. Restart Claude Desktop.
 
-4. Example Issues seen from Claude Desktop.
-    - You will see `No destinations found` when you query for a list of destination connectors. Check your API key in `.env` or in your config json, it needs to be your personal key in `https://platform.unstructured.io/app/account/api-keys`.
+**Alternatively, Using Python Package:**
+```json
+{
+  "mcpServers": {
+    "UNS_MCP": {
+      "command": "python",
+      "args": ["-m", "uns_mcp"],
+      "env": {
+        "UNSTRUCTURED_API_KEY": "<your_key>"
+      }
+    }
+  }
+}
+```
 
-## Debugging tools
+### Using Source Code
+1. Clone the repository.
+
+2. Install dependencies:
+   ```bash
+   uv sync
+   ```
+
+3. Set your Unstructured API key as an environment variable:
+   Create a `.env` file in the root directory with the following content:
+   ```
+      UNSTRUCTURED_API_KEY="YOUR_KEY"
+   ```
+
+You can now run the server using one of the following methods:
+
+#### Using Editable Package Installation
+Install as an editable package:
+```bash
+uvx install -e .
+```
+
+Update your Claude Desktop config:
+```json
+{
+  "mcpServers": {
+    "UNS_MCP": {
+      "command": "uvx",
+      "args": ["uns_mcp"]
+    }
+  }
+}
+```
+
+#### Using Stdio: Client Command
+Configure Claude Desktop to use stdio:
+```json
+{
+  "mcpServers": {
+    "UNS_MCP": {
+      "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
+      "args": [
+        "--directory",
+        "ABSOLUTE/PATH/TO/YOUR-UNS-MCP-REPO/uns_mcp",
+        "run",
+        "server.py"
+      ],
+      "env": {
+        "UNSTRUCTURED_API_KEY":"<your_key>"
+      }
+    }
+  }
+}
+
+```
+Alternatively, run the local client:
+```bash
+uv run python minimal_client/client.py uns_mcp/server.py
+```
+
+#### Using SSE Server Protocol
+**Note: Not supported by Claude Desktop.**
+For SSE protocol, you can debug more easily by decoupling the client and server:
+
+1. Start the server in one terminal:
+   ```bash
+   uv run python uns_mcp/server.py --host 127.0.0.1 --port 8080
+   # or
+   make sse-server
+   ```
+
+2. Test the server using a local client in another terminal:
+   ```bash
+   uv run python minimal_client/client.py "http://127.0.0.1:8080/sse"
+   # or
+   make sse-client
+   ```
+**Note:** To stop the services, use `Ctrl+C` on the client first, then the server.
+
+## Additional Local Client Configuration
+Configure the minimal client using environmental variables:
+- `LOG_LEVEL="ERROR"`: Set to suppress debug outputs from the LLM, displaying clear messages for users.
+- `CONFIRM_TOOL_USE='false'`: Disable tool use confirmation before execution. **Use with caution**, especially during development, as LLM may execute expensive workflows or delete data.
+
+
+#### Debugging tools
 
 Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the following command to spin up a debugging UI. From there, you will be able to add environment variables (pointing to your local env) on the left pane. Include your personal API key there as env var. Go to `tools`, you can test out the capabilities you add to the MCP server.
 ```
@@ -120,39 +218,6 @@ mcp dev uns_mcp/server.py
 If you need to log request call parameters to `UnstructuredClient`, set the environment variable `DEBUG_API_REQUESTS=false`.
 The logs are stored in a file with the format `unstructured-client-{date}.log`, which can be examined to debug request call parameters to `UnstructuredClient` functions.
 
-## Running locally minimal client
-```
-uv run python minimal_client/client.py uns_mcp/server.py
-```
-
-or
-
-```
-make local-client
-```
-
-Env variables to configure behavior of the client:
-- `LOG_LEVEL="ERROR"` # If you would like to hide outputs from the LLM and present clear messages for the user
-- `CONFIRM_TOOL_USE='false'` If you would like to disable the tool use confirmation before running it (True by default). **BE MINDFUL** about that option, as LLM can decide to purge all data from your account or run some expensive workflows; use only for development purposes.
-
-## Running locally minimal client, accessing local the MCP server over HTTP + SSE
-
-The main difference here is it becomes easier to set breakpoints on the server side during development -- the client and server are decoupled.
-
-```
-# in one terminal, run the server:
-python uns_mcp/server.py --host 127.0.0.1 --port 8080
-
-or
-make sse-server
-
-# in another terminal, run the client:
-python minimal_client/client.py "http://127.0.0.1:8080/sse"
-or
-make sse-client
-```
-
-Hint: `ctrl+c` out of the client first, then the server. Otherwise the server appears to hang.
 
 ## CHANGELOG.md
 
