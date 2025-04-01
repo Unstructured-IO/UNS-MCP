@@ -4,9 +4,9 @@
 
 - Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
 
-- ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table, Pinecone
+- **Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table, Pinecone
 
-- ** Source connector adding**: OneDrive, Salesforce
+- **Source connector adding**: OneDrive, Salesforce, Sharepoint
 
 - List all the tools in a table.
 
@@ -16,17 +16,6 @@
 
 - avoid client startup error if env not defined
 - force server using env var from .env instead of fetching them from system first
-
-
-## 0.1.2-dev
-
-### Enhancements
-
-### Features
-
-- ** Destination connector adding**: Pinecone
-
-### Fixes
 
 
 ## 0.1.1
