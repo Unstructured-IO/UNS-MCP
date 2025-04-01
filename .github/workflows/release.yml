@@ -28,7 +28,7 @@ jobs:
       - name: release
         env:
           TWINE_USERNAME: "__token__"
-          TWINE_PASSWORD: ${{ secrets.MYTOKEN }} # TODO Fix valid token
+          TWINE_PASSWORD: ${{ secrets.PYPI_PUBLISHER_TOKEN }} # TODO Fix valid token
         run: | # TODO set valid repository
           uv run python -m build --sdist
           uv run twine upload -r testpypi dist/*
