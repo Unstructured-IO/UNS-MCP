@@ -22,19 +22,20 @@ from connectors.utils import (
 def _prepare_neo4j_dest_config(
     database: str,
     uri: str,
-    username: str,
     batch_size: Optional[int] = None,
 ) -> Neo4jDestinationConnectorConfigInput:
 
     """Prepare the Azure source connector configuration."""
+    if os.getenv("NEO4J_USERNAME") is None:
+        raise ValueError("NEO4J_USERNAME environment variable is not set")
     if os.getenv("NEO4J_PASSWORD") is None:
         raise ValueError("NEO4J_PASSWORD environment variable is not set")
     else:
         return Neo4jDestinationConnectorConfigInput(
             database=database,
             uri=uri,
-            username=username,
             batch_size=batch_size,
+            username=os.getenv("NEO4J_USERNAME"),
             password=os.getenv("NEO4J_PASSWORD"),
         )
 
@@ -44,7 +45,6 @@ async def create_neo4j_destination(
     name: str,
     database: str,
     uri: str,
-    username: str,
     batch_size: Optional[int] = 100,
 ) -> str:
     """Create an neo4j destination connector.
@@ -53,15 +53,14 @@ async def create_neo4j_destination(
         name: A unique name for this connector
         database: The neo4j database, e.g. "neo4j"
         uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
-        username: The neo4j username
-
+        batch_size: The batch size for the connector
 
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_neo4j_dest_config(database, uri, username, batch_size)
+    config = _prepare_neo4j_dest_config(database, uri, batch_size)
 
     destination_connector = CreateDestinationConnector(name=name, type="neo4j", config=config)
 
@@ -86,7 +85,6 @@ async def update_neo4j_destination(
     destination_id: str,
     database: Optional[str] = None,
     uri: Optional[str] = None,
-    username: Optional[str] = None,
     batch_size: Optional[int] = None,
 ) -> str:
     """Update an neo4j destination connector.
@@ -95,8 +93,7 @@ async def update_neo4j_destination(
         destination_id: ID of the destination connector to update
         database: The neo4j database, e.g. "neo4j"
         uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
-        username: The neo4j username
-
+        batch_size: The batch size for the connector
 
     Returns:
         String containing the updated destination connector information
@@ -119,8 +116,6 @@ async def update_neo4j_destination(
         config["database"] = database
     if uri is not None:
         config["uri"] = uri
-    if username is not None:
-        config["username"] = username
     if batch_size is not None:
         config["batch_size"] = batch_size
 
