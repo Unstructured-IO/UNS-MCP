@@ -1,6 +1,6 @@
 [project]
-name = "uns-mcp"
-version = "0.1.1" # Set only non-dev versions here
+name = "uns_mcp"
+version = "0.1.2.1" # Set only non-dev versions to release
 description = "MCP server implementation providing structured tools for interacting with the Unstructured API, managing sources, destinations, workflows, and jobs"
 requires-python = ">=3.12"
 readme = "README.md"
@@ -23,7 +23,7 @@ dev=[
 ]
 
 [project.scripts]
-uns-mcp = "uns_mcp.server:main"
+uns_mcp = "uns_mcp.server:main"
 
 [build-system]
 requires = ["setuptools", "wheel"]

@@ -1,8 +1,9 @@
-## 0.1.2-dev
+## 0.1.2.1
 
 ### Enhancements
 
-- Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
+- Ability to run the minimal client and server separately (relies on the HTTP SSE interface)
+
 - UNS-MCP server can be installed as standalone package, thus the usage of it is simplified for non-dev users
 
 ### Features

@@ -96,44 +96,78 @@ For integration with Claude Desktop, add the following content to your `claude_d
 **Using `uvx` Command:**
 ```json
 {
-    "mcpServers":
-    {
-        "UNS_MCP":
-        {
-            "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
-            "args":
-            [
-                "--directory",
-                "ABSOLUTE/PATH/TO/YOUR-UNS-MCP-REPO/uns_mcp",
-                "run",
-                "server.py"
-            ],
-            "env":
-            [
-            "UNSTRUCTURED_API_KEY":"<your key>"
-            ],
-            "disabled": false
-        }
+   "mcpServers": {
+      "UNS_MCP": {
+         "command": "uvx",
+         "args": ["uns_mcp"],
+         "env": {
+           "UNSTRUCTURED_API_KEY": "<your-key>"
+         }
+      }
+   }
+}
+```
+
+**Alternatively, Using Python Package:**
+```json
+{
+   "mcpServers": {
+      "UNS_MCP": {
+         "command": "python",
+         "args": ["-m", "uns_mcp"],
+         "env": {
+           "UNSTRUCTURED_API_KEY": "<your-key>"
+         }
+      }
+   }
+}
+```
+
+### Using Source Code
+1. Clone the repository.
+
+2. Install dependencies:
+    ```bash
+    uv sync
+    ```
+
+3. Set your Unstructured API key as an environment variable. Create a .env file in the root directory with the following content:
+```bash
+UNSTRUCTURED_API_KEY="YOUR_KEY"
+```
+Refer to `.env.template` for the configurable environment variables.
+
+You can now run the server using one of the following methods:
+
+#### Using Editable Package Installation
+Install as an editable package:
+```bash
+uvx pip install -e .
+```
+
+Update your Claude Desktop config:
+```json
+{
+  "mcpServers": {
+    "UNS_MCP": {
+      "command": "uvx",
+      "args": ["uns_mcp"]
     }
   }
 }
-
 ```
-Alternatively, run the local client:
-```bash
-uv run python minimal_client/client.py uns_mcp/server.py
-```
+**Note**: Remember to point to the uvx executable in environment where you installed the package
 
 #### Using SSE Server Protocol
 **Note: Not supported by Claude Desktop.**
 For SSE protocol, you can debug more easily by decoupling the client and server:
 
 1. Start the server in one terminal:
-   ```bash
-   uv run python uns_mcp/server.py --host 127.0.0.1 --port 8080
-   # or
-   make sse-server
-   ```
+    ```bash
+    uv run python uns_mcp/server.py --host 127.0.0.1 --port 8080
+    # or
+    make sse-server
+    ```
 
 2. Test the server using a local client in another terminal:
    ```bash
@@ -142,6 +176,28 @@ For SSE protocol, you can debug more easily by decoupling the client and server:
    make sse-client
    ```
 **Note:** To stop the services, use `Ctrl+C` on the client first, then the server.
+
+#### Using Stdio Server Protocol
+Configure Claude Desktop to use stdio:
+```json
+{
+  "mcpServers": {
+    "UNS_MCP": {
+      "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
+      "args": [
+        "--directory",
+        "ABSOLUTE/PATH/TO/YOUR-UNS-MCP-REPO/uns_mcp",
+        "run",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+Alternatively, run the local client:
+```bash
+uv run python minimal_client/client.py uns_mcp/server.py
+```
 
 ## Additional Local Client Configuration
 Configure the minimal client using environmental variables:
@@ -163,3 +219,8 @@ The logs are stored in a file with the format `unstructured-client-{date}.log`, 
 ## CHANGELOG.md
 
 Any new developed features/fixes/enhancements will be added to CHANGELOG.md. 0.x.x-dev pre-release format is preferred before we bump to a stable version.
+
+# Troubleshooting
+- If you encounter issues with `Error: spawn <command> ENOENT` it means `<command>` is not installed or visible in your PATH:
+  - Make sure to install it and add it to your PATH.
+  - or provide absolute path to the command in the `command` field of your config. So for example replace `python` with `/opt/miniconda3/bin/python`
