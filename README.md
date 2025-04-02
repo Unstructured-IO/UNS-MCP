@@ -26,6 +26,20 @@ An MCP server implementation for interacting with the Unstructured API. This ser
 | `get_job_info` | Get detailed information about a specific job by job id. |
 | `cancel_job` |Delete a specific job by id. |
 
+Below is a list of connectors the `UNS-MCP` server currently supports, please see the full list of source connectors that Unstructured platform supports [here](https://docs.unstructured.io/api-reference/workflow/sources/overview) and destination list [here](https://docs.unstructured.io/api-reference/workflow/destinations/overview). We are planning on adding more!
+
+| Source | Destination |
+|------|-------------|
+| S3 | S3 |
+| Azure | Weaviate |
+| Google Drive | Pinecone |
+| OneDrive | AstraDB |
+| Salesforce | MongoDB |
+| Sharepoint | Neo4j|
+| | Databricks Volumes|
+|  | Databricks Volumes Delta Table |
+
+
 To use the tool that creates/updates/deletes a connector, the credentials for that specific connector must be defined in your .env file. Below is the list of `credentials` for the connectors we support:
 
 | Credential Name | Description |
@@ -43,6 +57,9 @@ To use the tool that creates/updates/deletes a connector, the credentials for th
 | `GOOGLEDRIVE_SERVICE_ACCOUNT_KEY` | a string value. The original server account key (follow [documentation](https://docs.unstructured.io/ui/sources/google-drive)) is in json file, run `cat /path/to/google_service_account_key.json | base64` in terminal to get the string value  |
 | `DATABRICKS_CLIENT_ID`,`DATABRICKS_CLIENT_SECRET` | required to create Databricks volume/delta table connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/databricks-volumes) and [here](https://docs.unstructured.io/ui/destinations/databricks-delta-table) |
 | `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_CRED`,`ONEDRIVE_TENANT_ID`| required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/onedrive) |
+| `PINECONE_API_KEY` | required to create Pinecone vector DB connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/pinecone) |
+| `SALESFORCE_CONSUMER_KEY`,`SALESFORCE_PRIVATE_KEY` | required to create salesforce source connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ingestion/source-connectors/salesforce)|
+| `SHAREPOINT_CLIENT_ID`, `SHAREPOINT_CLIENT_CRED`,`SHAREPOINT_TENANT_ID`| required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/sharepoint) |
 | `LOG_LEVEL` | Used to set logging level for our `minimal_client`, e.g. set to ERROR to get everything  |
 | `CONFIRM_TOOL_USE` | set to true so that `minimal_client` can confirm execution before each tool call |
 | `DEBUG_API_REQUESTS` | set to true so that `uns_mcp/server.py` can output request parameters for better debugging |
@@ -215,6 +232,22 @@ mcp dev uns_mcp/server.py
 If you need to log request call parameters to `UnstructuredClient`, set the environment variable `DEBUG_API_REQUESTS=false`.
 The logs are stored in a file with the format `unstructured-client-{date}.log`, which can be examined to debug request call parameters to `UnstructuredClient` functions.
 
+
+## Add terminal access to minimal client
+We are going to use [@wonderwhy-er/desktop-commander](https://github.com/wonderwhy-er/DesktopCommanderMCP) to add terminal access to the minimal client. It is built on the MCP Filesystem Server. Be careful, as the client (also LLM) now **has access to private files.**
+
+Execute the following command to install the package:
+```bash
+npx @wonderwhy-er/desktop-commander setup
+```
+
+Then start client with extra parameter:
+
+```bash
+uv run python minimal_client/client.py "http://127.0.0.1:8080/sse" "@wonderwhy-er/desktop-commander"
+# or
+make sse-client-terminal
+```
 
 ## CHANGELOG.md
 

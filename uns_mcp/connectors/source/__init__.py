@@ -31,3 +31,23 @@ def register_source_connectors(mcp: FastMCP):
     mcp.tool()(create_onedrive_source)
     mcp.tool()(update_onedrive_source)
     mcp.tool()(delete_onedrive_source)
+
+    from .salesforce import (
+        create_salesforce_source,
+        delete_salesforce_source,
+        update_salesforce_source,
+    )
+
+    mcp.tool()(create_salesforce_source)
+    mcp.tool()(update_salesforce_source)
+    mcp.tool()(delete_salesforce_source)
+
+    from .sharepoint import (
+        create_sharepoint_source,
+        delete_sharepoint_source,
+        update_sharepoint_source,
+    )
+
+    mcp.tool()(create_sharepoint_source)
+    mcp.tool()(update_sharepoint_source)
+    mcp.tool()(delete_sharepoint_source)

@@ -4,19 +4,21 @@
 
 - Ability to run the minimal client and server separately (relies on the HTTP SSE interface)
 
-- UNS-MCP server can be installed as standalone package, thus the usage of it is simplified for non-dev users
+- Neo4j Username is now ENV variable instead of being tool argument
 
-### Features
+- Added notebook with example workflow having Azure source and Neo4j destination
 
-### Features
+- **Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table, Pinecone
 
-- ** Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table
-
-- ** Source connector adding**: OneDrive
+- **Source connector adding**: OneDrive, Salesforce, Sharepoint
 
 - List all the tools in a table.
 
 - Capability to only log request parameters to UnstructuredClient's AsyncHttpClient, no error response is logged by this mechanism.
+
+- Adds terminal access to the minimal client using DesktopCommanderMCP
+
+- UNS-MCP server can be installed as standalone package, thus the usage of it is simplified for non-dev users
 
 ### Fixes
 
@@ -39,6 +41,7 @@
 - add notebooks to demonstrate end-to-end capabilities of creating connectors, combining them info workflow and executing the workflow
 
 ### Features
+
 - Integrated firecrawl's /crawl and /llmstxt endpoint to generate and push HTML and llms.txt files to S3.
 
 - ** Source connector adding**: azure, google drive
