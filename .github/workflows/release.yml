@@ -18,11 +18,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "${{ env.PYTHONVERSION }}"
-
       - name: Set up Python and Install dependencies
         if: env.SKIP_RELEASE != 'true'
         run: |
@@ -34,9 +29,10 @@ jobs:
       - name: Get version from main
         id: get-main-version
         run: |
-          git checkout main
+          git switch main
           MAIN_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
           echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
+          git switch -
 
       - name: Compare versions
         id: compare-versions
@@ -52,6 +48,7 @@ jobs:
           else
             echo "Versions differ. Proceed with the release."
             echo "SKIP_RELEASE=false" >> $GITHUB_ENV
+
       - name: Release to PyPI
         if: env.SKIP_RELEASE != 'true'
         env:
