@@ -1809,7 +1809,7 @@ wheels = [
 
 [[package]]
 name = "uns-mcp"
-version = "0.1.2.1"
+version = "0.1.2.2"
 source = { editable = "." }
 dependencies = [
     { name = "anthropic" },
