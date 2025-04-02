@@ -24,7 +24,7 @@ jobs:
           uv python install ${{ env.PYTHONVERSION }}
           uv venv
           uv pip install .
-          uv pip install twine build
+          uv pip install twine build toml
 
       - name: Get version from main
         id: get-main-version
