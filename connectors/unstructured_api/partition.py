@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from typing import Literal
 
 import unstructured_client
 from unstructured_client.models.operations import PartitionRequest
@@ -28,16 +29,18 @@ async def call_api(partition_params: PartitionParameters) -> list[dict]:
 
 async def partition_local_file(
     input_file_path: str,
+    output_file_dir: str,
     strategy: Strategy = Strategy.VLM,
     vlm_model: VLMModel = VLMModel.CLAUDE_3_5_SONNET_20241022,
     vlm_model_provider: VLMModelProvider = VLMModelProvider.ANTHROPIC,
-    output_file_dir: str | None = None,
+    output_type: Literal["json", "markdown"] = "json",
 ) -> str:
     """
     Transform a local file into structured data using the Unstructured API
 
     Args:
         input_file_path: The absolute path to the file
+        output_file_dir: The absolute path to the directory where output file should be saved.
         strategy:
             Available strategies:
                 VLM - most advanced transformation suitable for difficult PDFs and Images
@@ -46,9 +49,7 @@ async def partition_local_file(
                 auto - automatically choose the best strategy based on the input file
         vlm_model: The VLM model to use for the transformation
         vlm_model_provider: The VLM model provider to use for the transformation
-        output_file_dir:
-            The absolute path to the directory where output file should be saved.
-            If None output is returned as markdown.
+        output_type: The type of output to generate. Can be 'json' or 'markdown'.
 
     Returns:
         A string containing the structured data or a message indicating the output
@@ -70,7 +71,16 @@ async def partition_local_file(
     except Exception as e:
         return str(e)
 
-    if output_file_dir is None:
+    output_dir_path = Path(output_file_dir)
+    output_dir_path.mkdir(parents=True, exist_ok=True)
+
+    if output_type not in ["json", "markdown"]:
+        return "Output type must be either 'json' or 'markdown'."
+    elif output_type == "json":
+        json_elements_as_str = json.dumps(response, indent=2)
+        output_file = output_dir_path / Path(input_file_path).with_suffix(".json").name
+        output_file.write_text(json_elements_as_str)
+    else:
         markdown = f"# {Path(input_file_path).name}\n\n"
 
         for element in response:
@@ -84,14 +94,7 @@ async def partition_local_file(
                 text = element.get("text", "")
                 markdown += f"{text}\n\n"
 
-        return f"Partition file {input_file_path} to string: \n{markdown}"
-    else:
-        json_elements_as_str = json.dumps(response, indent=2)
+        output_file = output_dir_path / Path(input_file_path).with_suffix(".md").name
+        output_file.write_text(markdown)
 
-        output_dir_path = Path(output_file_dir)
-        output_dir_path.mkdir(parents=True, exist_ok=True)
-        output_file = output_dir_path / Path(input_file_path).with_suffix(".json").name
-
-        output_file.write_text(json_elements_as_str)
-
-        return f"Partition file {input_file_path} to {str(output_file)} successfully"
+    return f"Partition file {input_file_path} to {str(output_file)} successfully"
