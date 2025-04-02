@@ -33,7 +33,7 @@ async def partition_local_file(
     strategy: Strategy = Strategy.VLM,
     vlm_model: VLMModel = VLMModel.CLAUDE_3_5_SONNET_20241022,
     vlm_model_provider: VLMModelProvider = VLMModelProvider.ANTHROPIC,
-    output_type: Literal["json", "markdown"] = "json",
+    output_type: Literal["json", "md"] = "json",
 ) -> str:
     """
     Transform a local file into structured data using the Unstructured API.
@@ -49,7 +49,8 @@ async def partition_local_file(
                 auto - automatically choose the best strategy based on the input file
         vlm_model: The VLM model to use for the transformation.
         vlm_model_provider: The VLM model provider to use for the transformation.
-        output_type: The type of output to generate. Options: 'json' or 'markdown'.
+        output_type: The type of output to generate. Options: 'json' for json
+                     or 'md' for markdown.
 
     Returns:
         A string containing the structured data or a message indicating the output file
