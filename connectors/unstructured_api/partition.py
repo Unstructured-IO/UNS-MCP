@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import unstructured_client
 from unstructured_client.models.operations import PartitionRequest
@@ -36,32 +36,38 @@ async def partition_local_file(
     output_type: Literal["json", "markdown"] = "json",
 ) -> str:
     """
-    Transform a local file into structured data using the Unstructured API
+    Transform a local file into structured data using the Unstructured API.
 
     Args:
-        input_file_path: The absolute path to the file
-        output_file_dir: The absolute path to the directory where output file should be saved.
-        strategy:
+        input_file_path: The absolute path to the file.
+        output_file_dir: The absolute path to the directory where the output file should be saved.
+        strategy: The strategy for transformation.
             Available strategies:
                 VLM - most advanced transformation suitable for difficult PDFs and Images
                 hi_res - high resolution transformation suitable for most document types
                 fast - fast transformation suitable for PDFs with extractable text
                 auto - automatically choose the best strategy based on the input file
-        vlm_model: The VLM model to use for the transformation
-        vlm_model_provider: The VLM model provider to use for the transformation
-        output_type: The type of output to generate. Can be 'json' or 'markdown'.
+        vlm_model: The VLM model to use for the transformation.
+        vlm_model_provider: The VLM model provider to use for the transformation.
+        output_type: The type of output to generate. Options: 'json' or 'markdown'.
 
     Returns:
-        A string containing the structured data or a message indicating the output
-        file path with the structured data
-
+        A string containing the structured data or a message indicating the output file
+        path with the structured data.
     """
+
+    input_path = Path(input_file_path)
+    output_dir_path = Path(output_file_dir)
+
+    if output_type not in ["json", "markdown"]:
+        return f"Invalid output type '{output_type}'. Must be 'json' or 'markdown'."
+
     try:
-        with open(input_file_path, "rb") as content:
+        with input_path.open("rb") as content:
             partition_params = PartitionParameters(
                 files=Files(
                     content=content,
-                    file_name=os.path.basename(input_file_path),
+                    file_name=input_path.name,
                 ),
                 strategy=strategy,
                 vlm_model=vlm_model,
@@ -69,32 +75,45 @@ async def partition_local_file(
             )
             response = await call_api(partition_params)
     except Exception as e:
-        return str(e)
+        return f"Failed to partition file: {e}"
 
-    output_dir_path = Path(output_file_dir)
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
-    if output_type not in ["json", "markdown"]:
-        return "Output type must be either 'json' or 'markdown'."
-    elif output_type == "json":
+    output_file = output_dir_path / input_path.with_suffix(f".{output_type}").name
+
+    if output_type == "json":
         json_elements_as_str = json.dumps(response, indent=2)
-        output_file = output_dir_path / Path(input_file_path).with_suffix(".json").name
-        output_file.write_text(json_elements_as_str)
+        output_file.write_text(json_elements_as_str, encoding="utf-8")
     else:
-        markdown = f"# {Path(input_file_path).name}\n\n"
+        markdown = construct_markdown(response, input_path.name)
+        output_file.write_text(markdown, encoding="utf-8")
 
-        for element in response:
-            if element.get("type") == "Table":
-                text_as_html = element.get("metadata", {}).get("text_as_html", "<></>")
-                markdown += f"{text_as_html}\n\n"
-            elif element.get("type") == "Header":
-                text = element.get("text", "")
-                markdown += f"## {text}\n\n"
-            else:
-                text = element.get("text", "")
-                markdown += f"{text}\n\n"
+    return f"Partitioned file {input_file_path} to {output_file} successfully."
 
-        output_file = output_dir_path / Path(input_file_path).with_suffix(".md").name
-        output_file.write_text(markdown)
 
-    return f"Partition file {input_file_path} to {str(output_file)} successfully"
+def construct_markdown(elements_list: list[dict[str, Any]], file_name: str) -> str:
+    """
+    Constructs a markdown representation from the response data.
+
+    Args:
+        elements_list: The response data from the API call as a list of elements.
+        file_name: The name of the input file.
+
+    Returns:
+        A markdown string.
+    """
+    markdown = f"# {file_name}\n\n"
+
+    for element in elements_list:
+        element_type = element.get("type", "")
+        text = element.get("text", "")
+
+        if element_type == "Table":
+            text_as_html = element.get("metadata", {}).get("text_as_html", "<></>")
+            markdown += f"{text_as_html}\n\n"
+        elif element_type == "Header":
+            markdown += f"## {text}\n\n"
+        else:
+            markdown += f"{text}\n\n"
+
+    return markdown
