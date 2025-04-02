@@ -159,7 +159,7 @@ You can now run the server using one of the following methods:
 
 <details>
 <summary>
-#### Using Editable Package Installation
+**Using Editable Package Installation**
 </summary>
 Install as an editable package:
 ```bash
@@ -183,7 +183,7 @@ Update your Claude Desktop config:
 
 <details>
 <summary>
-#### Using SSE Server Protocol
+**Using SSE Server Protocol**
 </summary>
 
 **Note: Not supported by Claude Desktop.**
@@ -207,7 +207,7 @@ For SSE protocol, you can debug more easily by decoupling the client and server:
 
 <details>
 <summary>
-#### Using Stdio Server Protocol
+**Using Stdio Server Protocol**
 </summary>
 
 Configure Claude Desktop to use stdio:
