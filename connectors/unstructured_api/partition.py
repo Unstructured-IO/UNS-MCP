@@ -60,8 +60,8 @@ async def partition_local_file(
     input_path = Path(input_file_path)
     output_dir_path = Path(output_file_dir)
 
-    if output_type not in ["json", "markdown"]:
-        return f"Invalid output type '{output_type}'. Must be 'json' or 'markdown'."
+    if output_type not in ["json", "md"]:
+        return f"Invalid output type '{output_type}'. Must be 'json' or 'md'."
 
     try:
         with input_path.open("rb") as content:
