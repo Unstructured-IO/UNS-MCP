@@ -14,6 +14,8 @@
 
 - Capability to only log request parameters to UnstructuredClient's AsyncHttpClient, no error response is logged by this mechanism.
 
+- Adds terminal access to the minimal client using DesktopCommanderMCP
+
 ### Fixes
 
 - avoid client startup error if env not defined
