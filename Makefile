@@ -6,6 +6,11 @@ debug:
 sse-client:
 	uv run python minimal_client/client.py "http://127.0.0.1:8080/sse"
 
+
+.PHONY: sse-client-terminal
+sse-client:
+	uv run python minimal_client/client.py "http://127.0.0.1:8080/sse" "@wonderwhy-er/desktop-commander"
+
 .PHONY: sse-server
 sse-server:
 	uv run python uns_mcp/server.py --host 127.0.0.1 --port 8080

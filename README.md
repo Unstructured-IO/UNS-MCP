@@ -181,6 +181,22 @@ make sse-client
 
 Hint: `ctrl+c` out of the client first, then the server. Otherwise the server appears to hang.
 
+## Add terminal access to minimal client
+We are going to use [@wonderwhy-er/desktop-commander](https://github.com/wonderwhy-er/DesktopCommanderMCP) to add terminal access to the minimal client. It is built on the MCP Filesystem Server. Be careful, as the client (also LLM) now **has access to private files.**
+
+Execute the following command to install the package:
+```bash
+npx @wonderwhy-er/desktop-commander setup
+```
+
+Then start client with extra parameter:
+
+```bash
+uv run python minimal_client/client.py "http://127.0.0.1:8080/sse" "@wonderwhy-er/desktop-commander"
+# or
+make sse-client-terminal
+```
+
 ## CHANGELOG.md
 
 Any new developed features/fixes/enhancements will be added to CHANGELOG.md. 0.x.x-dev pre-release format is preferred before we bump to a stable version.
