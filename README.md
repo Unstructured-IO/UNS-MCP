@@ -51,6 +51,20 @@ uv run uns_mcp/server.py
 | `get_job_info` | Get detailed information about a specific job by job id. |
 | `cancel_job` |Delete a specific job by id. |
 
+Below is a list of connectors the `UNS-MCP` server currently supports, please see the full list of source connectors that Unstructured platform supports [here](https://docs.unstructured.io/api-reference/workflow/sources/overview) and destination list [here](https://docs.unstructured.io/api-reference/workflow/destinations/overview). We are planning on adding more!
+
+| Source | Destination |
+|------|-------------|
+| S3 | S3 |
+| Azure | Weaviate |
+| Google Drive | Pinecone |
+| OneDrive | AstraDB |
+| Salesforce | MongoDB |
+| Sharepoint | Neo4j|
+| | Databricks Volumes|
+|  | Databricks Volumes Delta Table |
+
+
 To use the tool that creates/updates/deletes a connector, the credentials for that specific connector must be defined in your .env file. Below is the list of `credentials` for the connectors we support:
 
 | Credential Name | Description |
