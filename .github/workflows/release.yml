@@ -9,6 +9,44 @@ env:
   PYTHONVERSION: "3.12"
 
 jobs:
+  check-version:
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install toml
+
+      - name: Get version from main
+        id: get-main-version
+        run: |
+          git checkout main
+          MAIN_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          echo "::set-output name=MAIN_VERSION::$MAIN_VERSION"
+
+      - name: Compare versions
+        id: compare-versions
+        run: |
+          CUR_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          MAIN_VERSION="${{ steps.get-main-version.outputs.MAIN_VERSION }}"
+
+          echo "Current version in pyproject.toml: $CUR_VERSION"
+          echo "Version on main branch: $MAIN_VERSION"
+
+          if [ "$CUR_VERSION" == "$MAIN_VERSION" ]; then
+            echo "The version hasn't changed. Skipping release."
+            exit 0
+          fi
+
   release:
     runs-on: ubuntu-latest
     steps:
