@@ -90,7 +90,7 @@ How Firecrawl works:
 
 Note: A `FIRECRAWL_API_KEY` environment variable must be set to use these functions.
 
-## Installation && Configuration
+## Installation & Configuration
 
 This guide provides step-by-step instructions to set up and configure the UNS_MCP server using Python 3.12 and the `uv` tool.
 
@@ -98,7 +98,7 @@ This guide provides step-by-step instructions to set up and configure the UNS_MC
 - Python 3.12+
 - `uv` for environment management
 - An API key from Unstructured. You can sign up and obtain your API key [here](https://platform.unstructured.io/app/account/api-keys).
--
+
 ### Using `uv` (Recommended)
 
 No additional installation is required when using `uvx` as it handles execution. However, if you prefer to install the package directly:
@@ -108,6 +108,7 @@ uv pip install uns_mcp
 
 #### Configure Claude Desktop
 For integration with Claude Desktop, add the following content to your `claude_desktop_config.json`:
+
 **Note:** The file is located in the `~/Library/Application Support/Claude/` directory.
 
 **Using `uvx` Command:**
@@ -149,14 +150,17 @@ For integration with Claude Desktop, add the following content to your `claude_d
     ```
 
 3. Set your Unstructured API key as an environment variable. Create a .env file in the root directory with the following content:
-```bash
-UNSTRUCTURED_API_KEY="YOUR_KEY"
-```
-Refer to `.env.template` for the configurable environment variables.
+    ````bash
+    UNSTRUCTURED_API_KEY="YOUR_KEY"
+    ````
+    Refer to `.env.template` for the configurable environment variables.
 
 You can now run the server using one of the following methods:
 
+<details>
+<summary>
 #### Using Editable Package Installation
+</summary>
 Install as an editable package:
 ```bash
 uvx pip install -e .
@@ -175,7 +179,13 @@ Update your Claude Desktop config:
 ```
 **Note**: Remember to point to the uvx executable in environment where you installed the package
 
+</details>
+
+<details>
+<summary>
 #### Using SSE Server Protocol
+</summary>
+
 **Note: Not supported by Claude Desktop.**
 For SSE protocol, you can debug more easily by decoupling the client and server:
 
@@ -193,8 +203,13 @@ For SSE protocol, you can debug more easily by decoupling the client and server:
    make sse-client
    ```
 **Note:** To stop the services, use `Ctrl+C` on the client first, then the server.
+</details>
 
+<details>
+<summary>
 #### Using Stdio Server Protocol
+</summary>
+
 Configure Claude Desktop to use stdio:
 ```json
 {
@@ -215,6 +230,7 @@ Alternatively, run the local client:
 ```bash
 uv run python minimal_client/client.py uns_mcp/server.py
 ```
+</details>
 
 ## Additional Local Client Configuration
 Configure the minimal client using environmental variables:
