@@ -1,11 +1,10 @@
 import os
-from typing import Optional, List
+from typing import List, Optional
 
 from mcp.server.fastmcp import Context
 from unstructured_client import UNSET, OptionalNullable
 from unstructured_client.models.operations import (
     CreateSourceRequest,
-    DeleteSourceRequest,
     GetSourceRequest,
     UpdateSourceRequest,
 )
@@ -15,9 +14,7 @@ from unstructured_client.models.shared import (
     UpdateSourceConnector,
 )
 
-from connectors.utils import (
-    create_log_for_created_updated_connector,
-)
+from connectors.utils import create_log_for_created_updated_connector
 
 
 def _prepare_gdrive_source_config(
@@ -128,23 +125,3 @@ async def update_gdrive_source(
         return result
     except Exception as e:
         return f"Error updating gdrive source connector: {str(e)}"
-
-
-async def delete_gdrive_source(ctx: Context, source_id: str) -> str:
-    """Delete an gdrive source connector.
-
-    Args:
-        source_id: ID of the source connector to delete
-
-    Returns:
-        String containing the result of the deletion
-    """
-    client = ctx.request_context.lifespan_context.client
-
-    try:
-        _ = await client.sources.delete_source_async(
-            request=DeleteSourceRequest(source_id=source_id),
-        )
-        return f"gdrive Source Connector with ID {source_id} deleted successfully"
-    except Exception as e:
-        return f"Error deleting gdrive source connector: {str(e)}"

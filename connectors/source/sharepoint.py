@@ -4,7 +4,6 @@ from typing import Optional
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
     CreateSourceRequest,
-    DeleteSourceRequest,
     GetSourceRequest,
     UpdateSourceRequest,
 )
@@ -14,9 +13,7 @@ from unstructured_client.models.shared import (
     UpdateSourceConnector,
 )
 
-from connectors.utils import (
-    create_log_for_created_updated_connector,
-)
+from connectors.utils import create_log_for_created_updated_connector
 
 
 def _prepare_sharepoint_source_config(
@@ -64,9 +61,7 @@ async def create_sharepoint_source(
         String containing the created source connector information
     """
     client = ctx.request_context.lifespan_context.client
-    config = _prepare_sharepoint_source_config(
-        site, user_pname, path, recursive, authority_url
-    )
+    config = _prepare_sharepoint_source_config(site, user_pname, path, recursive, authority_url)
     source_connector = CreateSourceConnector(name=name, type="sharepoint", config=config)
 
     try:
@@ -149,23 +144,3 @@ async def update_sharepoint_source(
         return result
     except Exception as e:
         return f"Error updating SharePoint source connector: {str(e)}"
-
-
-async def delete_sharepoint_source(ctx: Context, source_id: str) -> str:
-    """Delete a SharePoint source connector.
-
-    Args:
-        source_id: ID of the source connector to delete
-
-    Returns:
-        String containing the result of the deletion
-    """
-    client = ctx.request_context.lifespan_context.client
-
-    try:
-        _ = await client.sources.delete_source_async(
-            request=DeleteSourceRequest(source_id=source_id),
-        )
-        return f"SharePoint Source Connector with ID {source_id} deleted successfully"
-    except Exception as e:
-        return f"Error deleting SharePoint source connector: {str(e)}"
