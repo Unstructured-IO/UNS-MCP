@@ -173,7 +173,7 @@ async def update_destination_connector(
             neo4j:
                 database: (Optional[str]): The Neo4j database, e.g. "neo4j"
                 uri: (Optional[str]): The Neo4j URI
-                                      e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
+                      e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
                 batch_size: (Optional[int]) The batch size for the connector
             pinecone:
                 index_name: (Optional[str]): The Pinecone index name
