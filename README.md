@@ -211,6 +211,13 @@ uv run python minimal_client/client.py "http://127.0.0.1:8080/sse" "@wonderwhy-e
 make sse-client-terminal
 ```
 
+## Using subset of tools
+If your client supports using only subset of tools here are the list of things you should be aware:
+- `update_workflow` tool has to be loaded in the context together with `create_workflow` tool, because it contains detailed description on how to create and configure custom node.
+
+## Known issues
+- `update_workflow` - needs to have in context the configuration of the workflow it is updating either by providing it by the user or by calling `get_workflow_info` tool, as this tool doesn't work as `patch` applier, it fully replaces the workflow config.
+
 ## CHANGELOG.md
 
 Any new developed features/fixes/enhancements will be added to CHANGELOG.md. 0.x.x-dev pre-release format is preferred before we bump to a stable version.
