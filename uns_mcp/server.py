@@ -68,14 +68,20 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     if not api_key:
         raise ValueError("UNSTRUCTURED_API_KEY environment variable is required")
 
-    DEBUG_API_REQUESTS = os.environ.get("DEBUG_API_REQUESTS", "False").lower() == "true" #get env variable
+    DEBUG_API_REQUESTS = (
+        os.environ.get("DEBUG_API_REQUESTS", "False").lower() == "true"
+    )  # get env variable
     if DEBUG_API_REQUESTS:
-        from custom_http_client import CustomHttpClient
         import httpx
-        client = UnstructuredClient(api_key_auth=api_key, async_client=CustomHttpClient(httpx.AsyncClient()))
+        from custom_http_client import CustomHttpClient
+
+        client = UnstructuredClient(
+            api_key_auth=api_key,
+            async_client=CustomHttpClient(httpx.AsyncClient()),
+        )
     else:
         client = UnstructuredClient(api_key_auth=api_key)
-    
+
     try:
         yield AppContext(client=client)
     finally:
@@ -368,8 +374,6 @@ async def run_workflow(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
-@add_custom_node_examples  # Note: This documentation is added due to lack of typing in
-# WorkflowNode.settings. It can be safely deleted when typing is added.
 async def update_workflow(
     ctx: Context,
     workflow_id: str,
