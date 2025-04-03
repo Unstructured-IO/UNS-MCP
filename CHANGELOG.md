@@ -1,3 +1,12 @@
+## 0.1.3
+
+### Enhancements
+
+- **Tools unification** - Source and destination connectors are now unified into a generic `create/update_source/destination_connector` tools.
+
+### Fixes
+
+
 ## 0.1.2-dev
 
 ### Enhancements

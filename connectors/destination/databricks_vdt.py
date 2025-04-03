@@ -132,14 +132,15 @@ async def update_databricks_delta_table_destination(
 
     Args:
         destination_id: ID of the destination connector to update
+        catalog: Name of the catalog in the Databricks Unity Catalog service for the workspace.
         database: The name of the schema (formerly known as a database)
         in Unity Catalog for the target table
         http_path: The cluster’s or SQL warehouse’s HTTP Path value
         server_hostname: The Databricks cluster’s or SQL warehouse’s Server Hostname value
-        volume_path: Any target folder path within the volume to update,
-        starting from the root of the volume.
-
-
+        table_name: The name of the table in the schema
+        volume: Name of the volume associated with the schema.
+        schema: Name of the schema associated with the volume. The default value is "default".
+        volume_path: Any target folder path within the volume, starting from the root of the volume.
 
     Returns:
         String containing the updated destination connector information

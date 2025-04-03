@@ -116,8 +116,6 @@ async def update_databricks_volumes_destination(
         volume_path: Any target folder path within the volume to update,
         starting from the root of the volume.
 
-
-
     Returns:
         String containing the updated destination connector information
     """

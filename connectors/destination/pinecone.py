@@ -53,7 +53,6 @@ async def create_pinecone_destination(
         namespace: The pinecone namespace, a folder inside the pinecone index
         batch_size: The batch size refers to the number of vectors you upsert or delete
 
-
     Returns:
         String containing the created destination connector information
     """
