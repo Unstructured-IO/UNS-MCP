@@ -1,5 +1,6 @@
 from typing import Any
 
+from mcp.server.fastmcp import Context
 from typing_extensions import Literal
 
 from connectors.destination.astra import (
@@ -35,7 +36,7 @@ from connectors.destination.weaviate import (
 
 # Function to create a destination connector
 async def create_destination_connector(
-    ctx: Any,
+    ctx: Context,
     name: str,
     destination_type: Literal[
         "astradb",
@@ -60,33 +61,37 @@ async def create_destination_connector(
             astradb:
                 collection_name: The AstraDB collection name
                 keyspace: The AstraDB keyspace
-                batch_size: (Optional) The batch size for inserting documents
+                batch_size: (Optional[int]) The batch size for inserting documents
             databricks_delta_table:
                 catalog: Name of the catalog in Databricks Unity Catalog
                 database: The database in Unity Catalog
-                http_path: The HTTP Path value
-                server_hostname: The server hostname value
-                table_name: The name of the table
-                volume: Name of the volume
-                schema: (Optional) Name of the schema associated with the volume
-                volume_path: (Optional) Target folder path within the volume
+                http_path: The cluster’s or SQL warehouse’s HTTP Path value
+                server_hostname: The Databricks cluster’s or SQL warehouse’s Server Hostname value
+                table_name: The name of the table in the schema
+                volume: Name of the volume associated with the schema.
+                schema: (Optional[str]) Name of the schema associated with the volume
+                volume_path: (Optional[str]) Any target folder path within the volume, starting
+                            from the root of the volume.
             databricks_volumes:
                 catalog: Name of the catalog in Databricks
-                volume: Name of the volume
                 host: The Databricks host URL
-                schema: (Optional) The schema name
-                volume_path: (Optional) The folder path within the volume
+                volume: Name of the volume associated with the schema
+                schema: (Optional[str]) Name of the schema associated with the volume. The default
+                         value is "default".
+                volume_path: (Optional[str]) Any target folder path within the volume,
+                            starting from the root of the volume.
             mongodb:
                 database: The name of the MongoDB database
                 collection: The name of the MongoDB collection
             neo4j:
-                database: The Neo4j database
-                uri: The Neo4j URI
-                batch_size: (Optional) The batch size for the connector
+                database: The Neo4j database, e.g. "neo4j"
+                uri: The Neo4j URI e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
+                batch_size: (Optional[int]) The batch size for the connector
             pinecone:
                 index_name: The Pinecone index name
-                namespace: (Optional) The Pinecone namespace
-                batch_size: (Optional) The batch size
+                namespace: (Optional[str]) The pinecone namespace, a folder inside the
+                           pinecone index
+                batch_size: (Optional[int]) The batch size
             s3:
                 remote_url: The S3 URI to the bucket or folder
             weaviate:
@@ -129,7 +134,7 @@ async def create_destination_connector(
 
 # Function to update a destination connector
 async def update_destination_connector(
-    ctx: Any,
+    ctx: Context,
     destination_id: str,
     destination_type: Literal[
         "astradb",
@@ -152,40 +157,46 @@ async def update_destination_connector(
 
         type_specific_config:
             astradb:
-                collection_name: (Optional) The collection name
-                keyspace: (Optional) The keyspace
-                batch_size: (Optional) The batch size
+                collection_name: (Optional[str]): The AstraDB collection name
+                keyspace: (Optional[str]): The AstraDB keyspace
+                batch_size: (Optional[int]) The batch size for inserting documents
             databricks_delta_table:
-                catalog: (Optional) Name of the catalog
-                database: (Optional) The database in Unity Catalog
-                http_path: (Optional) The HTTP Path value
-                server_hostname: (Optional) The server hostname value
-                table_name: (Optional) The name of the table
-                schema: (Optional) The schema name
-                volume: (Optional) Name of the volume
-                volume_path: (Optional) The folder path within the volume
+                catalog: (Optional[str]): Name of the catalog in Databricks Unity Catalog
+                database: (Optional[str]): The database in Unity Catalog
+                http_path: (Optional[str]): The cluster’s or SQL warehouse’s HTTP Path value
+                server_hostname: (Optional[str]): The Databricks cluster’s or SQL warehouse’s
+                                 Server Hostname value
+                table_name: (Optional[str]): The name of the table in the schema
+                volume: (Optional[str]): Name of the volume associated with the schema.
+                schema: (Optional[str]) Name of the schema associated with the volume
+                volume_path: (Optional[str]) Any target folder path within the volume, starting
+                            from the root of the volume.
             databricks_volumes:
-                catalog: (Optional) Name of the catalog
-                volume: (Optional) Name of the volume
-                host: (Optional) The host URL
-                schema: (Optional) The schema name
-                volume_path: (Optional) The path within the volume
+                catalog: (Optional[str]): Name of the catalog in Databricks
+                host: (Optional[str]): The Databricks host URL
+                volume: (Optional[str]): Name of the volume associated with the schema
+                schema: (Optional[str]) Name of the schema associated with the volume. The default
+                         value is "default".
+                volume_path: (Optional[str]) Any target folder path within the volume,
+                            starting from the root of the volume.
             mongodb:
-                database: (Optional) The database name
-                collection: (Optional) The collection name
+                database: (Optional[str]): The name of the MongoDB database
+                collection: (Optional[str]): The name of the MongoDB collection
             neo4j:
-                database: (Optional) The database name
-                uri: (Optional) The URI
-                batch_size: (Optional) The batch size
+                database: (Optional[str]): The Neo4j database, e.g. "neo4j"
+                uri: (Optional[str]): The Neo4j URI
+                                      e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
+                batch_size: (Optional[int]) The batch size for the connector
             pinecone:
-                index_name: (Optional) The index name
-                namespace: (Optional) The namespace
-                batch_size: (Optional) The batch size
+                index_name: (Optional[str]): The Pinecone index name
+                namespace: (Optional[str]) The pinecone namespace, a folder inside the
+                           pinecone index
+                batch_size: (Optional[int]) The batch size
             s3:
-                remote_url: (Optional) The S3 URL
+                remote_url: (Optional[str]): The S3 URI to the bucket or folder
             weaviate:
-                cluster_url: (Optional) The cluster URL
-                collection: (Optional) The collection name
+                cluster_url: (Optional[str]): URL of the Weaviate cluster
+                collection: (Optional[str]): Name of the collection in the Weaviate cluster
 
     Returns:
         String containing the updated destination connector information

@@ -1,5 +1,6 @@
 from typing import Any
 
+from mcp.server.fastmcp import Context
 from typing_extensions import Literal
 
 from connectors.source.azure import create_azure_source, update_azure_source
@@ -17,7 +18,7 @@ from connectors.source.sharepoint import (
 
 
 async def create_source_connector(
-    ctx: Any,
+    ctx: Context,
     name: str,
     source_type: Literal["azure", "onedrive", "salesforce", "gdrive", "s3", "sharepoint"],
     type_specific_config: dict[str, Any],
@@ -32,41 +33,47 @@ async def create_source_connector(
 
         type_specific_config:
             azure:
-                remote_url: The Azure Storage remote URL
+                remote_url: The Azure Storage remote URL with the format
+                            az://<container-name>/<path/to/file/or/folder/in/container/as/needed>
+                recursive: (Optional[bool]) Whether to access subfolders
+            gdrive:
+                drive_id: The Drive ID for the Google Drive source
+                recursive: (Optional[bool]) Whether to access subfolders
+                extensions: (Optional[list[str]]) File extensions to filter
             onedrive:
                 path: The path to the target folder in the OneDrive account
                 user_pname: The User Principal Name (UPN) for the OneDrive user account
-                authority_url: (Optional) The authentication token provider URL
+                recursive: (Optional[bool]) Whether to access subfolders
+                authority_url: (Optional[str]) The authentication token provider URL
+            s3:
+                remote_url: The S3 URI to the bucket or folder (e.g., s3://my-bucket/)
+                recursive: (Optional[bool]) Whether to access subfolders
             salesforce:
                 username: The Salesforce username
-                categories: (Optional) Salesforce domain
-            gdrive:
-                drive_id: The Drive ID for the Google Drive source
-                recursive: (Optional) Whether to access subfolders
-                extensions: (Optional) File extensions to filter
-            s3:
-                remote_url: The S3 URI to the bucket or folder
-                recursive: (Optional) Whether to access subfolders
+                categories: (Optional[list[str]]) Optional Salesforce domain,the names of the
+                            Salesforce categories (objects) that you want to access, specified as
+                            a comma-separated list. Available categories include Account, Campaign,
+                            Case, EmailMessage, and Lead.
             sharepoint:
                 site: The SharePoint site to connect to
                 user_pname: The username for the SharePoint site
                 path: (Optional) The path within the SharePoint site
-                recursive: (Optional) Whether to access subfolders
-                authority_url: (Optional) The authority URL for authentication
+                recursive: (Optional[bool]) Whether to access subfolders
+                authority_url: (Optional[str]) The authority URL for authentication
 
     Returns:
         String containing the created source connector information
     """
     if source_type == "azure":
         return await create_azure_source(ctx=ctx, name=name, **type_specific_config)
-    elif source_type == "onedrive":
-        return await create_onedrive_source(ctx=ctx, name=name, **type_specific_config)
-    elif source_type == "salesforce":
-        return await create_salesforce_source(ctx=ctx, name=name, **type_specific_config)
     elif source_type == "gdrive":
         return await create_gdrive_source(ctx=ctx, name=name, **type_specific_config)
+    elif source_type == "onedrive":
+        return await create_onedrive_source(ctx=ctx, name=name, **type_specific_config)
     elif source_type == "s3":
         return await create_s3_source(ctx=ctx, name=name, **type_specific_config)
+    elif source_type == "salesforce":
+        return await create_salesforce_source(ctx=ctx, name=name, **type_specific_config)
     elif source_type == "sharepoint":
         return await create_sharepoint_source(ctx=ctx, name=name, **type_specific_config)
     else:
@@ -74,7 +81,7 @@ async def create_source_connector(
 
 
 async def update_source_connector(
-    ctx: Any,
+    ctx: Context,
     source_id: str,
     source_type: Literal["azure", "onedrive", "salesforce", "gdrive", "s3", "sharepoint"],
     type_specific_config: dict[str, Any],
@@ -89,44 +96,49 @@ async def update_source_connector(
 
         type_specific_config:
             azure:
-                remote_url: (Optional) The Azure Storage remote URL
-                recursive: (Optional) Whether to access subfolders
-            onedrive:
-                path: (Optional) The path to the target folder in the OneDrive account
-                user_pname: (Optional) The User Principal Name for the OneDrive user account
-                authority_url: (Optional) The authentication token provider URL
-                tenant: (Optional) The directory (tenant) ID of the app registration
-                client_id: (Optional) The client ID for the app registration
-            salesforce:
-                username: (Optional) The Salesforce username
-                categories: (Optional) Salesforce categories
+                remote_url: (Optional[str]) The Azure Storage remote URL with the format
+                            az://<container-name>/<path/to/file/or/folder/in/container/as/needed>
+                recursive: (Optional[bool]) Whether to access subfolders
             gdrive:
-                drive_id: (Optional) The Drive ID for the Google Drive source
-                recursive: (Optional) Whether to access subfolders
-                extensions: (Optional) File extensions to filter
+                drive_id: (Optional[str]) The Drive ID for the Google Drive source
+                recursive: (Optional[bool]) Whether to access subfolders
+                extensions: (Optional[list[str]]) File extensions to filter
+            onedrive:
+                path: (Optional[str]) The path to the target folder in the OneDrive account
+                user_pname: (Optional[str]) The User Principal Name (UPN) for the OneDrive
+                            user account
+                recursive: (Optional[bool]) Whether to access subfolders
+                authority_url: (Optional[str]) The authentication token provider URL
             s3:
-                remote_url: (Optional) The S3 URI to the bucket or folder
-                recursive: (Optional) Whether to access subfolders
+                remote_url: (Optional[str]) The S3 URI to the bucket or folder
+                            (e.g., s3://my-bucket/)
+                recursive: (Optional[bool]) Whether to access subfolders
+            salesforce:
+                username: (Optional[str]) The Salesforce username
+                categories: (Optional[list[str]]) Optional Salesforce domain,the names of the
+                            Salesforce categories (objects) that you want to access, specified as
+                            a comma-separated list. Available categories include Account, Campaign,
+                            Case, EmailMessage, and Lead.
             sharepoint:
-                site: (Optional) The SharePoint site to connect to
-                user_pname: (Optional) The username for the SharePoint site
+                site: Optional([str]) The SharePoint site to connect to
+                user_pname: Optional([str]) The username for the SharePoint site
                 path: (Optional) The path within the SharePoint site
-                recursive: (Optional) Whether to access subfolders
-                authority_url: (Optional) The authority URL for authentication
+                recursive: (Optional[bool]) Whether to access subfolders
+                authority_url: (Optional[str]) The authority URL for authentication
 
     Returns:
         String containing the updated source connector information
     """
     if source_type == "azure":
         return await update_azure_source(ctx=ctx, source_id=source_id, **type_specific_config)
-    elif source_type == "onedrive":
-        return await update_onedrive_source(ctx=ctx, source_id=source_id, **type_specific_config)
-    elif source_type == "salesforce":
-        return await update_salesforce_source(ctx=ctx, source_id=source_id, **type_specific_config)
     elif source_type == "gdrive":
         return await update_gdrive_source(ctx=ctx, source_id=source_id, **type_specific_config)
+    elif source_type == "onedrive":
+        return await update_onedrive_source(ctx=ctx, source_id=source_id, **type_specific_config)
     elif source_type == "s3":
         return await update_s3_source(ctx=ctx, source_id=source_id, **type_specific_config)
+    elif source_type == "salesforce":
+        return await update_salesforce_source(ctx=ctx, source_id=source_id, **type_specific_config)
     elif source_type == "sharepoint":
         return await update_sharepoint_source(ctx=ctx, source_id=source_id, **type_specific_config)
     else:
