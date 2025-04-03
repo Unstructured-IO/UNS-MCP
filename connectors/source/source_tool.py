@@ -64,20 +64,23 @@ async def create_source_connector(
     Returns:
         String containing the created source connector information
     """
-    if source_type == "azure":
-        return await create_azure_source(ctx=ctx, name=name, **type_specific_config)
-    elif source_type == "gdrive":
-        return await create_gdrive_source(ctx=ctx, name=name, **type_specific_config)
-    elif source_type == "onedrive":
-        return await create_onedrive_source(ctx=ctx, name=name, **type_specific_config)
-    elif source_type == "s3":
-        return await create_s3_source(ctx=ctx, name=name, **type_specific_config)
-    elif source_type == "salesforce":
-        return await create_salesforce_source(ctx=ctx, name=name, **type_specific_config)
-    elif source_type == "sharepoint":
-        return await create_sharepoint_source(ctx=ctx, name=name, **type_specific_config)
-    else:
-        return f"Unsupported source type: {source_type}. Please use a supported source type."
+    source_functions = {
+        "azure": create_azure_source,
+        "gdrive": create_gdrive_source,
+        "onedrive": create_onedrive_source,
+        "s3": create_s3_source,
+        "salesforce": create_salesforce_source,
+        "sharepoint": create_sharepoint_source,
+    }
+
+    if source_type in source_functions:
+        source_function = source_functions[source_type]
+        return await source_function(ctx=ctx, name=name, **type_specific_config)
+
+    return (
+        f"Unsupported source type: {source_type}. "
+        f"Please use a supported source type: {list(source_functions.keys())}."
+    )
 
 
 async def update_source_connector(
@@ -129,17 +132,21 @@ async def update_source_connector(
     Returns:
         String containing the updated source connector information
     """
-    if source_type == "azure":
-        return await update_azure_source(ctx=ctx, source_id=source_id, **type_specific_config)
-    elif source_type == "gdrive":
-        return await update_gdrive_source(ctx=ctx, source_id=source_id, **type_specific_config)
-    elif source_type == "onedrive":
-        return await update_onedrive_source(ctx=ctx, source_id=source_id, **type_specific_config)
-    elif source_type == "s3":
-        return await update_s3_source(ctx=ctx, source_id=source_id, **type_specific_config)
-    elif source_type == "salesforce":
-        return await update_salesforce_source(ctx=ctx, source_id=source_id, **type_specific_config)
-    elif source_type == "sharepoint":
-        return await update_sharepoint_source(ctx=ctx, source_id=source_id, **type_specific_config)
-    else:
-        return f"Unsupported source type: {source_type}. Please use a supported source type."
+
+    update_functions = {
+        "azure": update_azure_source,
+        "gdrive": update_gdrive_source,
+        "onedrive": update_onedrive_source,
+        "s3": update_s3_source,
+        "salesforce": update_salesforce_source,
+        "sharepoint": update_sharepoint_source,
+    }
+
+    if source_type in update_functions:
+        update_function = update_functions[source_type]
+        return await update_function(ctx=ctx, source_id=source_id, **type_specific_config)
+
+    return (
+        f"Unsupported source type: {source_type}. "
+        f"Please use a supported source type: {list(update_functions.keys())}."
+    )

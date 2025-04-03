@@ -100,35 +100,25 @@ async def create_destination_connector(
     Returns:
         String containing the created destination connector information
     """
-    if destination_type == "astradb":
-        return await create_astradb_destination(ctx=ctx, name=name, **type_specific_config)
-    elif destination_type == "databricks_delta_table":
-        return await create_databricks_delta_table_destination(
-            ctx=ctx,
-            name=name,
-            **type_specific_config,
-        )
-    elif destination_type == "databricks_volumes":
-        return await create_databricks_volumes_destination(
-            ctx=ctx,
-            name=name,
-            **type_specific_config,
-        )
-    elif destination_type == "mongodb":
-        return await create_mongodb_destination(ctx=ctx, name=name, **type_specific_config)
-    elif destination_type == "neo4j":
-        return await create_neo4j_destination(ctx=ctx, name=name, **type_specific_config)
-    elif destination_type == "pinecone":
-        return await create_pinecone_destination(ctx=ctx, name=name, **type_specific_config)
-    elif destination_type == "s3":
-        return await create_s3_destination(ctx=ctx, name=name, **type_specific_config)
-    elif destination_type == "weaviate":
-        return await create_weaviate_destination(ctx=ctx, name=name, **type_specific_config)
-    else:
-        return (
-            f"Unsupported destination type: {destination_type}. "
-            f"Please use a supported destination type."
-        )
+    destination_functions = {
+        "astradb": create_astradb_destination,
+        "databricks_delta_table": create_databricks_delta_table_destination,
+        "databricks_volumes": create_databricks_volumes_destination,
+        "mongodb": create_mongodb_destination,
+        "neo4j": create_neo4j_destination,
+        "pinecone": create_pinecone_destination,
+        "s3": create_s3_destination,
+        "weaviate": create_weaviate_destination,
+    }
+
+    if destination_type in destination_functions:
+        destination_function = destination_functions[destination_type]
+        return await destination_function(ctx=ctx, name=name, **type_specific_config)
+
+    return (
+        f"Unsupported destination type: {destination_type}. "
+        f"Please use a supported destination type {list(destination_functions.keys())}."
+    )
 
 
 async def update_destination_connector(
@@ -199,56 +189,22 @@ async def update_destination_connector(
     Returns:
         String containing the updated destination connector information
     """
-    if destination_type == "astradb":
-        return await update_astradb_destination(
-            ctx=ctx,
-            destination_id=destination_id,
-            **type_specific_config,
-        )
-    elif destination_type == "databricks_delta_table":
-        return await update_databricks_delta_table_destination(
-            ctx=ctx,
-            destination_id=destination_id,
-            **type_specific_config,
-        )
-    elif destination_type == "databricks_volumes":
-        return await update_databricks_volumes_destination(
-            ctx=ctx,
-            destination_id=destination_id,
-            **type_specific_config,
-        )
-    elif destination_type == "mongodb":
-        return await update_mongodb_destination(
-            ctx=ctx,
-            destination_id=destination_id,
-            **type_specific_config,
-        )
-    elif destination_type == "neo4j":
-        return await update_neo4j_destination(
-            ctx=ctx,
-            destination_id=destination_id,
-            **type_specific_config,
-        )
-    elif destination_type == "pinecone":
-        return await update_pinecone_destination(
-            ctx=ctx,
-            destination_id=destination_id,
-            **type_specific_config,
-        )
-    elif destination_type == "s3":
-        return await update_s3_destination(
-            ctx=ctx,
-            destination_id=destination_id,
-            **type_specific_config,
-        )
-    elif destination_type == "weaviate":
-        return await update_weaviate_destination(
-            ctx=ctx,
-            destination_id=destination_id,
-            **type_specific_config,
-        )
-    else:
-        return (
-            f"Unsupported destination type: {destination_type}. "
-            f"Please use a supported destination type."
-        )
+    update_functions = {
+        "astradb": update_astradb_destination,
+        "databricks_delta_table": update_databricks_delta_table_destination,
+        "databricks_volumes": update_databricks_volumes_destination,
+        "mongodb": update_mongodb_destination,
+        "neo4j": update_neo4j_destination,
+        "pinecone": update_pinecone_destination,
+        "s3": update_s3_destination,
+        "weaviate": update_weaviate_destination,
+    }
+
+    if destination_type in update_functions:
+        update_function = update_functions[destination_type]
+        return await update_function(ctx=ctx, destination_id=destination_id, **type_specific_config)
+
+    return (
+        f"Unsupported destination type: {destination_type}. "
+        f"Please use a supported destination type: {list(update_functions.keys())}."
+    )
