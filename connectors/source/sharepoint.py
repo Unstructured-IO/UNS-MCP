@@ -14,9 +14,7 @@ from unstructured_client.models.shared import (
     UpdateSourceConnector,
 )
 
-from connectors.utils import (
-    create_log_for_created_updated_connector,
-)
+from connectors.utils import create_log_for_created_updated_connector
 
 
 def _prepare_sharepoint_source_config(
@@ -64,9 +62,7 @@ async def create_sharepoint_source(
         String containing the created source connector information
     """
     client = ctx.request_context.lifespan_context.client
-    config = _prepare_sharepoint_source_config(
-        site, user_pname, path, recursive, authority_url
-    )
+    config = _prepare_sharepoint_source_config(site, user_pname, path, recursive, authority_url)
     source_connector = CreateSourceConnector(name=name, type="sharepoint", config=config)
 
     try:
