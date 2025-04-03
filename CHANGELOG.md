@@ -1,4 +1,12 @@
-## 0.1.2-dev
+## 0.1.3-dev
+
+### Enhancements
+
+- Duplicated description of the custom workflow was removed from the tools, freeing up tokens from the LLM.
+
+### Fixes
+
+## 0.1.2
 
 ### Enhancements
 
