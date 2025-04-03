@@ -36,7 +36,9 @@ from unstructured_client.models.shared import (
     JobStatus,
     SourceConnectorType,
     UpdateWorkflow,
+    WorkflowInformation,
     WorkflowState,
+    WorkflowType,
 )
 from unstructured_client.models.shared.createworkflow import CreateWorkflowTypedDict
 
@@ -68,14 +70,20 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     if not api_key:
         raise ValueError("UNSTRUCTURED_API_KEY environment variable is required")
 
-    DEBUG_API_REQUESTS = os.environ.get("DEBUG_API_REQUESTS", "False").lower() == "true" #get env variable
+    DEBUG_API_REQUESTS = (
+        os.environ.get("DEBUG_API_REQUESTS", "False").lower() == "true"
+    )  # get env variable
     if DEBUG_API_REQUESTS:
-        from custom_http_client import CustomHttpClient
         import httpx
-        client = UnstructuredClient(api_key_auth=api_key, async_client=CustomHttpClient(httpx.AsyncClient()))
+        from custom_http_client import CustomHttpClient
+
+        client = UnstructuredClient(
+            api_key_auth=api_key,
+            async_client=CustomHttpClient(httpx.AsyncClient()),
+        )
     else:
         client = UnstructuredClient(api_key_auth=api_key)
-    
+
     try:
         yield AppContext(client=client)
     finally:
@@ -283,25 +291,35 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
         request=GetWorkflowRequest(workflow_id=workflow_id),
     )
 
-    info = response.workflow_information
+    info: WorkflowInformation = response.workflow_information
 
     result = ["Workflow Information:"]
     result.append(f"Name: {info.name}")
     result.append(f"ID: {info.id}")
-    result.append(f"Status: {info.status}")
-    result.append(f"Type: {info.workflow_type}")
+    result.append(f"Status: {info.status.value}")
+    result.append(f"Type: {info.workflow_type.value}")
 
     result.append("\nSources:")
     for source in info.sources:
         result.append(f"  - {source}")
+
+    if info.workflow_type == WorkflowType.CUSTOM.value:
+        result.append("\nWorkflow Nodes:")
+        for node in info.workflow_nodes:
+            result.append(f"  - {node.name} (Type: {node.type.value}) (Subtype: {node.subtype}):")
+            if node.settings:
+                result.append(f"    Settings: {json.dumps(node.settings, indent=8)}")
 
     result.append("\nDestinations:")
     for destination in info.destinations:
         result.append(f"  - {destination}")
 
     result.append("\nSchedule:")
-    for crontab_entry in info.schedule.crontab_entries:
-        result.append(f"  - {crontab_entry.cron_expression}")
+    if info.schedule.crontab_entries:
+        for crontab_entry in info.schedule.crontab_entries:
+            result.append(f"  - {crontab_entry.cron_expression}")
+    else:
+        result.append("  - No crontab entry")
 
     return "\n".join(result)
 
@@ -368,8 +386,6 @@ async def run_workflow(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
-@add_custom_node_examples  # Note: This documentation is added due to lack of typing in
-# WorkflowNode.settings. It can be safely deleted when typing is added.
 async def update_workflow(
     ctx: Context,
     workflow_id: str,
