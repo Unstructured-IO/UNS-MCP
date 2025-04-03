@@ -34,7 +34,6 @@ from connectors.destination.weaviate import (
 )
 
 
-# Function to create a destination connector
 async def create_destination_connector(
     ctx: Context,
     name: str,
@@ -132,7 +131,6 @@ async def create_destination_connector(
         )
 
 
-# Function to update a destination connector
 async def update_destination_connector(
     ctx: Context,
     destination_id: str,
