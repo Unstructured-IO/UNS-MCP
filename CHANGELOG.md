@@ -1,3 +1,12 @@
+## 0.1.3-dev
+
+### Enhancements
+
+- **Delete Connector Tools Unification**: All delete tools require just the ID of the connector, so they were combined into one tool for sources and one for destinations.
+
+### Fixes
+
+
 ## 0.1.2-dev
 
 ### Enhancements
