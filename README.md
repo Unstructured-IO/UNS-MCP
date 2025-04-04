@@ -115,6 +115,65 @@ How Firecrawl works:
 
 Note: A `FIRECRAWL_API_KEY` environment variable must be set to use these functions.
 
+## VS Code Integration
+
+For one-click installation, click one of the install buttons below:
+
+[![Install with UV in VS Code](https://img.shields.io/badge/VS_Code-UV-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=uns-mcp&config=%7B%22command%22%3A%22uv%22%2C%22args%22%3A%5B%22run%22%2C%22server.py%22%5D%2C%22env%22%3A%7B%22UNSTRUCTURED_API_KEY%22%3A%22%24%7Binput%3AapiKey%7D%22%7D%7D&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22apiKey%22%2C%22description%22%3A%22Unstructured+API+Key%22%2C%22password%22%3Atrue%7D%5DD) [![Install with UV in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-UV-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=uns-mcp&config=%7B%22command%22%3A%22uv%22%2C%22args%22%3A%5B%22run%22%2C%22server.py%22%5D%2C%22env%22%3A%7B%22UNSTRUCTURED_API_KEY%22%3A%22%24%7Binput%3AapiKey%7D%22%7D%7D&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22apiKey%22%2C%22description%22%3A%22Unstructured+API+Key%22%2C%22password%22%3Atrue%7D%5D&quality=insiders)
+
+### Manual Installation
+
+For manual installation, first make sure you've installed all dependencies as described in the Setup section above.
+
+Add the following JSON block to your User Settings (JSON) file in VS Code. You can do this by pressing `Ctrl + Shift + P` and typing `Preferences: Open User Settings (JSON)`.
+
+```json
+{
+  "mcp": {
+    "inputs": [
+      {
+        "type": "promptString",
+        "id": "apiKey",
+        "description": "Unstructured API Key",
+        "password": true
+      }
+    ],
+    "servers": {
+      "uns-mcp": {
+        "command": "uv",
+        "args": ["run", "server.py"],
+        "env": {
+          "UNSTRUCTURED_API_KEY": "${input:apiKey}"
+        }
+      }
+    }
+  }
+}
+```
+
+Optionally, you can add it to a file called `.vscode/mcp.json` in your workspace. This will allow you to share the configuration with others.
+
+```json
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "apiKey",
+      "description": "Unstructured API Key",
+      "password": true
+    }
+  ],
+  "servers": {
+    "uns-mcp": {
+      "command": "uv",
+      "args": ["run", "server.py"],
+      "env": {
+        "UNSTRUCTURED_API_KEY": "${input:apiKey}"
+      }
+    }
+  }
+}
+```
 
 ## Claude Desktop Integration
 
