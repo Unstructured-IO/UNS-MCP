@@ -11,7 +11,6 @@ def register_external_connectors(mcp: FastMCP):
     # Register Firecrawl tools
     from .firecrawl import (
         cancel_crawlhtml_job,
-        # cancel_llmtxt_job,
         check_crawlhtml_status,
         check_llmtxt_status,
         invoke_firecrawl_crawlhtml,
