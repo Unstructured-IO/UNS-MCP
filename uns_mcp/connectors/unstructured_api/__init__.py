@@ -1,6 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 
-from connectors.unstructured_api.partition import partition_local_file
+from uns_mcp.connectors.unstructured_api.partition import partition_local_file
 
 
 def register_unstructured_api_tools(mcp: FastMCP):

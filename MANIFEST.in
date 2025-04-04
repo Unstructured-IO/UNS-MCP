@@ -1,0 +1,5 @@
+graft uns_mcp
+prune notebooks
+prune minimal_client
+prune tests
+global-exclude *.py[cod] __pycache__/* *.egg-info/*

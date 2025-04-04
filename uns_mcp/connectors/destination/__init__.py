@@ -3,12 +3,6 @@ from mcp.server.fastmcp import FastMCP
 
 def register_destination_connectors(mcp: FastMCP):
     """Register all destination connector tools with the MCP server."""
-    from connectors.destination.mongo import (
-        create_mongodb_destination,
-        delete_mongodb_destination,
-        update_mongodb_destination,
-    )
-
     from .astra import (
         create_astradb_destination,
         delete_astradb_destination,
@@ -23,6 +17,11 @@ def register_destination_connectors(mcp: FastMCP):
         create_databricks_volumes_destination,
         delete_databricks_volumes_destination,
         update_databricks_volumes_destination,
+    )
+    from .mongo import (
+        create_mongodb_destination,
+        delete_mongodb_destination,
+        update_mongodb_destination,
     )
     from .neo4j import (
         create_neo4j_destination,

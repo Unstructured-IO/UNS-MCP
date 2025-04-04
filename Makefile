@@ -8,7 +8,7 @@ sse-client:
 
 
 .PHONY: sse-client-terminal
-sse-client:
+sse-client-terminal:
 	uv run python minimal_client/client.py "http://127.0.0.1:8080/sse" "@wonderwhy-er/desktop-commander"
 
 .PHONY: sse-server

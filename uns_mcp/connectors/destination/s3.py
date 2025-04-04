@@ -10,58 +10,59 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
-    PineconeDestinationConnectorConfigInput,
+    DestinationConnectorType,
+    S3DestinationConnectorConfigInput,
     UpdateDestinationConnector,
 )
 
-from connectors.utils import (
+from uns_mcp.connectors.utils import (
     create_log_for_created_updated_connector,
 )
 
 
-def _prepare_pinecone_dest_config(
-    index_name: str,
-    namespace: str = "default",
-    batch_size: Optional[int] = 50,
-) -> PineconeDestinationConnectorConfigInput:
-
-    """Prepare the Azure source connector configuration."""
-    if os.getenv("PINECONE_API_KEY") is None:
-        raise ValueError("PINECONE_API_KEY environment variable is not set")
-    else:
-        return PineconeDestinationConnectorConfigInput(
-            index_name=index_name,
-            namespace=namespace,
-            batch_size=batch_size,
-            api_key=os.getenv("PINECONE_API_KEY"),
-        )
+def _prepare_s3_dest_config(
+    remote_url: Optional[str],
+) -> S3DestinationConnectorConfigInput:
+    """Prepare the S3 destination connector configuration."""
+    config = S3DestinationConnectorConfigInput(
+        remote_url=remote_url,
+        key=os.getenv("AWS_KEY"),
+        secret=os.getenv("AWS_SECRET"),
+    )
+    if os.getenv("TOKEN"):
+        config.token = os.getenv("TOKEN")
+    if os.getenv("ENDPOINT_URL"):
+        config.endpoint_url = os.getenv("ENDPOINT_URL")
+    return config
 
 
-async def create_pinecone_destination(
+async def create_s3_destination(
     ctx: Context,
     name: str,
-    index_name: str,
-    namespace: Optional[str] = "default",
-    batch_size: Optional[int] = 50,
+    remote_url: str,
 ) -> str:
-    """Create an pinecone destination connector.
+    """Create an S3 destination connector.
 
     Args:
         name: A unique name for this connector
-        index_name: The pinecone index name, used to insert vectors,
-        query for similar vectors, and delete them.
-        namespace: The pinecone namespace, a folder inside the pinecone index
-        batch_size: The batch size refers to the number of vectors you upsert or delete
-
+        remote_url: The S3 URI to the bucket or folder
+        key: The AWS access key ID
+        secret: The AWS secret access key
+        token: The AWS STS session token for temporary access (optional)
+        endpoint_url: Custom URL if connecting to a non-AWS S3 bucket
 
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_pinecone_dest_config(index_name, namespace, batch_size)
+    config = _prepare_s3_dest_config(remote_url)
 
-    destination_connector = CreateDestinationConnector(name=name, type="pinecone", config=config)
+    destination_connector = CreateDestinationConnector(
+        name=name,
+        type=DestinationConnectorType.S3,
+        config=config,
+    )
 
     try:
         response = await client.destinations.create_destination_async(
@@ -70,32 +71,26 @@ async def create_pinecone_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="Pinecone",
+            connector_name="S3",
             connector_type="Destination",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating pinecone destination connector: {str(e)}"
+        return f"Error creating S3 destination connector: {str(e)}"
 
 
-async def update_pinecone_destination(
+async def update_s3_destination(
     ctx: Context,
     destination_id: str,
-    index_name: Optional[str] = None,
-    namespace: Optional[str] = None,
-    batch_size: Optional[int] = 50,
+    remote_url: Optional[str] = None,
+    recursive: Optional[bool] = None,
 ) -> str:
-    """Update an Pinecone destination connector.
+    """Update an S3 destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        index_name: The pinecone index name, used to insert vectors,
-        query for similar vectors, and delete them.
-        namespace: The pinecone namespace, a folder inside the pinecone index
-
-        batch_size: The batch size refers to the number of vectors you upsert or delete
-
+        remote_url: The S3 URI to the bucket or folder
 
     Returns:
         String containing the updated destination connector information
@@ -114,12 +109,10 @@ async def update_pinecone_destination(
     # Update configuration with new values
     config = dict(current_config)
 
-    if index_name is not None:
-        config["index_name"] = index_name
-    if namespace is not None:
-        config["namespace"] = namespace
-    if batch_size is not None:
-        config["batch_size"] = batch_size
+    if remote_url is not None:
+        config["remote_url"] = remote_url
+    if recursive is not None:
+        config["recursive"] = recursive
 
     destination_connector = UpdateDestinationConnector(config=config)
 
@@ -133,17 +126,17 @@ async def update_pinecone_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="Pinecone",
+            connector_name="S3",
             connector_type="Destination",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating pinecone destination connector: {str(e)}"
+        return f"Error updating S3 destination connector: {str(e)}"
 
 
-async def delete_pinecone_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an pinecone destination connector.
+async def delete_s3_destination(ctx: Context, destination_id: str) -> str:
+    """Delete an S3 destination connector.
 
     Args:
         destination_id: ID of the destination connector to delete
@@ -157,6 +150,6 @@ async def delete_pinecone_destination(ctx: Context, destination_id: str) -> str:
         _ = await client.destinations.delete_destination_async(
             request=DeleteDestinationRequest(destination_id=destination_id),
         )
-        return f"Pinecone Destination Connector with ID {destination_id} deleted successfully"
+        return f"S3 Destination Connector with ID {destination_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting Pinecone destination connector: {str(e)}"
+        return f"Error deleting S3 destination connector: {str(e)}"

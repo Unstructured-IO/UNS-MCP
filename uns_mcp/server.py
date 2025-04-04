@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import AsyncIterator, Optional
 
 import uvicorn
-from docstring_extras import add_custom_node_examples  # relative import required by mcp
 from dotenv import load_dotenv
 from mcp.server import Server
 from mcp.server.fastmcp import Context, FastMCP
@@ -40,7 +39,8 @@ from unstructured_client.models.shared import (
 )
 from unstructured_client.models.shared.createworkflow import CreateWorkflowTypedDict
 
-from connectors import register_connectors
+from uns_mcp.connectors import register_connectors
+from uns_mcp.docstring_extras import add_custom_node_examples
 
 
 def load_environment_variables() -> None:
@@ -68,14 +68,21 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     if not api_key:
         raise ValueError("UNSTRUCTURED_API_KEY environment variable is required")
 
-    DEBUG_API_REQUESTS = os.environ.get("DEBUG_API_REQUESTS", "False").lower() == "true" #get env variable
+    DEBUG_API_REQUESTS = (
+        os.environ.get("DEBUG_API_REQUESTS", "False").lower() == "true"
+    )  # get env variable
     if DEBUG_API_REQUESTS:
-        from custom_http_client import CustomHttpClient
         import httpx
-        client = UnstructuredClient(api_key_auth=api_key, async_client=CustomHttpClient(httpx.AsyncClient()))
+
+        from uns_mcp.custom_http_client import CustomHttpClient
+
+        client = UnstructuredClient(
+            api_key_auth=api_key,
+            async_client=CustomHttpClient(httpx.AsyncClient()),
+        )
     else:
         client = UnstructuredClient(api_key_auth=api_key)
-    
+
     try:
         yield AppContext(client=client)
     finally:
@@ -541,11 +548,11 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
     )
 
 
-if __name__ == "__main__":
+def main():
     load_environment_variables()
     if len(sys.argv) < 2:
         # server is directly being invoked from client
-        mcp.run()
+        mcp.run(transport="stdio")
     else:
         # server is running as HTTP SSE server
         # reference: https://github.com/sidharthrajaram/mcp-sse
@@ -562,3 +569,7 @@ if __name__ == "__main__":
         starlette_app = create_starlette_app(mcp_server, debug=True)
 
         uvicorn.run(starlette_app, host=args.host, port=args.port)
+
+
+if __name__ == "__main__":
+    main()
