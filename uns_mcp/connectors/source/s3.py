@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional
+from typing import Optional
 
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
@@ -10,55 +10,52 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateSourceConnector,
-    SalesforceSourceConnectorConfigInput,
+    S3SourceConnectorConfigInput,
     UpdateSourceConnector,
 )
 
-from connectors.utils import (
+from uns_mcp.connectors.utils import (
     create_log_for_created_updated_connector,
 )
 
 
-def _prepare_salesforce_source_config(
-    username: str,
-    categories: Optional[List[str]] = None,
-) -> SalesforceSourceConnectorConfigInput:
-    """Prepare the Salesforce source connector configuration."""
-    if os.getenv("SALESFORCE_CONSUMER_KEY") is None or os.getenv("SALESFORCE_PRIVATE_KEY") is None:
-        raise ValueError(
-            "SALESFORCE_CONSUMER_KEY or SALESFORCE_PRIVATE_KEY environment variables are not set",
-        )
-    config = SalesforceSourceConnectorConfigInput(
-        username=username,
-        consumer_key=os.getenv("SALESFORCE_CONSUMER_KEY"),
-        private_key=os.getenv("SALESFORCE_PRIVATE_KEY"),
-        categories=categories,
+def _prepare_s3_source_config(
+    remote_url: Optional[str],
+    recursive: Optional[bool],
+) -> S3SourceConnectorConfigInput:
+    """Prepare the Azure source connector configuration."""
+    config = S3SourceConnectorConfigInput(
+        remote_url=remote_url,
+        recursive=recursive,
+        key=os.getenv("AWS_KEY"),
+        secret=os.getenv("AWS_SECRET"),
     )
-
+    if os.getenv("TOKEN"):
+        config.token = os.getenv("TOKEN")
+    if os.getenv("ENDPOINT_URL"):
+        config.endpoint_url = os.getenv("ENDPOINT_URL")
     return config
 
 
-async def create_salesforce_source(
+async def create_s3_source(
     ctx: Context,
     name: str,
-    username: str,
-    categories: Optional[List[str]] = None,
+    remote_url: str,
+    recursive: bool = False,
 ) -> str:
-    """Create a Salesforce source connector.
+    """Create an S3 source connector.
 
     Args:
         name: A unique name for this connector
-        username: The Salesforce username
-        categories: Optional Salesforce domain,the names of the Salesforce categories (objects)
-        that you want to access, specified as a comma-separated list.
-        Available categories include Account, Campaign, Case, EmailMessage, and Lead.
+        remote_url: The S3 URI to the bucket or folder (e.g., s3://my-bucket/)
+        recursive: Whether to access subfolders within the bucket
 
     Returns:
         String containing the created source connector information
     """
     client = ctx.request_context.lifespan_context.client
-    config = _prepare_salesforce_source_config(username, categories)
-    source_connector = CreateSourceConnector(name=name, type="salesforce", config=config)
+    config = _prepare_s3_source_config(remote_url, recursive)
+    source_connector = CreateSourceConnector(name=name, type="s3", config=config)
 
     try:
         response = await client.sources.create_source_async(
@@ -66,29 +63,27 @@ async def create_salesforce_source(
         )
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="Salesforce",
+            connector_name="S3",
             connector_type="Source",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating Salesforce source connector: {str(e)}"
+        return f"Error creating S3 source connector: {str(e)}"
 
 
-async def update_salesforce_source(
+async def update_s3_source(
     ctx: Context,
     source_id: str,
-    username: Optional[str] = None,
-    categories: Optional[List[str]] = None,
+    remote_url: Optional[str] = None,
+    recursive: Optional[bool] = None,
 ) -> str:
-    """Update a Salesforce source connector.
+    """Update an S3 source connector.
 
     Args:
         source_id: ID of the source connector to update
-        username: The Salesforce username
-        categories: Optional Salesforce domain,the names of the Salesforce categories (objects)
-        that you want to access, specified as a comma-separated list.
-        Available categories include Account, Campaign, Case, EmailMessage, and Lead.
+        remote_url: The S3 URI to the bucket or folder
+        recursive: Whether to access subfolders within the bucket
 
     Returns:
         String containing the updated source connector information
@@ -107,11 +102,11 @@ async def update_salesforce_source(
     # Update configuration with new values
     config = dict(current_config)
 
-    if username is not None:
-        config["username"] = username
+    if remote_url is not None:
+        config["remote_url"] = remote_url
 
-    if categories is not None:
-        config["categories"] = categories
+    if recursive is not None:
+        config["recursive"] = recursive
 
     source_connector = UpdateSourceConnector(config=config)
 
@@ -124,17 +119,17 @@ async def update_salesforce_source(
         )
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="Salesforce",
+            connector_name="S3",
             connector_type="Source",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating Salesforce source connector: {str(e)}"
+        return f"Error updating S3 source connector: {str(e)}"
 
 
-async def delete_salesforce_source(ctx: Context, source_id: str) -> str:
-    """Delete a Salesforce source connector.
+async def delete_s3_source(ctx: Context, source_id: str) -> str:
+    """Delete an S3 source connector.
 
     Args:
         source_id: ID of the source connector to delete
@@ -148,6 +143,6 @@ async def delete_salesforce_source(ctx: Context, source_id: str) -> str:
         _ = await client.sources.delete_source_async(
             request=DeleteSourceRequest(source_id=source_id),
         )
-        return f"Salesforce Source Connector with ID {source_id} deleted successfully"
+        return f"S3 Source Connector with ID {source_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting Salesforce source connector: {str(e)}"
+        return f"Error deleting S3 source connector: {str(e)}"

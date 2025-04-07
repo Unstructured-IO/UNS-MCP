@@ -10,53 +10,58 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
-    DestinationConnectorType,
-    MongoDBConnectorConfigInput,
+    PineconeDestinationConnectorConfigInput,
     UpdateDestinationConnector,
 )
 
-from connectors.utils import (
+from uns_mcp.connectors.utils import (
     create_log_for_created_updated_connector,
 )
 
 
-def _prepare_mongodb_dest_config(
-    database: str,
-    collection: str,
-) -> MongoDBConnectorConfigInput:
-    """Prepare the MongoDB destination connector configuration."""
-    config = MongoDBConnectorConfigInput(
-        database=database,
-        collection=collection,
-        uri=os.getenv("MONGO_DB_CONNECTION_STRING"),
-    )
-    return config
+def _prepare_pinecone_dest_config(
+    index_name: str,
+    namespace: str = "default",
+    batch_size: Optional[int] = 50,
+) -> PineconeDestinationConnectorConfigInput:
+
+    """Prepare the Azure source connector configuration."""
+    if os.getenv("PINECONE_API_KEY") is None:
+        raise ValueError("PINECONE_API_KEY environment variable is not set")
+    else:
+        return PineconeDestinationConnectorConfigInput(
+            index_name=index_name,
+            namespace=namespace,
+            batch_size=batch_size,
+            api_key=os.getenv("PINECONE_API_KEY"),
+        )
 
 
-async def create_mongodb_destination(
+async def create_pinecone_destination(
     ctx: Context,
     name: str,
-    database: str,
-    collection: str,
+    index_name: str,
+    namespace: Optional[str] = "default",
+    batch_size: Optional[int] = 50,
 ) -> str:
-    """Create an MongoDB destination connector.
+    """Create an pinecone destination connector.
 
     Args:
         name: A unique name for this connector
-        database: The name of the database to connect to.
-        collection: The name of the target MongoDB collection
+        index_name: The pinecone index name, used to insert vectors,
+        query for similar vectors, and delete them.
+        namespace: The pinecone namespace, a folder inside the pinecone index
+        batch_size: The batch size refers to the number of vectors you upsert or delete
+
+
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_mongodb_dest_config(database=database, collection=collection)
+    config = _prepare_pinecone_dest_config(index_name, namespace, batch_size)
 
-    destination_connector = CreateDestinationConnector(
-        name=name,
-        type=DestinationConnectorType.MONGODB,
-        config=config,
-    )
+    destination_connector = CreateDestinationConnector(name=name, type="pinecone", config=config)
 
     try:
         response = await client.destinations.create_destination_async(
@@ -65,27 +70,32 @@ async def create_mongodb_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="MongoDB",
+            connector_name="Pinecone",
             connector_type="Destination",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating MongoDB destination connector: {str(e)}"
+        return f"Error creating pinecone destination connector: {str(e)}"
 
 
-async def update_mongodb_destination(
+async def update_pinecone_destination(
     ctx: Context,
     destination_id: str,
-    database: Optional[str] = None,
-    collection: Optional[str] = None,
+    index_name: Optional[str] = None,
+    namespace: Optional[str] = None,
+    batch_size: Optional[int] = 50,
 ) -> str:
-    """Update an MongoDB destination connector.
+    """Update an Pinecone destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        database: The name of the database to connect to.
-        collection: The name of the target MongoDB collection
+        index_name: The pinecone index name, used to insert vectors,
+        query for similar vectors, and delete them.
+        namespace: The pinecone namespace, a folder inside the pinecone index
+
+        batch_size: The batch size refers to the number of vectors you upsert or delete
+
 
     Returns:
         String containing the updated destination connector information
@@ -101,11 +111,15 @@ async def update_mongodb_destination(
     except Exception as e:
         return f"Error retrieving destination connector: {str(e)}"
 
-    input_config = MongoDBConnectorConfigInput(**current_config.model_dump())
-    config: MongoDBConnectorConfigInput = _prepare_mongodb_dest_config(
-        database=database or input_config.database,
-        collection=collection or input_config.collection,
-    )
+    # Update configuration with new values
+    config = dict(current_config)
+
+    if index_name is not None:
+        config["index_name"] = index_name
+    if namespace is not None:
+        config["namespace"] = namespace
+    if batch_size is not None:
+        config["batch_size"] = batch_size
 
     destination_connector = UpdateDestinationConnector(config=config)
 
@@ -119,17 +133,17 @@ async def update_mongodb_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="MongoDB",
+            connector_name="Pinecone",
             connector_type="Destination",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating MongoDB destination connector: {str(e)}"
+        return f"Error updating pinecone destination connector: {str(e)}"
 
 
-async def delete_mongodb_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an MongoDB destination connector.
+async def delete_pinecone_destination(ctx: Context, destination_id: str) -> str:
+    """Delete an pinecone destination connector.
 
     Args:
         destination_id: ID of the destination connector to delete
@@ -143,6 +157,6 @@ async def delete_mongodb_destination(ctx: Context, destination_id: str) -> str:
         _ = await client.destinations.delete_destination_async(
             request=DeleteDestinationRequest(destination_id=destination_id),
         )
-        return f"MongoDB Destination Connector with ID {destination_id} deleted successfully"
+        return f"Pinecone Destination Connector with ID {destination_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting MongoDB destination connector: {str(e)}"
+        return f"Error deleting Pinecone destination connector: {str(e)}"

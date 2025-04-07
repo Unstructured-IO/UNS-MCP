@@ -2,31 +2,6 @@
 
 An MCP server implementation for interacting with the Unstructured API. This server provides tools to list sources and workflows.
 
-## Setup
-
-1. Install dependencies:
-- `uv add "mcp[cli]"`
-- `uv pip install --upgrade unstructured-client python-dotenv`
-
-or use `uv sync`.
-
-2. Set your Unstructured API key as an environment variable.
-   - Create a `.env` file in the root directory, and add a line with your key: `UNSTRUCTURED_API_KEY="YOUR_KEY"`
-
-
-To test in local, any working key that pointing to prod env would work. However, to be able to return valid results from client's side (e.g, Claude for Desktop), your personal key that is fetched from `https://platform.unstructured.io/app/account/api-keys` is needed.
-
-## Running the Server
-Using the MCP CLI:
-```bash
-mcp run uns_mcp/server.py
-```
-
-or:
-```bash
-uv run uns_mcp/server.py
-```
-
 ## Available Tools
 
 | Tool | Description |
@@ -115,42 +90,157 @@ How Firecrawl works:
 
 Note: A `FIRECRAWL_API_KEY` environment variable must be set to use these functions.
 
+## Installation & Configuration
 
-## Claude Desktop Integration
+This guide provides step-by-step instructions to set up and configure the UNS_MCP server using Python 3.12 and the `uv` tool.
 
-To install in Claude Desktop:
+## Prerequisites
+- Python 3.12+
+- `uv` for environment management
+- An API key from Unstructured. You can sign up and obtain your API key [here](https://platform.unstructured.io/app/account/api-keys).
 
-1. Go to `~/Library/Application Support/Claude/` and create a `claude_desktop_config.json`.
-2. In that file add:
+### Using `uv` (Recommended)
+
+No additional installation is required when using `uvx` as it handles execution. However, if you prefer to install the package directly:
 ```bash
+uv pip install uns_mcp
+```
+
+#### Configure Claude Desktop
+For integration with Claude Desktop, add the following content to your `claude_desktop_config.json`:
+
+**Note:** The file is located in the `~/Library/Application Support/Claude/` directory.
+
+**Using `uvx` Command:**
+```json
 {
-    "mcpServers":
-    {
-        "UNS_MCP":
-        {
-            "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
-            "args":
-            [
-                "--directory",
-                "ABSOLUTE/PATH/TO/YOUR-UNS-MCP-REPO/uns_mcp",
-                "run",
-                "server.py"
-            ],
-            "env":
-            [
-            "UNSTRUCTURED_API_KEY":"<your key>"
-            ],
-            "disabled": false
-        }
-    }
+   "mcpServers": {
+      "UNS_MCP": {
+         "command": "uvx",
+         "args": ["uns_mcp"],
+         "env": {
+           "UNSTRUCTURED_API_KEY": "<your-key>"
+         }
+      }
+   }
 }
 ```
-3. Restart Claude Desktop.
 
-4. Example Issues seen from Claude Desktop.
-    - You will see `No destinations found` when you query for a list of destination connectors. Check your API key in `.env` or in your config json, it needs to be your personal key in `https://platform.unstructured.io/app/account/api-keys`.
+**Alternatively, Using Python Package:**
+```json
+{
+   "mcpServers": {
+      "UNS_MCP": {
+         "command": "python",
+         "args": ["-m", "uns_mcp"],
+         "env": {
+           "UNSTRUCTURED_API_KEY": "<your-key>"
+         }
+      }
+   }
+}
+```
 
-## Debugging tools
+### Using Source Code
+1. Clone the repository.
+
+2. Install dependencies:
+    ```bash
+    uv sync
+    ```
+
+3. Set your Unstructured API key as an environment variable. Create a .env file in the root directory with the following content:
+    ````bash
+    UNSTRUCTURED_API_KEY="YOUR_KEY"
+    ````
+    Refer to `.env.template` for the configurable environment variables.
+
+You can now run the server using one of the following methods:
+
+<details>
+<summary>
+Using Editable Package Installation
+</summary>
+Install as an editable package:
+
+```bash
+uvx pip install -e .
+```
+
+Update your Claude Desktop config:
+```json
+{
+  "mcpServers": {
+    "UNS_MCP": {
+      "command": "uvx",
+      "args": ["uns_mcp"]
+    }
+  }
+}
+```
+**Note**: Remember to point to the uvx executable in environment where you installed the package
+
+</details>
+
+<details>
+<summary>
+Using SSE Server Protocol
+</summary>
+
+**Note: Not supported by Claude Desktop.**
+
+For SSE protocol, you can debug more easily by decoupling the client and server:
+
+1. Start the server in one terminal:
+    ```bash
+    uv run python uns_mcp/server.py --host 127.0.0.1 --port 8080
+    # or
+    make sse-server
+    ```
+
+2. Test the server using a local client in another terminal:
+   ```bash
+   uv run python minimal_client/client.py "http://127.0.0.1:8080/sse"
+   # or
+   make sse-client
+   ```
+**Note:** To stop the services, use `Ctrl+C` on the client first, then the server.
+</details>
+
+<details>
+<summary>
+Using Stdio Server Protocol
+</summary>
+
+Configure Claude Desktop to use stdio:
+```json
+{
+  "mcpServers": {
+    "UNS_MCP": {
+      "command": "ABSOLUTE/PATH/TO/.local/bin/uv",
+      "args": [
+        "--directory",
+        "ABSOLUTE/PATH/TO/YOUR-UNS-MCP-REPO/uns_mcp",
+        "run",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+Alternatively, run the local client:
+```bash
+uv run python minimal_client/client.py uns_mcp/server.py
+```
+</details>
+
+## Additional Local Client Configuration
+Configure the minimal client using environmental variables:
+- `LOG_LEVEL="ERROR"`: Set to suppress debug outputs from the LLM, displaying clear messages for users.
+- `CONFIRM_TOOL_USE='false'`: Disable tool use confirmation before execution. **Use with caution**, especially during development, as LLM may execute expensive workflows or delete data.
+
+
+#### Debugging tools
 
 Anthropic provides `MCP Inspector` tool to debug/test your MCP server. Run the following command to spin up a debugging UI. From there, you will be able to add environment variables (pointing to your local env) on the left pane. Include your personal API key there as env var. Go to `tools`, you can test out the capabilities you add to the MCP server.
 ```
@@ -160,40 +250,6 @@ mcp dev uns_mcp/server.py
 If you need to log request call parameters to `UnstructuredClient`, set the environment variable `DEBUG_API_REQUESTS=false`.
 The logs are stored in a file with the format `unstructured-client-{date}.log`, which can be examined to debug request call parameters to `UnstructuredClient` functions.
 
-## Running locally minimal client
-```
-uv run python minimal_client/client.py uns_mcp/server.py
-```
-
-or
-
-```
-make local-client
-```
-
-Env variables to configure behavior of the client:
-- `LOG_LEVEL="ERROR"` # If you would like to hide outputs from the LLM and present clear messages for the user
-- `CONFIRM_TOOL_USE='false'` If you would like to disable the tool use confirmation before running it (True by default). **BE MINDFUL** about that option, as LLM can decide to purge all data from your account or run some expensive workflows; use only for development purposes.
-
-## Running locally minimal client, accessing local the MCP server over HTTP + SSE
-
-The main difference here is it becomes easier to set breakpoints on the server side during development -- the client and server are decoupled.
-
-```
-# in one terminal, run the server:
-uv run python uns_mcp/server.py --host 127.0.0.1 --port 8080
-
-or
-make sse-server
-
-# in another terminal, run the client:
-uv run python minimal_client/client.py "http://127.0.0.1:8080/sse"
-
-or
-make sse-client
-```
-
-Hint: `ctrl+c` out of the client first, then the server. Otherwise the server appears to hang.
 
 ## Add terminal access to minimal client
 We are going to use [@wonderwhy-er/desktop-commander](https://github.com/wonderwhy-er/DesktopCommanderMCP) to add terminal access to the minimal client. It is built on the MCP Filesystem Server. Be careful, as the client (also LLM) now **has access to private files.**
@@ -214,3 +270,8 @@ make sse-client-terminal
 ## CHANGELOG.md
 
 Any new developed features/fixes/enhancements will be added to CHANGELOG.md. 0.x.x-dev pre-release format is preferred before we bump to a stable version.
+
+# Troubleshooting
+- If you encounter issues with `Error: spawn <command> ENOENT` it means `<command>` is not installed or visible in your PATH:
+  - Make sure to install it and add it to your PATH.
+  - or provide absolute path to the command in the `command` field of your config. So for example replace `python` with `/opt/miniconda3/bin/python`

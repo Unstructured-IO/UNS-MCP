@@ -1,8 +1,7 @@
 import os
-from typing import Optional, List
+from typing import Optional
 
 from mcp.server.fastmcp import Context
-from unstructured_client import UNSET, OptionalNullable
 from unstructured_client.models.operations import (
     CreateSourceRequest,
     DeleteSourceRequest,
@@ -11,49 +10,62 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateSourceConnector,
-    GoogleDriveSourceConnectorConfigInput,
+    SharePointSourceConnectorConfigInput,
     UpdateSourceConnector,
 )
 
-from connectors.utils import (
+from uns_mcp.connectors.utils import (
     create_log_for_created_updated_connector,
 )
 
 
-def _prepare_gdrive_source_config(
-    drive_id: str,
+def _prepare_sharepoint_source_config(
+    site: str,
+    user_pname: str,
+    path: Optional[str],
     recursive: Optional[bool],
-    extensions: OptionalNullable[List[str]] = UNSET,
-) -> GoogleDriveSourceConnectorConfigInput:
-    """Prepare the gdrive source connector configuration."""
-    return GoogleDriveSourceConnectorConfigInput(
-        drive_id=drive_id,
+    authority_url: Optional[str],
+) -> SharePointSourceConnectorConfigInput:
+    """Prepare the SharePoint source connector configuration."""
+    config = SharePointSourceConnectorConfigInput(
+        site=site,
+        user_pname=user_pname,
+        client_id=os.getenv("SHAREPOINT_CLIENT_ID"),
+        client_cred=os.getenv("SHAREPOINT_CLIENT_CRED"),
+        tenant=os.getenv("SHAREPOINT_TENANT_ID"),
+        path=path,
         recursive=recursive,
-        extensions=extensions,
-        service_account_key=os.getenv("GOOGLEDRIVE_SERVICE_ACCOUNT_KEY"),
     )
+    if authority_url:
+        config.authority_url = authority_url
+    return config
 
 
-async def create_gdrive_source(
+async def create_sharepoint_source(
     ctx: Context,
     name: str,
-    drive_id: str,
+    site: str,
+    user_pname: str,
+    path: Optional[str] = None,
     recursive: bool = False,
-    extensions: OptionalNullable[List[str]] = UNSET,
+    authority_url: Optional[str] = None,
 ) -> str:
-    """Create a gdrive source connector.
+    """Create a SharePoint source connector.
 
     Args:
         name: A unique name for this connector
-        remote_url: The gdrive URI to the bucket or folder (e.g., gdrive://my-bucket/)
-        recursive: Whether to access subfolders within the bucket
+        site: The SharePoint site to connect to
+        user_pname: The username for the SharePoint site
+        path: The path within the SharePoint site
+        recursive: Whether to access subfolders within the site
+        authority_url: The authority URL for authentication
 
     Returns:
         String containing the created source connector information
     """
     client = ctx.request_context.lifespan_context.client
-    config = _prepare_gdrive_source_config(drive_id, recursive, extensions)
-    source_connector = CreateSourceConnector(name=name, type="google_drive", config=config)
+    config = _prepare_sharepoint_source_config(site, user_pname, path, recursive, authority_url)
+    source_connector = CreateSourceConnector(name=name, type="sharepoint", config=config)
 
     try:
         response = await client.sources.create_source_async(
@@ -61,28 +73,33 @@ async def create_gdrive_source(
         )
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="GoogleDrive",
+            connector_name="SharePoint",
             connector_type="Source",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating gdrive source connector: {str(e)}"
+        return f"Error creating SharePoint source connector: {str(e)}"
 
 
-async def update_gdrive_source(
+async def update_sharepoint_source(
     ctx: Context,
     source_id: str,
-    drive_id: Optional[str] = None,
+    site: Optional[str] = None,
+    user_pname: Optional[str] = None,
+    path: Optional[str] = None,
     recursive: Optional[bool] = None,
-    extensions: OptionalNullable[List[str]] = UNSET,
+    authority_url: Optional[str] = None,
 ) -> str:
-    """Update an gdrive source connector.
+    """Update a SharePoint source connector.
 
     Args:
         source_id: ID of the source connector to update
-        remote_url: The gdrive URI to the bucket or folder
-        recursive: Whether to access subfolders within the bucket
+        site: The SharePoint site to connect to
+        user_pname: The username for the SharePoint site
+        path: The path within the SharePoint site
+        recursive: Whether to access subfolders within the site
+        authority_url: The authority URL for authentication
 
     Returns:
         String containing the updated source connector information
@@ -101,14 +118,16 @@ async def update_gdrive_source(
     # Update configuration with new values
     config = dict(current_config)
 
-    if drive_id is not None:
-        config["drive_id"] = drive_id
-
+    if site is not None:
+        config["site"] = site
+    if user_pname is not None:
+        config["user_pname"] = user_pname
+    if path is not None:
+        config["path"] = path
     if recursive is not None:
         config["recursive"] = recursive
-
-    if extensions is not None:
-        config["extensions"] = extensions
+    if authority_url is not None:
+        config["authority_url"] = authority_url
 
     source_connector = UpdateSourceConnector(config=config)
 
@@ -121,17 +140,17 @@ async def update_gdrive_source(
         )
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="GoogleDrive",
+            connector_name="SharePoint",
             connector_type="Source",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating gdrive source connector: {str(e)}"
+        return f"Error updating SharePoint source connector: {str(e)}"
 
 
-async def delete_gdrive_source(ctx: Context, source_id: str) -> str:
-    """Delete an gdrive source connector.
+async def delete_sharepoint_source(ctx: Context, source_id: str) -> str:
+    """Delete a SharePoint source connector.
 
     Args:
         source_id: ID of the source connector to delete
@@ -145,6 +164,6 @@ async def delete_gdrive_source(ctx: Context, source_id: str) -> str:
         _ = await client.sources.delete_source_async(
             request=DeleteSourceRequest(source_id=source_id),
         )
-        return f"gdrive Source Connector with ID {source_id} deleted successfully"
+        return f"SharePoint Source Connector with ID {source_id} deleted successfully"
     except Exception as e:
-        return f"Error deleting gdrive source connector: {str(e)}"
+        return f"Error deleting SharePoint source connector: {str(e)}"
