@@ -1,10 +1,11 @@
-from unstructured_client.httpclient import AsyncHttpClient
-from datetime import datetime
 import json
-import httpx
 import logging
 import os
+from datetime import datetime
 from typing import Any, Optional, Union
+
+import httpx
+from unstructured_client.httpclient import AsyncHttpClient
 
 
 def log_request_params(
@@ -79,7 +80,7 @@ class CustomHttpClient(AsyncHttpClient):
     def __init__(self, client: AsyncHttpClient):
         self.client = client
         self.log_file = os.path.abspath(
-            f"unstructured-client-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.log"
+            f"unstructured-client-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.log",
         )  # Store absolute log path
         self.logger = logging.getLogger(__name__)  # Get logger for this module
         self.logger.setLevel(logging.INFO)  # Set default log level
@@ -89,9 +90,7 @@ class CustomHttpClient(AsyncHttpClient):
         file_handler.setLevel(logging.INFO)
 
         # Create formatter and add it to the handler
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         file_handler.setFormatter(formatter)
 
         # Add the handler to the logger
@@ -103,14 +102,17 @@ class CustomHttpClient(AsyncHttpClient):
         *,
         stream: bool = False,
         auth: Union[
-            httpx._types.AuthTypes, httpx._client.UseClientDefault, None
+            httpx._types.AuthTypes,
+            httpx._client.UseClientDefault,
+            None,
         ] = httpx.USE_CLIENT_DEFAULT,
-        follow_redirects: Union[
-            bool, httpx._client.UseClientDefault
-        ] = httpx.USE_CLIENT_DEFAULT,
+        follow_redirects: Union[bool, httpx._client.UseClientDefault] = httpx.USE_CLIENT_DEFAULT,
     ) -> httpx.Response:
         return await self.client.send(
-            request, stream=stream, auth=auth, follow_redirects=follow_redirects
+            request,
+            stream=stream,
+            auth=auth,
+            follow_redirects=follow_redirects,
         )
 
     def build_request(
@@ -126,7 +128,8 @@ class CustomHttpClient(AsyncHttpClient):
         headers: Optional[httpx._types.HeaderTypes] = None,
         cookies: Optional[httpx._types.CookieTypes] = None,
         timeout: Union[
-            httpx._types.TimeoutTypes, httpx._client.UseClientDefault
+            httpx._types.TimeoutTypes,
+            httpx._client.UseClientDefault,
         ] = httpx.USE_CLIENT_DEFAULT,
         extensions: Optional[httpx._types.RequestExtensions] = None,
     ) -> httpx.Request:

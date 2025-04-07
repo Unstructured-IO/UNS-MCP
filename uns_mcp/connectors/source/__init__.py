@@ -44,8 +44,8 @@ def register_source_connectors(mcp: FastMCP):
 
     from .sharepoint import (
         create_sharepoint_source,
-        update_sharepoint_source,
         delete_sharepoint_source,
+        update_sharepoint_source,
     )
 
     mcp.tool()(create_sharepoint_source)

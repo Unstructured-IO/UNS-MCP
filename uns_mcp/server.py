@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import AsyncIterator, Optional
 
 import uvicorn
-from docstring_extras import add_custom_node_examples  # relative import required by mcp
 from dotenv import load_dotenv
 from mcp.server import Server
 from mcp.server.fastmcp import Context, FastMCP
@@ -36,13 +35,12 @@ from unstructured_client.models.shared import (
     JobStatus,
     SourceConnectorType,
     UpdateWorkflow,
-    WorkflowInformation,
     WorkflowState,
-    WorkflowType,
 )
 from unstructured_client.models.shared.createworkflow import CreateWorkflowTypedDict
 
-from connectors import register_connectors
+from uns_mcp.connectors import register_connectors
+from uns_mcp.docstring_extras import add_custom_node_examples
 
 
 def load_environment_variables() -> None:
@@ -75,7 +73,8 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     )  # get env variable
     if DEBUG_API_REQUESTS:
         import httpx
-        from custom_http_client import CustomHttpClient
+
+        from uns_mcp.custom_http_client import CustomHttpClient
 
         client = UnstructuredClient(
             api_key_auth=api_key,
@@ -291,35 +290,25 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
         request=GetWorkflowRequest(workflow_id=workflow_id),
     )
 
-    info: WorkflowInformation = response.workflow_information
+    info = response.workflow_information
 
     result = ["Workflow Information:"]
     result.append(f"Name: {info.name}")
     result.append(f"ID: {info.id}")
-    result.append(f"Status: {info.status.value}")
-    result.append(f"Type: {info.workflow_type.value}")
+    result.append(f"Status: {info.status}")
+    result.append(f"Type: {info.workflow_type}")
 
     result.append("\nSources:")
     for source in info.sources:
         result.append(f"  - {source}")
-
-    if info.workflow_type == WorkflowType.CUSTOM.value:
-        result.append("\nWorkflow Nodes:")
-        for node in info.workflow_nodes:
-            result.append(f"  - {node.name} (Type: {node.type.value}) (Subtype: {node.subtype}):")
-            if node.settings:
-                result.append(f"    Settings: {json.dumps(node.settings, indent=8)}")
 
     result.append("\nDestinations:")
     for destination in info.destinations:
         result.append(f"  - {destination}")
 
     result.append("\nSchedule:")
-    if info.schedule.crontab_entries:
-        for crontab_entry in info.schedule.crontab_entries:
-            result.append(f"  - {crontab_entry.cron_expression}")
-    else:
-        result.append("  - No crontab entry")
+    for crontab_entry in info.schedule.crontab_entries:
+        result.append(f"  - {crontab_entry.cron_expression}")
 
     return "\n".join(result)
 
@@ -386,6 +375,8 @@ async def run_workflow(ctx: Context, workflow_id: str) -> str:
 
 
 @mcp.tool()
+@add_custom_node_examples  # Note: This documentation is added due to lack of typing in
+# WorkflowNode.settings. It can be safely deleted when typing is added.
 async def update_workflow(
     ctx: Context,
     workflow_id: str,
@@ -557,11 +548,11 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
     )
 
 
-if __name__ == "__main__":
+def main():
     load_environment_variables()
     if len(sys.argv) < 2:
         # server is directly being invoked from client
-        mcp.run()
+        mcp.run(transport="stdio")
     else:
         # server is running as HTTP SSE server
         # reference: https://github.com/sidharthrajaram/mcp-sse
@@ -578,3 +569,7 @@ if __name__ == "__main__":
         starlette_app = create_starlette_app(mcp_server, debug=True)
 
         uvicorn.run(starlette_app, host=args.host, port=args.port)
+
+
+if __name__ == "__main__":
+    main()
