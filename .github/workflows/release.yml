@@ -36,6 +36,7 @@ jobs:
       - name: Get version from main
         id: get-main-version
         run: |
+          source .venv/bin/activate
           git switch main
           MAIN_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
           echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
@@ -44,6 +45,7 @@ jobs:
       - name: Compare versions
         id: compare-versions
         run: |
+          source .venv/bin/activate
           CUR_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
 
           echo "Current version in pyproject.toml: $CUR_VERSION"
@@ -55,6 +57,7 @@ jobs:
           else
             echo "Versions differ. Proceed with the release."
             echo "SKIP_RELEASE=false" >> $GITHUB_ENV
+          fi
 
       - name: Release to PyPI
         if: env.SKIP_RELEASE != 'true'

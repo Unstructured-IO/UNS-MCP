@@ -4,7 +4,6 @@ from typing import Optional
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
     CreateDestinationRequest,
-    DeleteDestinationRequest,
     GetDestinationRequest,
     UpdateDestinationRequest,
 )
@@ -140,23 +139,3 @@ async def update_pinecone_destination(
         return result
     except Exception as e:
         return f"Error updating pinecone destination connector: {str(e)}"
-
-
-async def delete_pinecone_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an pinecone destination connector.
-
-    Args:
-        destination_id: ID of the destination connector to delete
-
-    Returns:
-        String containing the result of the deletion
-    """
-    client = ctx.request_context.lifespan_context.client
-
-    try:
-        _ = await client.destinations.delete_destination_async(
-            request=DeleteDestinationRequest(destination_id=destination_id),
-        )
-        return f"Pinecone Destination Connector with ID {destination_id} deleted successfully"
-    except Exception as e:
-        return f"Error deleting Pinecone destination connector: {str(e)}"
