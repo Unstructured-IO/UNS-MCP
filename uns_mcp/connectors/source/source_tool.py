@@ -3,15 +3,18 @@ from typing import Any
 from mcp.server.fastmcp import Context
 from typing_extensions import Literal
 
-from connectors.source.azure import create_azure_source, update_azure_source
-from connectors.source.gdrive import create_gdrive_source, update_gdrive_source
-from connectors.source.onedrive import create_onedrive_source, update_onedrive_source
-from connectors.source.s3 import create_s3_source, update_s3_source
-from connectors.source.salesforce import (
+from uns_mcp.connectors.source.azure import create_azure_source, update_azure_source
+from uns_mcp.connectors.source.gdrive import create_gdrive_source, update_gdrive_source
+from uns_mcp.connectors.source.onedrive import (
+    create_onedrive_source,
+    update_onedrive_source,
+)
+from uns_mcp.connectors.source.s3 import create_s3_source, update_s3_source
+from uns_mcp.connectors.source.salesforce import (
     create_salesforce_source,
     update_salesforce_source,
 )
-from connectors.source.sharepoint import (
+from uns_mcp.connectors.source.sharepoint import (
     create_sharepoint_source,
     update_sharepoint_source,
 )

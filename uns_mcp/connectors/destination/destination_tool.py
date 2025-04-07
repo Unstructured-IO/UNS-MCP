@@ -3,32 +3,35 @@ from typing import Any
 from mcp.server.fastmcp import Context
 from typing_extensions import Literal
 
-from connectors.destination.astra import (
+from uns_mcp.connectors.destination.astra import (
     create_astradb_destination,
     update_astradb_destination,
 )
-from connectors.destination.databricks_vdt import (
+from uns_mcp.connectors.destination.databricks_vdt import (
     create_databricks_delta_table_destination,
     update_databricks_delta_table_destination,
 )
-from connectors.destination.databricksvolumes import (
+from uns_mcp.connectors.destination.databricksvolumes import (
     create_databricks_volumes_destination,
     update_databricks_volumes_destination,
 )
-from connectors.destination.mongo import (
+from uns_mcp.connectors.destination.mongo import (
     create_mongodb_destination,
     update_mongodb_destination,
 )
-from connectors.destination.neo4j import (
+from uns_mcp.connectors.destination.neo4j import (
     create_neo4j_destination,
     update_neo4j_destination,
 )
-from connectors.destination.pinecone import (
+from uns_mcp.connectors.destination.pinecone import (
     create_pinecone_destination,
     update_pinecone_destination,
 )
-from connectors.destination.s3 import create_s3_destination, update_s3_destination
-from connectors.destination.weaviate import (
+from uns_mcp.connectors.destination.s3 import (
+    create_s3_destination,
+    update_s3_destination,
+)
+from uns_mcp.connectors.destination.weaviate import (
     create_weaviate_destination,
     update_weaviate_destination,
 )
