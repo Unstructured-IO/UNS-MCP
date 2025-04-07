@@ -5,3 +5,4 @@
 *.ipynb_checkpoints*
 build
 .idea
+dist

@@ -10,48 +10,52 @@ from unstructured_client.models.operations import (
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
     DestinationConnectorType,
-    MongoDBConnectorConfigInput,
     UpdateDestinationConnector,
+    WeaviateDestinationConnectorConfigInput,
 )
 
-from connectors.utils import create_log_for_created_updated_connector
+from uns_mcp.connectors.utils import (
+    create_log_for_created_updated_connector,
+)
 
 
-def _prepare_mongodb_dest_config(
-    database: str,
+def _prepare_weaviate_dest_config(
     collection: str,
-) -> MongoDBConnectorConfigInput:
-    """Prepare the MongoDB destination connector configuration."""
-    config = MongoDBConnectorConfigInput(
-        database=database,
+    cluster_url: str,
+) -> WeaviateDestinationConnectorConfigInput:
+    """Prepare the Azure source connector configuration."""
+    return WeaviateDestinationConnectorConfigInput(
+        cluster_url=cluster_url,
+        api_key=os.getenv("WEAVIATE_CLOUD_API_KEY"),
         collection=collection,
-        uri=os.getenv("MONGO_DB_CONNECTION_STRING"),
     )
-    return config
 
 
-async def create_mongodb_destination(
+async def create_weaviate_destination(
     ctx: Context,
     name: str,
-    database: str,
+    cluster_url: str,
     collection: str,
 ) -> str:
-    """Create an MongoDB destination connector.
+    """Create an weaviate vector database destination connector.
 
     Args:
-        name: A unique name for this connector
-        database: The name of the database to connect to.
-        collection: The name of the target MongoDB collection
+        cluster_url: URL of the weaviate cluster
+        collection : Name of the collection to use in the weaviate cluster
+        Note: The collection is a table in the weaviate cluster.
+              In platform, there are dedicated code to generate collection for users
+              here, due to the simplicity of the server, we are not generating it for users.
+
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_mongodb_dest_config(database=database, collection=collection)
+    config = _prepare_weaviate_dest_config(collection, cluster_url)
 
     destination_connector = CreateDestinationConnector(
         name=name,
-        type=DestinationConnectorType.MONGODB,
+        type=DestinationConnectorType.WEAVIATE_CLOUD,
         config=config,
     )
 
@@ -59,30 +63,30 @@ async def create_mongodb_destination(
         response = await client.destinations.create_destination_async(
             request=CreateDestinationRequest(create_destination_connector=destination_connector),
         )
-
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="MongoDB",
+            connector_name="Weaviate",
             connector_type="Destination",
             created_or_updated="Created",
         )
         return result
+
     except Exception as e:
-        return f"Error creating MongoDB destination connector: {str(e)}"
+        return f"Error creating weaviate destination connector: {str(e)}"
 
 
-async def update_mongodb_destination(
+async def update_weaviate_destination(
     ctx: Context,
     destination_id: str,
-    database: Optional[str] = None,
+    cluster_url: Optional[str] = None,
     collection: Optional[str] = None,
 ) -> str:
-    """Update an MongoDB destination connector.
+    """Update an weaviate destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        database: The name of the database to connect to.
-        collection: The name of the target MongoDB collection
+        cluster_url (optional): URL of the weaviate cluster
+        collection (optional): Name of the collection(like a file) to use in the weaviate cluster
 
     Returns:
         String containing the updated destination connector information
@@ -98,11 +102,14 @@ async def update_mongodb_destination(
     except Exception as e:
         return f"Error retrieving destination connector: {str(e)}"
 
-    input_config = MongoDBConnectorConfigInput(**current_config.model_dump())
-    config: MongoDBConnectorConfigInput = _prepare_mongodb_dest_config(
-        database=database or input_config.database,
-        collection=collection or input_config.collection,
-    )
+    # Update configuration with new values
+    config = dict(current_config)
+
+    if cluster_url is not None:
+        config["cluster_url"] = cluster_url
+
+    if collection is not None:
+        config["collection"] = collection
 
     destination_connector = UpdateDestinationConnector(config=config)
 
@@ -116,10 +123,10 @@ async def update_mongodb_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="MongoDB",
+            connector_name="Weaviate",
             connector_type="Destination",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating MongoDB destination connector: {str(e)}"
+        return f"Error updating weaviate destination connector: {str(e)}"

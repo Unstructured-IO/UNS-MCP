@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PYTHONVERSION: "3.12"
+
+jobs:
+  release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          uv sync
+          uv pip install twine build toml
+
+      - name: Get version from main
+        id: get-main-version
+        run: |
+          git switch main
+          MAIN_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
+          git switch -
+
+      - name: Compare versions
+        id: compare-versions
+        run: |
+          CUR_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+
+          echo "Current version in pyproject.toml: $CUR_VERSION"
+          echo "Version on main branch: $MAIN_VERSION"
+
+          if [ "$CUR_VERSION" == "$MAIN_VERSION" ]; then
+            echo "The version hasn't changed. Skipping release."
+            echo "SKIP_RELEASE=true" >> $GITHUB_ENV
+          else
+            echo "Versions differ. Proceed with the release."
+            echo "SKIP_RELEASE=false" >> $GITHUB_ENV
+
+      - name: Release to PyPI
+        if: env.SKIP_RELEASE != 'true'
+        env:
+          TWINE_USERNAME: "__token__"
+          TWINE_PASSWORD: ${{ secrets.PRIVATE_PYPI_PUBLISHER_TOKEN }}
+        run: |
+          uv run python -m build --sdist
+          uv run twine upload -r pypi dist/*

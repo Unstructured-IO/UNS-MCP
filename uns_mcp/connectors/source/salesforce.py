@@ -13,7 +13,9 @@ from unstructured_client.models.shared import (
     UpdateSourceConnector,
 )
 
-from connectors.utils import create_log_for_created_updated_connector
+from uns_mcp.connectors.utils import (
+    create_log_for_created_updated_connector,
+)
 
 
 def _prepare_salesforce_source_config(

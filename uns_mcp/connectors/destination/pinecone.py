@@ -9,57 +9,58 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
-    Neo4jDestinationConnectorConfigInput,
+    PineconeDestinationConnectorConfigInput,
     UpdateDestinationConnector,
 )
 
-from connectors.utils import create_log_for_created_updated_connector
+from uns_mcp.connectors.utils import (
+    create_log_for_created_updated_connector,
+)
 
 
-def _prepare_neo4j_dest_config(
-    database: str,
-    uri: str,
-    batch_size: Optional[int] = None,
-) -> Neo4jDestinationConnectorConfigInput:
+def _prepare_pinecone_dest_config(
+    index_name: str,
+    namespace: str = "default",
+    batch_size: Optional[int] = 50,
+) -> PineconeDestinationConnectorConfigInput:
 
     """Prepare the Azure source connector configuration."""
-    if os.getenv("NEO4J_USERNAME") is None:
-        raise ValueError("NEO4J_USERNAME environment variable is not set")
-    if os.getenv("NEO4J_PASSWORD") is None:
-        raise ValueError("NEO4J_PASSWORD environment variable is not set")
+    if os.getenv("PINECONE_API_KEY") is None:
+        raise ValueError("PINECONE_API_KEY environment variable is not set")
     else:
-        return Neo4jDestinationConnectorConfigInput(
-            database=database,
-            uri=uri,
+        return PineconeDestinationConnectorConfigInput(
+            index_name=index_name,
+            namespace=namespace,
             batch_size=batch_size,
-            username=os.getenv("NEO4J_USERNAME"),
-            password=os.getenv("NEO4J_PASSWORD"),
+            api_key=os.getenv("PINECONE_API_KEY"),
         )
 
 
-async def create_neo4j_destination(
+async def create_pinecone_destination(
     ctx: Context,
     name: str,
-    database: str,
-    uri: str,
-    batch_size: Optional[int] = 100,
+    index_name: str,
+    namespace: Optional[str] = "default",
+    batch_size: Optional[int] = 50,
 ) -> str:
-    """Create an neo4j destination connector.
+    """Create an pinecone destination connector.
 
     Args:
         name: A unique name for this connector
-        database: The neo4j database, e.g. "neo4j"
-        uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
-        batch_size: The batch size for the connector
+        index_name: The pinecone index name, used to insert vectors,
+        query for similar vectors, and delete them.
+        namespace: The pinecone namespace, a folder inside the pinecone index
+        batch_size: The batch size refers to the number of vectors you upsert or delete
+
 
     Returns:
         String containing the created destination connector information
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_neo4j_dest_config(database, uri, batch_size)
+    config = _prepare_pinecone_dest_config(index_name, namespace, batch_size)
 
-    destination_connector = CreateDestinationConnector(name=name, type="neo4j", config=config)
+    destination_connector = CreateDestinationConnector(name=name, type="pinecone", config=config)
 
     try:
         response = await client.destinations.create_destination_async(
@@ -68,29 +69,32 @@ async def create_neo4j_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="neo4j",
+            connector_name="Pinecone",
             connector_type="Destination",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating neo4j destination connector: {str(e)}"
+        return f"Error creating pinecone destination connector: {str(e)}"
 
 
-async def update_neo4j_destination(
+async def update_pinecone_destination(
     ctx: Context,
     destination_id: str,
-    database: Optional[str] = None,
-    uri: Optional[str] = None,
-    batch_size: Optional[int] = None,
+    index_name: Optional[str] = None,
+    namespace: Optional[str] = None,
+    batch_size: Optional[int] = 50,
 ) -> str:
-    """Update an neo4j destination connector.
+    """Update an Pinecone destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        database: The neo4j database, e.g. "neo4j"
-        uri: The neo4j URI, e.g. neo4j+s://<neo4j_instance_id>.databases.neo4j.io
-        batch_size: The batch size for the connector
+        index_name: The pinecone index name, used to insert vectors,
+        query for similar vectors, and delete them.
+        namespace: The pinecone namespace, a folder inside the pinecone index
+
+        batch_size: The batch size refers to the number of vectors you upsert or delete
+
 
     Returns:
         String containing the updated destination connector information
@@ -109,10 +113,10 @@ async def update_neo4j_destination(
     # Update configuration with new values
     config = dict(current_config)
 
-    if database is not None:
-        config["database"] = database
-    if uri is not None:
-        config["uri"] = uri
+    if index_name is not None:
+        config["index_name"] = index_name
+    if namespace is not None:
+        config["namespace"] = namespace
     if batch_size is not None:
         config["batch_size"] = batch_size
 
@@ -128,10 +132,10 @@ async def update_neo4j_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="neo4j",
+            connector_name="Pinecone",
             connector_type="Destination",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating neo4j destination connector: {str(e)}"
+        return f"Error updating pinecone destination connector: {str(e)}"

@@ -14,7 +14,9 @@ from unstructured_client.models.shared import (
     UpdateDestinationConnector,
 )
 
-from connectors.utils import create_log_for_created_updated_connector
+from uns_mcp.connectors.utils import (
+    create_log_for_created_updated_connector,
+)
 
 
 def _prepare_astra_dest_config(
@@ -80,8 +82,8 @@ async def create_astradb_destination(
         Note: A collection in AstraDB is a schemaless document store optimized for NoSQL workloads,
               equivalent to a table in traditional databases.
               A keyspace is the top-level namespace in AstraDB that groups multiple collections.
-              We require the users to create their own collection
-              and keyspace before creating the connector.
+              We require the users to create their own collection and keyspace before
+              creating the connector.
 
     Returns:
         String containing the created destination connector information
@@ -131,8 +133,8 @@ async def update_astradb_destination(
         keyspace: The AstraDB keyspace (optional)
         batch_size: The batch size for inserting documents (optional)
 
-        Note: We require the users to create their own collection and keyspace before
-              creating the connector.
+        Note: We require the users to create their own collection and
+                keyspace before creating the connector.
 
     Returns:
         String containing the updated destination connector information

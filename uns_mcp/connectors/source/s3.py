@@ -1,8 +1,7 @@
 import os
-from typing import List, Optional
+from typing import Optional
 
 from mcp.server.fastmcp import Context
-from unstructured_client import UNSET, OptionalNullable
 from unstructured_client.models.operations import (
     CreateSourceRequest,
     GetSourceRequest,
@@ -10,47 +9,52 @@ from unstructured_client.models.operations import (
 )
 from unstructured_client.models.shared import (
     CreateSourceConnector,
-    GoogleDriveSourceConnectorConfigInput,
+    S3SourceConnectorConfigInput,
     UpdateSourceConnector,
 )
 
-from connectors.utils import create_log_for_created_updated_connector
+from uns_mcp.connectors.utils import (
+    create_log_for_created_updated_connector,
+)
 
 
-def _prepare_gdrive_source_config(
-    drive_id: str,
+def _prepare_s3_source_config(
+    remote_url: Optional[str],
     recursive: Optional[bool],
-    extensions: OptionalNullable[List[str]] = UNSET,
-) -> GoogleDriveSourceConnectorConfigInput:
-    """Prepare the gdrive source connector configuration."""
-    return GoogleDriveSourceConnectorConfigInput(
-        drive_id=drive_id,
+) -> S3SourceConnectorConfigInput:
+    """Prepare the Azure source connector configuration."""
+    config = S3SourceConnectorConfigInput(
+        remote_url=remote_url,
         recursive=recursive,
-        extensions=extensions,
-        service_account_key=os.getenv("GOOGLEDRIVE_SERVICE_ACCOUNT_KEY"),
+        key=os.getenv("AWS_KEY"),
+        secret=os.getenv("AWS_SECRET"),
     )
+    if os.getenv("TOKEN"):
+        config.token = os.getenv("TOKEN")
+    if os.getenv("ENDPOINT_URL"):
+        config.endpoint_url = os.getenv("ENDPOINT_URL")
+    return config
 
 
-async def create_gdrive_source(
+async def create_s3_source(
     ctx: Context,
     name: str,
-    drive_id: str,
+    remote_url: str,
     recursive: bool = False,
-    extensions: OptionalNullable[List[str]] = UNSET,
 ) -> str:
-    """Create a gdrive source connector.
+    """Create an S3 source connector.
 
     Args:
         name: A unique name for this connector
-        remote_url: The gdrive URI to the bucket or folder (e.g., gdrive://my-bucket/)
+        remote_url: The S3 URI to the bucket or folder (e.g., s3://my-bucket/)
         recursive: Whether to access subfolders within the bucket
 
     Returns:
         String containing the created source connector information
     """
     client = ctx.request_context.lifespan_context.client
-    config = _prepare_gdrive_source_config(drive_id, recursive, extensions)
-    source_connector = CreateSourceConnector(name=name, type="google_drive", config=config)
+    config = _prepare_s3_source_config(remote_url, recursive)
+    source_connector = CreateSourceConnector(name=name, type="s3", config=config)
 
     try:
         response = await client.sources.create_source_async(
@@ -58,27 +62,26 @@ async def create_gdrive_source(
         )
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="GoogleDrive",
+            connector_name="S3",
             connector_type="Source",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating gdrive source connector: {str(e)}"
+        return f"Error creating S3 source connector: {str(e)}"
 
 
-async def update_gdrive_source(
+async def update_s3_source(
     ctx: Context,
     source_id: str,
-    drive_id: Optional[str] = None,
+    remote_url: Optional[str] = None,
     recursive: Optional[bool] = None,
-    extensions: OptionalNullable[List[str]] = UNSET,
 ) -> str:
-    """Update an gdrive source connector.
+    """Update an S3 source connector.
 
     Args:
         source_id: ID of the source connector to update
-        remote_url: The gdrive URI to the bucket or folder
+        remote_url: The S3 URI to the bucket or folder
         recursive: Whether to access subfolders within the bucket
 
     Returns:
@@ -98,14 +101,11 @@ async def update_gdrive_source(
     # Update configuration with new values
     config = dict(current_config)
 
-    if drive_id is not None:
-        config["drive_id"] = drive_id
+    if remote_url is not None:
+        config["remote_url"] = remote_url
 
     if recursive is not None:
         config["recursive"] = recursive
-
-    if extensions is not None:
-        config["extensions"] = extensions
 
     source_connector = UpdateSourceConnector(config=config)
 
@@ -118,10 +118,10 @@ async def update_gdrive_source(
         )
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="GoogleDrive",
+            connector_name="S3",
             connector_type="Source",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating gdrive source connector: {str(e)}"
+        return f"Error updating S3 source connector: {str(e)}"
