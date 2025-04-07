@@ -58,6 +58,9 @@ jobs:
             echo "Versions differ. Proceed with the release."
             echo "SKIP_RELEASE=false" >> $GITHUB_ENV
 
+          cat $GITHUB_ENV
+          exit 0
+
       - name: Release to PyPI
         if: env.SKIP_RELEASE != 'true'
         env:
