@@ -18,12 +18,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python and Install dependencies
-        if: env.SKIP_RELEASE != 'true'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
         run: |
-          uv python install ${{ env.PYTHONVERSION }}
-          uv venv
-          uv pip install .
+          uv sync
           uv pip install twine build toml
 
       - name: Get version from main
