@@ -175,30 +175,30 @@ css = [
 
 [[package]]
 name = "boto3"
-version = "1.37.17"
+version = "1.37.28"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ba/25/b9a582673cd50617115c944876e1e92f836b4ac9fdc253cfb2e4c1d492fb/boto3-1.37.17.tar.gz", hash = "sha256:f4ae383aca1799061d83c0097e9ccd7b494a71b36d72226628ad0fde1b95b7c9", size = 111331 }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/f5/dd50ed0a20019fa38c22797718c80d38e8b75b5e97c971a908c638e819aa/boto3-1.37.28.tar.gz", hash = "sha256:09ee85ba70a88286bba0d1bf5f0460a4b3bde52d162216accfe637b8bfac351b", size = 111385 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/57/f8/e9caa63e388c474f061578e8d8d744ddf36bb22ccea1525e9e6bcca16067/boto3-1.37.17-py3-none-any.whl", hash = "sha256:3e7c2056b0e7950818c4b8695ac0da3a7933cf9f4f45d67f8804ce37fdef8a7b", size = 139561 },
+    { url = "https://files.pythonhosted.org/packages/5d/76/2723dede8c69d04e37f0897e9c05b597b6906df3d4c80186e39a0bc1b914/boto3-1.37.28-py3-none-any.whl", hash = "sha256:e584d9d33808633e73af3d962e22cf2cea91a38bc5a17577bb25618f8ded504f", size = 139562 },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.37.17"
+version = "1.37.28"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0f/e6/0800833b3716a249634158a6ae336bf5fc5e5fb9ead64634229024854202/botocore-1.37.17.tar.gz", hash = "sha256:c879c2a5dc6952b81591d0e765c7b93e90df7f6c50b3d9b68011ec7cfe7fe48d", size = 13663335 }
+sdist = { url = "https://files.pythonhosted.org/packages/92/90/557082a8379ece106b37eb00766efc7a32cbfcdaa0d1d78f38f99eefd218/botocore-1.37.28.tar.gz", hash = "sha256:69ea327f70f0607d174c4c2b1dcc87327b9c48e413c9d322179172b614b28e03", size = 13799915 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/eb/2d9c1ee3cbbed2f68e5140ec56605bb03a2ab109a62bba86c5ee8547db26/botocore-1.37.17-py3-none-any.whl", hash = "sha256:f8c93eec385a346c7a59efcb15d8cf3613cd9d6ab27f32492eed9549bd86d69e", size = 13427283 },
+    { url = "https://files.pythonhosted.org/packages/ea/c3/29ffcb4c90492bcfcff1b7e5ddb5529846acc0e627569432db9842c47675/botocore-1.37.28-py3-none-any.whl", hash = "sha256:c26b645d7b125bf42ffc1671b862b47500ee658e3a1c95d2438cb689fc85df15", size = 13467675 },
 ]
 
 [[package]]
@@ -1896,7 +1896,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "anthropic", specifier = ">=0.49.0" },
-    { name = "boto3", specifier = ">=1.37.14" },
+    { name = "boto3", specifier = ">=1.37.27" },
     { name = "firecrawl-py", specifier = ">=1.14.1" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.29.5" },
     { name = "jupyter", marker = "extra == 'dev'", specifier = ">=1.1.1" },
@@ -1907,13 +1907,13 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.5" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.25.3" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "unstructured-client", specifier = ">=0.32.0" },
+    { name = "unstructured-client", specifier = ">=0.32.1" },
 ]
 provides-extras = ["dev"]
 
 [[package]]
 name = "unstructured-client"
-version = "0.32.0"
+version = "0.32.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -1927,9 +1927,9 @@ dependencies = [
     { name = "requests-toolbelt" },
     { name = "typing-inspection" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/aa/60edb5443f9b01c3d98e02ab2faf037f7985446b2ac957b4c8ee88e4566e/unstructured_client-0.32.0.tar.gz", hash = "sha256:2d691f6c3390a91b6a2e2e738503770a96f05357146be05b2068c7c4d6986f47", size = 78804 }
+sdist = { url = "https://files.pythonhosted.org/packages/40/74/fffef6e3c0f25d1d959ac30544341bbe8b41d011af3516ba982e74848707/unstructured_client-0.32.1.tar.gz", hash = "sha256:64597643598f9c19f3f2915331fe6f102587d9618174098ac09c75c92fcfc516", size = 79225 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/20/89/6dae3de36efc370c388da2567433dbc2d3ed56c8bfefa1d180e0119c3ffd/unstructured_client-0.32.0-py3-none-any.whl", hash = "sha256:6131a645dad7da3528812c5ac6db387d9e73d751aa0b7ad745608acc67807bd9", size = 178218 },
+    { url = "https://files.pythonhosted.org/packages/4b/2b/15758a4db8637bc2fa6db38faa7885096e572361a962550dc3c368e9c2dc/unstructured_client-0.32.1-py3-none-any.whl", hash = "sha256:755c02e967f772cb4a5502b1351bf4c5f6a10a7c11b6e3acffe332ddfc9cd428", size = 180535 },
 ]
 
 [[package]]
