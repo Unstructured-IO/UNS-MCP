@@ -57,7 +57,7 @@ jobs:
           else
             echo "Versions differ. Proceed with the release."
             echo "SKIP_RELEASE=false" >> $GITHUB_ENV
-
+          fi
           cat $GITHUB_ENV
           exit 0
 
