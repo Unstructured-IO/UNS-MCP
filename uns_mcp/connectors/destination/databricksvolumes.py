@@ -4,32 +4,28 @@ from typing import Optional
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
     CreateDestinationRequest,
-    DeleteDestinationRequest,
     GetDestinationRequest,
     UpdateDestinationRequest,
 )
 from unstructured_client.models.shared import (
     CreateDestinationConnector,
-    DatabricksVDTDestinationConnectorConfigInput,
+    DatabricksVolumesConnectorConfigInput,
     DestinationConnectorType,
     UpdateDestinationConnector,
 )
 
-from connectors.utils import (
+from uns_mcp.connectors.utils import (
     create_log_for_created_updated_connector,
 )
 
 
-def _prepare_databricks_delta_table_dest_config(
+def _prepare_databricks_volumes_dest_config(
     catalog: str,
-    database: str,
-    http_path: str,
-    server_hostname: str,
-    table_name: str,
     volume: str,
-    schema: Optional[str] = "default",
-    volume_path: Optional[str] = "/",
-) -> DatabricksVDTDestinationConnectorConfigInput:
+    host: str,
+    schema: str = "default",
+    volume_path: str = "/",
+) -> DatabricksVolumesConnectorConfigInput:
 
     """Prepare the Azure source connector configuration."""
     client_id = os.getenv("DATABRICKS_CLIENT_ID")
@@ -39,42 +35,32 @@ def _prepare_databricks_delta_table_dest_config(
             "Both Databricks client id and client secret environment variable are needed",
         )
     else:
-        return DatabricksVDTDestinationConnectorConfigInput(
+        return DatabricksVolumesConnectorConfigInput(
             catalog=catalog,
-            database=database,
-            http_path=http_path,
-            server_hostname=server_hostname,
-            table_name=table_name,
-            schema_=schema,
             volume=volume,
+            host=host,
+            schema_=schema,
             volume_path=volume_path,
             client_id=os.getenv("DATABRICKS_CLIENT_ID"),
             client_secret=os.getenv("DATABRICKS_CLIENT_SECRET"),
         )
 
 
-async def create_databricks_delta_table_destination(
+async def create_databricks_volumes_destination(
     ctx: Context,
     name: str,
     catalog: str,
-    database: str,
-    http_path: str,
-    server_hostname: str,
-    table_name: str,
     volume: str,
-    schema: Optional[str] = "default",
-    volume_path: Optional[str] = "/",
+    host: str,
+    schema: str = "default",
+    volume_path: str = "/",
 ) -> str:
     """Create an databricks volume destination connector.
 
     Args:
         name: A unique name for this connector
         catalog: Name of the catalog in the Databricks Unity Catalog service for the workspace.
-        database: The name of the schema (formerly known as a database)
-        in Unity Catalog for the target table
-        http_path: The cluster’s or SQL warehouse’s HTTP Path value
-        server_hostname: The Databricks cluster’s or SQL warehouse’s Server Hostname value
-        table_name: The name of the table in the schema
+        host: The Databricks host URL for the Databricks workspace.
         volume: Name of the volume associated with the schema.
         schema: Name of the schema associated with the volume. The default value is "default".
         volume_path: Any target folder path within the volume, starting from the root of the volume.
@@ -83,20 +69,11 @@ async def create_databricks_delta_table_destination(
     """
     client = ctx.request_context.lifespan_context.client
 
-    config = _prepare_databricks_delta_table_dest_config(
-        catalog,
-        database,
-        http_path,
-        server_hostname,
-        table_name,
-        volume,
-        schema,
-        volume_path,
-    )
+    config = _prepare_databricks_volumes_dest_config(catalog, volume, host, schema, volume_path)
 
     destination_connector = CreateDestinationConnector(
         name=name,
-        type=DestinationConnectorType.DATABRICKS_VOLUME_DELTA_TABLES,
+        type=DestinationConnectorType.DATABRICKS_VOLUMES,
         config=config,
     )
 
@@ -107,40 +84,36 @@ async def create_databricks_delta_table_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="Databricks Volumes Delta Table",
+            connector_name="Databricks Volumes",
             connector_type="Destination",
             created_or_updated="Created",
         )
         return result
     except Exception as e:
-        return f"Error creating databricks volumes Delta Table destination connector: {str(e)}"
+        return f"Error creating databricks volumes destination connector: {str(e)}"
 
 
-async def update_databricks_delta_table_destination(
+async def update_databricks_volumes_destination(
     ctx: Context,
     destination_id: str,
     catalog: Optional[str] = None,
-    database: Optional[str] = None,
-    http_path: Optional[str] = None,
-    server_hostname: Optional[str] = None,
-    table_name: Optional[str] = None,
-    schema: Optional[str] = None,
     volume: Optional[str] = None,
+    host: Optional[str] = None,
+    schema: Optional[str] = None,
     volume_path: Optional[str] = None,
 ) -> str:
     """Update an databricks volumes destination connector.
 
     Args:
         destination_id: ID of the destination connector to update
-        catalog: Name of the catalog in the Databricks Unity Catalog service for the workspace.
-        database: The name of the schema (formerly known as a database)
-        in Unity Catalog for the target table
-        http_path: The cluster’s or SQL warehouse’s HTTP Path value
-        server_hostname: The Databricks cluster’s or SQL warehouse’s Server Hostname value
-        table_name: The name of the table in the schema
-        volume: Name of the volume associated with the schema.
-        schema: Name of the schema associated with the volume. The default value is "default".
-        volume_path: Any target folder path within the volume, starting from the root of the volume.
+        catalog: Name of the catalog to update in the Databricks Unity Catalog
+        service for the workspace.
+        host: The Databricks host URL for the Databricks workspace to update.
+        volume: Name of the volume associated with the schema to update.
+        schema: Name of the schema associated with the volume to update.
+        The default value is "default".
+        volume_path: Any target folder path within the volume to update,
+        starting from the root of the volume.
 
     Returns:
         String containing the updated destination connector information
@@ -158,22 +131,15 @@ async def update_databricks_delta_table_destination(
 
     # Update configuration with new values
     config = dict(current_config)
+
     if catalog is not None:
         config["catalog"] = catalog
-
-    if database is not None:
-        config["database"] = database
-    if server_hostname is not None:
-        config["server_hostname"] = server_hostname
-    if http_path is not None:
-        config["http_path"] = http_path
-    if table_name is not None:
-        config["table_name"] = table_name
-    if volume is not None:
-        config["volume"] = volume
-
+    if host is not None:
+        config["host"] = host
     if schema is not None:
         config["schema_"] = schema
+    if volume is not None:
+        config["volume"] = volume
     if volume_path is not None:
         config["volume_path"] = volume_path
 
@@ -189,31 +155,10 @@ async def update_databricks_delta_table_destination(
 
         result = create_log_for_created_updated_connector(
             response,
-            connector_name="Databricks Volumes Delta Table",
+            connector_name="Databricks Volumes",
             connector_type="Destination",
             created_or_updated="Updated",
         )
         return result
     except Exception as e:
-        return f"Error updating databricks volumes Delta Table destination connector: {str(e)}"
-
-
-async def delete_databricks_delta_table_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an databricks volumes destination connector.
-
-    Args:
-        destination_id: ID of the destination connector to delete
-
-    Returns:
-        String containing the result of the deletion
-    """
-    client = ctx.request_context.lifespan_context.client
-
-    try:
-        _ = await client.destinations.delete_destination_async(
-            request=DeleteDestinationRequest(destination_id=destination_id),
-        )
-        return f"Databricks volumes Delta Table Destination Connector with ID {destination_id} \
-            deleted successfully"
-    except Exception as e:
-        return f"Error deleting Databricks volumes Delta Table destination connector: {str(e)}"
+        return f"Error updating databricks volumes destination connector: {str(e)}"

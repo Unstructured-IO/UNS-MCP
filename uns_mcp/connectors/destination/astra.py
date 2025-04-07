@@ -1,20 +1,20 @@
-from typing import Optional
-import os
 import logging
+import os
+from typing import Optional
+
 from mcp.server.fastmcp import Context
 from unstructured_client.models.operations import (
     CreateDestinationRequest,
-    DeleteDestinationRequest,
     GetDestinationRequest,
     UpdateDestinationRequest,
 )
 from unstructured_client.models.shared import (
-    CreateDestinationConnector,
     AstraDBConnectorConfigInput,
+    CreateDestinationConnector,
     UpdateDestinationConnector,
 )
 
-from connectors.utils import (
+from uns_mcp.connectors.utils import (
     create_log_for_created_updated_connector,
 )
 
@@ -30,9 +30,15 @@ def _prepare_astra_dest_config(
 
     # Validate required parameters
     if not token:
-        return "Error: AstraDB application token is required. Set ASTRA_DB_APPLICATION_TOKEN environment variable."
+        return (
+            "Error: AstraDB application token is required. "
+            "Set ASTRA_DB_APPLICATION_TOKEN environment variable."
+        )
     if not api_endpoint:
-        return "Error: AstraDB API endpoint is required. Set ASTRA_DB_API_ENDPOINT environment variable."
+        return (
+            "Error: AstraDB API endpoint is required. "
+            "Set ASTRA_DB_API_ENDPOINT environment variable."
+        )
     if not collection_name:
         return "Error: AstraDB collection name is required."
     if not keyspace:
@@ -41,18 +47,20 @@ def _prepare_astra_dest_config(
     config = AstraDBConnectorConfigInput(
         token=token,
         api_endpoint=api_endpoint,
-        collection_name=collection_name, 
+        collection_name=collection_name,
         keyspace=keyspace,
     )
-    
+
     # Set optional parameters if provided
     if batch_size is not None:
         # Use default if batch_size is not positive
         if batch_size <= 0:
             batch_size = 20
-            logging.info(f"\n Note: Provided batch_size was invalid, using default value of {batch_size}")
+            logging.info(
+                f"\n Note: Provided batch_size was invalid, using default value of {batch_size}",
+            )
         config.batch_size = batch_size
-    
+
     return config
 
 
@@ -67,14 +75,15 @@ async def create_astradb_destination(
 
     Args:
         name: A unique name for this connector
-        collection_name: The name of the collection to use 
-        keyspace: The AstraDB keyspace 
+        collection_name: The name of the collection to use
+        keyspace: The AstraDB keyspace
         batch_size: The batch size for inserting documents, must be positive (default: 20)
-        
-        Note: A collection in AstraDB is a schemaless document store optimized for NoSQL workloads, 
+
+        Note: A collection in AstraDB is a schemaless document store optimized for NoSQL workloads,
               equivalent to a table in traditional databases.
               A keyspace is the top-level namespace in AstraDB that groups multiple collections.
-              We require the users to create their own collection and keyspace before creating the connector.
+              We require the users to create their own collection and keyspace before
+              creating the connector.
 
     Returns:
         String containing the created destination connector information
@@ -102,7 +111,7 @@ async def create_astradb_destination(
             response,
             connector_name="AstraDB",
             connector_type="Destination",
-            created_or_updated="Created"
+            created_or_updated="Created",
         )
         return result
     except Exception as e:
@@ -123,8 +132,9 @@ async def update_astradb_destination(
         collection_name: The name of the collection to use (optional)
         keyspace: The AstraDB keyspace (optional)
         batch_size: The batch size for inserting documents (optional)
-        
-        Note: We require the users to create their own collection and keyspace before creating the connector.
+
+        Note: We require the users to create their own collection and
+                keyspace before creating the connector.
 
     Returns:
         String containing the updated destination connector information
@@ -139,7 +149,7 @@ async def update_astradb_destination(
         current_config = get_response.destination_connector_information.config
     except Exception as e:
         return f"Error retrieving destination connector: {str(e)}"
-    
+
     # Use current values if new ones aren't provided
     current_config = dict(current_config)
     if collection_name is None and "collection_name" in current_config:
@@ -177,23 +187,3 @@ async def update_astradb_destination(
         return result
     except Exception as e:
         return f"Error updating AstraDB destination connector: {str(e)}"
-
-
-async def delete_astradb_destination(ctx: Context, destination_id: str) -> str:
-    """Delete an AstraDB destination connector.
-
-    Args:
-        destination_id: ID of the destination connector to delete
-
-    Returns:
-        String containing the result of the deletion
-    """
-    client = ctx.request_context.lifespan_context.client
-
-    try:
-        _ = await client.destinations.delete_destination_async(
-            request=DeleteDestinationRequest(destination_id=destination_id),
-        )
-        return f"AstraDB Destination Connector with ID {destination_id} deleted successfully"
-    except Exception as e:
-        return f"Error deleting AstraDB destination connector: {str(e)}" 

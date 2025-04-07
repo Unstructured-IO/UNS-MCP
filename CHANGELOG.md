@@ -2,17 +2,20 @@
 
 ### Enhancements
 
+- Duplicated description of the custom workflow was removed from the tools, freeing up tokens from the LLM.
+- **Delete Connector Tools Unification**: All delete tools require just the ID of the connector, so they were combined into one tool for sources and one for destinations.
 - **Tools unification** - Source and destination connectors are now unified into a generic `create/update_source/destination_connector` tools.
 
 ### Fixes
 
-
-## 0.1.2-dev
+## 0.1.2
 
 ### Enhancements
 
-- Ability to run the minimal client and server separately (relies on the HTTP SSE interaface)
+- Ability to run the minimal client and server separately (relies on the HTTP SSE interface)
+
 - Neo4j Username is now ENV variable instead of being tool argument
+
 - Added notebook with example workflow having Azure source and Neo4j destination
 
 - **Destination connector adding**: MongoDB, Databricks Volumes, Databricks Volumes Delta Table, Pinecone
@@ -24,6 +27,8 @@
 - Capability to only log request parameters to UnstructuredClient's AsyncHttpClient, no error response is logged by this mechanism.
 
 - Adds terminal access to the minimal client using DesktopCommanderMCP
+
+- UNS-MCP server can be installed as standalone package, thus the usage of it is simplified for non-dev users
 
 ### Fixes
 
