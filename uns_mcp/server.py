@@ -104,7 +104,7 @@ register_connectors(mcp)
 
 
 @mcp.tool()
-async def list_sources(ctx: Context, source_type: Optional[str] = None) -> str:
+async def list_sources(ctx: Context, source_type: Optional[SourceConnectorType] = None) -> str:
     """
     List available sources from the Unstructured API.
 
@@ -118,9 +118,8 @@ async def list_sources(ctx: Context, source_type: Optional[str] = None) -> str:
 
     request = ListSourcesRequest()
     if source_type:
-        source_type = source_type.upper()  # it needs uppercase to access
         try:
-            request.source_type = SourceConnectorType[source_type]
+            request.source_type = SourceConnectorType(source_type)
         except KeyError:
             return f"Invalid source type: {source_type}"
 
@@ -166,7 +165,10 @@ async def get_source_info(ctx: Context, source_id: str) -> str:
 
 
 @mcp.tool()
-async def list_destinations(ctx: Context, destination_type: Optional[str] = None) -> str:
+async def list_destinations(
+    ctx: Context,
+    destination_type: Optional[DestinationConnectorType] = None,
+) -> str:
     """List available destinations from the Unstructured API.
 
     Args:
@@ -179,9 +181,8 @@ async def list_destinations(ctx: Context, destination_type: Optional[str] = None
 
     request = ListDestinationsRequest()
     if destination_type:
-        destination_type = destination_type.upper()
         try:
-            request.destination_type = DestinationConnectorType[destination_type]
+            request.destination_type = DestinationConnectorType(destination_type)
         except KeyError:
             return f"Invalid destination type: {destination_type}"
 
@@ -234,7 +235,7 @@ async def list_workflows(
     ctx: Context,
     destination_id: Optional[str] = None,
     source_id: Optional[str] = None,
-    status: Optional[str] = None,
+    status: Optional[WorkflowState] = None,
 ) -> str:
     """
     List workflows from the Unstructured API.
@@ -253,7 +254,7 @@ async def list_workflows(
 
     if status:
         try:
-            request.status = WorkflowState[status]
+            request.status = WorkflowState(status)
         except KeyError:
             return f"Invalid workflow status: {status}"
 
@@ -442,7 +443,7 @@ async def delete_workflow(ctx: Context, workflow_id: str) -> str:
 async def list_jobs(
     ctx: Context,
     workflow_id: Optional[str] = None,
-    status: Optional[str] = None,
+    status: Optional[JobStatus] = None,
 ) -> str:
     """
     List jobs via the Unstructured API.
@@ -460,7 +461,7 @@ async def list_jobs(
 
     if status:
         try:
-            request.status = JobStatus[status]
+            request.status = JobStatus(status)
         except KeyError:
             return f"Invalid job status: {status}"
 

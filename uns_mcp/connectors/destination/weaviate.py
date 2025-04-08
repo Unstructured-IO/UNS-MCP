@@ -42,9 +42,11 @@ async def create_weaviate_destination(
     Args:
         cluster_url: URL of the weaviate cluster
         collection : Name of the collection to use in the weaviate cluster
-        Note: The collection is a table in the weaviate cluster.
-              In platform, there are dedicated code to generate collection for users
-              here, due to the simplicity of the server, we are not generating it for users.
+
+    Note: The collection is a table in the Weaviate cluster. In the platform, the collection
+        name can be generated automatically; however, this is not yet supported via the API.
+        Therefore, the collection name is required. Please note that the schema cannot be empty
+        and must contain at least a record_id: Text.
 
     Returns:
         String containing the created destination connector information
