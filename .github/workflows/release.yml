@@ -73,4 +73,4 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PRIVATE_PYPI_PUBLISHER_TOKEN }}
         run: |
           uv run python -m build --sdist
-          uv run twine upload -r pypi dist/*
+          uv run twine upload -r pypi dist/* --verbose
