@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       force_release:
+        type: boolean
         description: 'Force release regardless of version changes'
-        required: false
-        default: 'false'
+        default: false
 
 env:
   PYTHONVERSION: "3.12"
