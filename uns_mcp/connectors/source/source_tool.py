@@ -2,6 +2,7 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 from typing_extensions import Literal
+from unstructured_client.models.operations import DeleteSourceRequest
 
 from uns_mcp.connectors.source.azure import create_azure_source, update_azure_source
 from uns_mcp.connectors.source.gdrive import create_gdrive_source, update_gdrive_source
@@ -153,3 +154,21 @@ async def update_source_connector(
         f"Unsupported source type: {source_type}. "
         f"Please use a supported source type: {list(update_functions.keys())}."
     )
+
+
+async def delete_source_connector(ctx: Context, source_id: str) -> str:
+    """Delete a source connector.
+
+    Args:
+        source_id: ID of the source connector to delete
+
+    Returns:
+        String containing the result of the deletion
+    """
+    client = ctx.request_context.lifespan_context.client
+
+    try:
+        await client.sources.delete_source_async(request=DeleteSourceRequest(source_id=source_id))
+        return f"Source Connector with ID {source_id} deleted successfully"
+    except Exception as e:
+        return f"Error deleting source connector: {str(e)}"

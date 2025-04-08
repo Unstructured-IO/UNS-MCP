@@ -2,6 +2,7 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 from typing_extensions import Literal
+from unstructured_client.models.operations import DeleteDestinationRequest
 
 from uns_mcp.connectors.destination.astra import (
     create_astradb_destination,
@@ -211,3 +212,23 @@ async def update_destination_connector(
         f"Unsupported destination type: {destination_type}. "
         f"Please use a supported destination type: {list(update_functions.keys())}."
     )
+
+
+async def delete_destination_connector(ctx: Context, destination_id: str) -> str:
+    """Delete a destination connector.
+
+    Args:
+        destination_id: ID of the destination connector to delete
+
+    Returns:
+        String containing the result of the deletion
+    """
+    client = ctx.request_context.lifespan_context.client
+
+    try:
+        _ = await client.destinations.delete_destination_async(
+            request=DeleteDestinationRequest(destination_id=destination_id),
+        )
+        return f"Destination Connector with ID {destination_id} deleted successfully"
+    except Exception as e:
+        return f"Error deleting destination connector: {str(e)}"
