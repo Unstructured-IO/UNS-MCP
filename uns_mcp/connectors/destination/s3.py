@@ -45,10 +45,6 @@ async def create_s3_destination(
     Args:
         name: A unique name for this connector
         remote_url: The S3 URI to the bucket or folder
-        key: The AWS access key ID
-        secret: The AWS secret access key
-        token: The AWS STS session token for temporary access (optional)
-        endpoint_url: Custom URL if connecting to a non-AWS S3 bucket
 
     Returns:
         String containing the created destination connector information

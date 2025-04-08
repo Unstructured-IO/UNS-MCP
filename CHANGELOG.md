@@ -1,9 +1,10 @@
-## 0.1.3-dev
+## 0.1.3
 
 ### Enhancements
 
 - Duplicated description of the custom workflow was removed from the tools, freeing up tokens from the LLM.
 - **Delete Connector Tools Unification**: All delete tools require just the ID of the connector, so they were combined into one tool for sources and one for destinations.
+- **Tools unification** - Source and destination connectors are now unified into a generic `create/update_source/destination_connector` tools.
 
 ### Fixes
 

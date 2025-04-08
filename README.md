@@ -4,65 +4,65 @@ An MCP server implementation for interacting with the Unstructured API. This ser
 
 ## Available Tools
 
-| Tool | Description |
-|------|-------------|
-| `list_sources` | Lists available sources from the Unstructured API. |
-| `get_source_info` | Get detailed information about a specific source connector. |
-| `create_[connector]_source` | Create a source connector. Currently, we have s3/google drive/azure connectors (more to come!) |
-| `update_[connector]_source` | Update an existing source connector by params. |
-| `delete_[connector]_source` | Delete a source connector by source id. |
-| `list_destinations` | Lists available destinations from the Unstructured API. |
-| `get_destination_info` | Get detailed info about a specific destination connector. Currently, we have s3/weaviate/astra/neo4j/mongo DB (more to come!) |
-| `create_[connector]_destination` | Create a destination connector by params. |
-| `update_[connector]_destination` | Update an existing destination connector by destination id. |
-| `delete_[connector]_destination` | Delete a destination connector by destination id. |
-| `list_workflows` | Lists workflows from the Unstructured API. |
-| `get_workflow_info` | Get detailed information about a specific workflow. |
-| `create_workflow` | Create a new workflow with source, destination id, etc. |
-| `run_workflow` | Run a specific workflow with workflow id |
-| `update_workflow` | Update an existing workflow by params. |
-| `delete_workflow` | Delete a specific workflow by id. |
-| `list_jobs` | Lists jobs for a specific workflow from the Unstructured API. |
-| `get_job_info` | Get detailed information about a specific job by job id. |
-| `cancel_job` |Delete a specific job by id. |
+| Tool                           | Description                                                   |
+|--------------------------------|---------------------------------------------------------------|
+| `list_sources`                 | Lists available sources from the Unstructured API.            |
+| `get_source_info`              | Get detailed information about a specific source connector.   |
+| `create_source_connector`      | Create a source connector.)                                   |
+| `update_source_connector`      | Update an existing source connector by params.                |
+| `delete_source_connector`      | Delete a source connector by source id.                       |
+| `list_destinations`            | Lists available destinations from the Unstructured API.       |
+| `get_destination_info`         | Get detailed info about a specific destination connector      |
+| `create_destination_connector` | Create a destination connector by params.                     |
+| `update_destination_connector` | Update an existing destination connector by destination id.   |
+| `delete_destination_connector` | Delete a destination connector by destination id.             |
+| `list_workflows`               | Lists workflows from the Unstructured API.                    |
+| `get_workflow_info`            | Get detailed information about a specific workflow.           |
+| `create_workflow`              | Create a new workflow with source, destination id, etc.       |
+| `run_workflow`                 | Run a specific workflow with workflow id                      |
+| `update_workflow`              | Update an existing workflow by params.                        |
+| `delete_workflow`              | Delete a specific workflow by id.                             |
+| `list_jobs`                    | Lists jobs for a specific workflow from the Unstructured API. |
+| `get_job_info`                 | Get detailed information about a specific job by job id.      |
+| `cancel_job`                   | Delete a specific job by id.                                  |
 
 Below is a list of connectors the `UNS-MCP` server currently supports, please see the full list of source connectors that Unstructured platform supports [here](https://docs.unstructured.io/api-reference/workflow/sources/overview) and destination list [here](https://docs.unstructured.io/api-reference/workflow/destinations/overview). We are planning on adding more!
 
-| Source | Destination |
-|------|-------------|
-| S3 | S3 |
-| Azure | Weaviate |
-| Google Drive | Pinecone |
-| OneDrive | AstraDB |
-| Salesforce | MongoDB |
-| Sharepoint | Neo4j|
-| | Databricks Volumes|
-|  | Databricks Volumes Delta Table |
+| Source       | Destination                    |
+|--------------|--------------------------------|
+| S3           | S3                             |
+| Azure        | Weaviate                       |
+| Google Drive | Pinecone                       |
+| OneDrive     | AstraDB                        |
+| Salesforce   | MongoDB                        |
+| Sharepoint   | Neo4j                          |
+|              | Databricks Volumes             |
+|              | Databricks Volumes Delta Table |
 
 
 To use the tool that creates/updates/deletes a connector, the credentials for that specific connector must be defined in your .env file. Below is the list of `credentials` for the connectors we support:
 
-| Credential Name | Description |
-|------|-------------|
-| `ANTHROPIC_API_KEY` | required to run the `minimal_client` to interact with our server. |
-| `AWS_KEY`, `AWS_SECRET`| required to create S3 connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/sources/s3) and [here](https://docs.unstructured.io/api-reference/workflow/destinations/s3) |
-| `WEAVIATE_CLOUD_API_KEY` | required to create Weaviate vector db connector, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/destinations/weaviate) |
-| `FIRECRAWL_API_KEY` | required to use Firecrawl tools in `external/firecrawl.py`, sign up on [Firecrawl](https://www.firecrawl.dev/) and get an API key. |
-| `ASTRA_DB_APPLICATION_TOKEN`, `ASTRA_DB_API_ENDPOINT` | required to create Astradb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/astradb)|
-| `AZURE_CONNECTION_STRING`| required option 1 to create Azure connector via ``uns-mcp`` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
-| `AZURE_ACCOUNT_NAME`+`AZURE_ACCOUNT_KEY`| required option 2 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage)|
-| `AZURE_ACCOUNT_NAME`+`AZURE_SAS_TOKEN` | required option 3 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage) |
-| `NEO4J_PASSWORD` | required to create Neo4j connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/neo4j) |
-| `MONGO_DB_CONNECTION_STRING` | required to create Mongodb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/mongodb) |
-| `GOOGLEDRIVE_SERVICE_ACCOUNT_KEY` | a string value. The original server account key (follow [documentation](https://docs.unstructured.io/ui/sources/google-drive)) is in json file, run `cat /path/to/google_service_account_key.json | base64` in terminal to get the string value  |
-| `DATABRICKS_CLIENT_ID`,`DATABRICKS_CLIENT_SECRET` | required to create Databricks volume/delta table connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/databricks-volumes) and [here](https://docs.unstructured.io/ui/destinations/databricks-delta-table) |
-| `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_CRED`,`ONEDRIVE_TENANT_ID`| required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/onedrive) |
-| `PINECONE_API_KEY` | required to create Pinecone vector DB connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/pinecone) |
-| `SALESFORCE_CONSUMER_KEY`,`SALESFORCE_PRIVATE_KEY` | required to create salesforce source connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ingestion/source-connectors/salesforce)|
-| `SHAREPOINT_CLIENT_ID`, `SHAREPOINT_CLIENT_CRED`,`SHAREPOINT_TENANT_ID`| required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/sharepoint) |
-| `LOG_LEVEL` | Used to set logging level for our `minimal_client`, e.g. set to ERROR to get everything  |
-| `CONFIRM_TOOL_USE` | set to true so that `minimal_client` can confirm execution before each tool call |
-| `DEBUG_API_REQUESTS` | set to true so that `uns_mcp/server.py` can output request parameters for better debugging |
+| Credential Name                                                         | Description                                                                                                                                                                                                                                                     |
+|-------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ANTHROPIC_API_KEY`                                                     | required to run the `minimal_client` to interact with our server.                                                                                                                                                                                               |
+| `AWS_KEY`, `AWS_SECRET`                                                 | required to create S3 connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/sources/s3) and [here](https://docs.unstructured.io/api-reference/workflow/destinations/s3)                                |
+| `WEAVIATE_CLOUD_API_KEY`                                                | required to create Weaviate vector db connector, see how in [documentation](https://docs.unstructured.io/api-reference/workflow/destinations/weaviate)                                                                                                          |
+| `FIRECRAWL_API_KEY`                                                     | required to use Firecrawl tools in `external/firecrawl.py`, sign up on [Firecrawl](https://www.firecrawl.dev/) and get an API key.                                                                                                                              |
+| `ASTRA_DB_APPLICATION_TOKEN`, `ASTRA_DB_API_ENDPOINT`                   | required to create Astradb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/astradb)                                                                                                                     |
+| `AZURE_CONNECTION_STRING`                                               | required option 1 to create Azure connector via ``uns-mcp`` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage)                                                                                                      |
+| `AZURE_ACCOUNT_NAME`+`AZURE_ACCOUNT_KEY`                                | required option 2 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage)                                                                                                        |
+| `AZURE_ACCOUNT_NAME`+`AZURE_SAS_TOKEN`                                  | required option 3 to create Azure connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/azure-blob-storage)                                                                                                        |
+| `NEO4J_PASSWORD`                                                        | required to create Neo4j connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/neo4j)                                                                                                                         |
+| `MONGO_DB_CONNECTION_STRING`                                            | required to create Mongodb connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/mongodb)                                                                                                                     |
+| `GOOGLEDRIVE_SERVICE_ACCOUNT_KEY`                                       | a string value. The original server account key (follow [documentation](https://docs.unstructured.io/ui/sources/google-drive)) is in json file, run `base64 < /path/to/google_service_account_key.json` in terminal to get the string value                     |
+| `DATABRICKS_CLIENT_ID`,`DATABRICKS_CLIENT_SECRET`                       | required to create Databricks volume/delta table connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/databricks-volumes) and [here](https://docs.unstructured.io/ui/destinations/databricks-delta-table)    |
+| `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_CRED`,`ONEDRIVE_TENANT_ID`       | required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/onedrive)                                                                                                                  |
+| `PINECONE_API_KEY`                                                      | required to create Pinecone vector DB connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/destinations/pinecone)                                                                                                         |
+| `SALESFORCE_CONSUMER_KEY`,`SALESFORCE_PRIVATE_KEY`                      | required to create salesforce source connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ingestion/source-connectors/salesforce)                                                                                            |
+| `SHAREPOINT_CLIENT_ID`, `SHAREPOINT_CLIENT_CRED`,`SHAREPOINT_TENANT_ID` | required to create One Drive connector via `uns-mcp` server, see how in [documentation](https://docs.unstructured.io/ui/sources/sharepoint)                                                                                                                     |
+| `LOG_LEVEL`                                                             | Used to set logging level for our `minimal_client`, e.g. set to ERROR to get everything                                                                                                                                                                         |
+| `CONFIRM_TOOL_USE`                                                      | set to true so that `minimal_client` can confirm execution before each tool call                                                                                                                                                                                |
+| `DEBUG_API_REQUESTS`                                                    | set to true so that `uns_mcp/server.py` can output request parameters for better debugging                                                                                                                                                                      |
 
 
 ### Firecrawl Source

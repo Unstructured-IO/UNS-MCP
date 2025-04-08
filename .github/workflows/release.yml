@@ -33,20 +33,16 @@ jobs:
           uv sync
           uv pip install twine build toml
 
-      - name: Get version from main
-        id: get-main-version
-        run: |
-          source .venv/bin/activate
-          git switch main
-          MAIN_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
-          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
-          git switch -
-
       - name: Compare versions
         id: compare-versions
         run: |
           source .venv/bin/activate
+
           CUR_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+
+          git switch --detach HEAD^
+          MAIN_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          git switch -
 
           echo "Current version in pyproject.toml: $CUR_VERSION"
           echo "Version on main branch: $MAIN_VERSION"

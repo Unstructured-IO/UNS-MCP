@@ -41,7 +41,7 @@ async def create_salesforce_source(
     ctx: Context,
     name: str,
     username: str,
-    categories: Optional[List[str]] = None,
+    categories: Optional[list[str]] = None,
 ) -> str:
     """Create a Salesforce source connector.
 

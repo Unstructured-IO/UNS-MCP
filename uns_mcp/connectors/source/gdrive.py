@@ -38,14 +38,15 @@ async def create_gdrive_source(
     name: str,
     drive_id: str,
     recursive: bool = False,
-    extensions: OptionalNullable[List[str]] = UNSET,
+    extensions: OptionalNullable[list[str]] = UNSET,
 ) -> str:
     """Create a gdrive source connector.
 
     Args:
         name: A unique name for this connector
-        remote_url: The gdrive URI to the bucket or folder (e.g., gdrive://my-bucket/)
+        drive_id: The gdrive URI to the bucket or folder (e.g., gdrive://my-bucket/)
         recursive: Whether to access subfolders within the bucket
+        extensions: (Optional[list[str]]) File extensions to filter
 
     Returns:
         String containing the created source connector information
