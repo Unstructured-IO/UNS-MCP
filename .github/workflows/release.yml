@@ -2,6 +2,7 @@ name: Release
 
 on:
   push:
+    # The CI job is triggered after merged to branch, so the version between last commits are compared
     branches: [main]
   workflow_dispatch:
     inputs:
