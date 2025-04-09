@@ -101,6 +101,8 @@ async def create_destination_connector(
                 cluster_url: URL of the Weaviate cluster
                 collection: Name of the collection in the Weaviate cluster
 
+                Note: Minimal schema is required for the collection, e.g. record_id: Text
+
     Returns:
         String containing the created destination connector information
     """
@@ -189,6 +191,8 @@ async def update_destination_connector(
             weaviate:
                 cluster_url: (Optional[str]): URL of the Weaviate cluster
                 collection: (Optional[str]): Name of the collection in the Weaviate cluster
+
+                Note: Minimal schema is required for the collection, e.g. record_id: Text
 
     Returns:
         String containing the updated destination connector information

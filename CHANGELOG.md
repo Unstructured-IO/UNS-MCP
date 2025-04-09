@@ -1,3 +1,10 @@
+## 0.1.4-dev
+
+### Enhancements
+
+### Fixes
+- Adds information in weaviate destination docstring that it requires a schema to be created before using the tool
+
 ## 0.1.3
 
 ### Enhancements
