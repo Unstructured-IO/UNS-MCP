@@ -2,8 +2,14 @@ name: Release
 
 on:
   push:
+    # The CI job is triggered after merged to branch, so the version between last commits are compared
     branches: [main]
   workflow_dispatch:
+    inputs:
+      force_release:
+        type: boolean
+        description: 'Force release regardless of version changes'
+        default: false
 
 env:
   PYTHONVERSION: "3.12"
@@ -38,6 +44,7 @@ jobs:
         run: |
           source .venv/bin/activate
 
+          FORCE_RELEASE="${{ github.event.inputs.force_release }}"
           CUR_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
 
           git switch --detach HEAD^
@@ -46,8 +53,12 @@ jobs:
 
           echo "Current version in pyproject.toml: $CUR_VERSION"
           echo "Version on main branch: $MAIN_VERSION"
+          echo "FORCE_RELEASE: $FORCE_RELEASE"
 
-          if [ "$CUR_VERSION" == "$MAIN_VERSION" ]; then
+          if [ "$FORCE_RELEASE" == "true" ]; then
+            echo "Force release is enabled. Proceeding with the release."
+            echo "SKIP_RELEASE=false" >> $GITHUB_ENV
+          elif [ "$CUR_VERSION" == "$MAIN_VERSION" ]; then
             echo "The version hasn't changed. Skipping release."
             echo "SKIP_RELEASE=true" >> $GITHUB_ENV
           else
@@ -59,7 +70,7 @@ jobs:
         if: env.SKIP_RELEASE != 'true'
         env:
           TWINE_USERNAME: "__token__"
-          TWINE_PASSWORD: ${{ secrets.PRIVATE_PYPI_PUBLISHER_TOKEN }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PUBLISHER_TOKEN }}
         run: |
           uv run python -m build --sdist
           uv run twine upload -r pypi dist/*

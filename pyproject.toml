@@ -1,6 +1,6 @@
 [project]
 name = "uns_mcp"
-version = "0.1.3" # Set only non-dev versions to release
+version = "0.1.4" # Set only non-dev versions to release
 description = "MCP server implementation providing structured tools for interacting with the Unstructured API, managing sources, destinations, workflows, and jobs"
 requires-python = ">=3.12"
 readme = "README.md"

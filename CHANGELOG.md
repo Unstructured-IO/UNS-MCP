@@ -1,9 +1,10 @@
-## 0.1.4-dev
+## 0.1.4
 
 ### Enhancements
 
 ### Fixes
 - Adds information in weaviate destination docstring that it requires a schema to be created before using the tool
+- Fixed countinous develiery credentials
 
 ## 0.1.3
 
