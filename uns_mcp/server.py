@@ -304,7 +304,7 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
     response = await client.workflows.get_workflow_async(
         request=GetWorkflowRequest(workflow_id=workflow_id),
     )
-    
+
     info: WorkflowInformation = response.workflow_information
 
     result = ["Workflow Information:"]
@@ -314,7 +314,7 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
     if info.workflow_type is None:
         result.append("Type: Undefined")
     else:
-        result.append(f"Type: {info.workflow_type.value}")    
+        result.append(f"Type: {info.workflow_type.value}")
 
     result.append("\nSources:")
     for source in info.sources:
