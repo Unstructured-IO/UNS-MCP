@@ -311,13 +311,16 @@ async def get_workflow_info(ctx: Context, workflow_id: str) -> str:
     result.append(f"Name: {info.name}")
     result.append(f"ID: {info.id}")
     result.append(f"Status: {info.status.value}")
-    result.append(f"Type: {info.workflow_type.value}")
+    if info.workflow_type is None:
+        result.append("Type: Undefined")
+    else:
+        result.append(f"Type: {info.workflow_type.value}")
 
     result.append("\nSources:")
     for source in info.sources:
         result.append(f"  - {source}")
 
-    if info.workflow_type == WorkflowType.CUSTOM.value:
+    if info.workflow_type and info.workflow_type == WorkflowType.CUSTOM.value:
         result.append("\nWorkflow Nodes:")
         for node in info.workflow_nodes:
             result.append(f"  - {node.name} (Type: {node.type.value}) (Subtype: {node.subtype}):")
