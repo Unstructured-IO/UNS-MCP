@@ -1,3 +1,11 @@
+## 0.1.5
+
+### Enhancements
+- Add a new tool `list_workflows_with_finished_jobs` that lists all workflows that have any completed job, together
+  with information about source and destination details
+
+### Fixes
+
 ## 0.1.4
 
 ### Enhancements
