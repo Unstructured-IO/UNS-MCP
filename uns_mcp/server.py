@@ -558,6 +558,93 @@ async def cancel_job(ctx: Context, job_id: str) -> str:
         return f"Error canceling job: {str(e)}"
 
 
+@mcp.tool()
+async def list_workflows_with_finished_jobs(
+    ctx: Context,
+    source_type: Optional[SourceConnectorType | str] = None,
+    destination_type: Optional[DestinationConnectorType | str] = None,
+) -> str:
+    """
+    List workflows with finished jobs via the Unstructured API.
+    Args:
+        source_type: Optional source connector type to filter by
+        destination_type: Optional destination connector type to filter by
+    Returns:
+        String containing the list of workflows with finished jobs and source and destination
+        details
+    """
+    if source_type:
+        try:
+            source_type = (
+                SourceConnectorType(source_type) if isinstance(source_type, str) else source_type
+            )
+        except KeyError:
+            return f"Invalid source type: {source_type}"
+    if destination_type:
+        try:
+            destination_type = (
+                DestinationConnectorType(destination_type)
+                if isinstance(destination_type, str)
+                else destination_type
+            )
+        except KeyError:
+            return f"Invalid destination type: {destination_type}"
+
+    client = ctx.request_context.lifespan_context.client
+    try:
+        workflows_details = await gather_workflows_details(client=client)
+    except Exception as e:
+        return f"Error retrieving workflows: {str(e)}"
+
+    filtered_workflows_details = []
+
+    for workflow_details in workflows_details:
+        updated_workflow_details = deepcopy(workflow_details)
+
+        if source_type:
+            updated_workflow_details.sources = [
+                source for source in workflow_details.sources if source.type == source_type
+            ]
+
+        if destination_type:
+            updated_workflow_details.destinations = [
+                destination
+                for destination in workflow_details.destinations
+                if destination.type == destination_type
+            ]
+
+        updated_workflow_details.jobs = [
+            job for job in workflow_details.jobs if job.status == JobStatus.COMPLETED
+        ]
+
+        if (
+            updated_workflow_details.sources
+            and updated_workflow_details.destinations
+            and updated_workflow_details.jobs
+        ):
+            filtered_workflows_details.append(updated_workflow_details)
+
+    if not filtered_workflows_details:
+        return "No workflows found with finished jobs"
+
+    result = ["Workflows:"]
+    for workflow_details in filtered_workflows_details:
+        result.append(f"- Workflow ID: {workflow_details.workflow.id}")
+        result.append("  Sources:")
+        for source in workflow_details.sources:
+            result.append(f"    - {source.name} (ID: {source.id})")
+            for key, value in source.config:
+                result.append(f"      {key}: {value}")
+
+        result.append("  Destinations:")
+        for destination in workflow_details.destinations:
+            result.append(f"    - {destination.name} (ID: {destination.id})")
+            for key, value in destination.config:
+                result.append(f"      {key}: {value}")
+
+    return "\n".join(result)
+
+
 def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlette:
     """Create a Starlette application that can server the provied mcp server with SSE."""
     sse = SseServerTransport("/messages/")
@@ -633,92 +720,6 @@ async def gather_workflows_details(client: UnstructuredClient) -> list[WorkflowD
         workflows_details.append(workflow_details)
 
     return workflows_details
-
-
-@mcp.tool()
-async def list_workflows_with_finished_jobs(
-    ctx: Context,
-    source_type: Optional[SourceConnectorType | str] = None,
-    destination_type: Optional[DestinationConnectorType | str] = None,
-) -> str:
-    """
-    List workflows with finished jobs via the Unstructured API.
-    Args:
-        source_type: Optional source connector type to filter by
-        destination_type: Optional destination connector type to filter by
-    Returns:
-        String containing the list of workflows with finished jobs and their details
-    """
-    if source_type:
-        try:
-            source_type = (
-                SourceConnectorType(source_type) if isinstance(source_type, str) else source_type
-            )
-        except KeyError:
-            return f"Invalid source type: {source_type}"
-    if destination_type:
-        try:
-            destination_type = (
-                DestinationConnectorType(destination_type)
-                if isinstance(destination_type, str)
-                else destination_type
-            )
-        except KeyError:
-            return f"Invalid destination type: {destination_type}"
-
-    client = ctx.request_context.lifespan_context.client
-    try:
-        workflows_details = await gather_workflows_details(client=client)
-    except Exception as e:
-        return f"Error retrieving workflows: {str(e)}"
-
-    filtered_workflows_details = []
-
-    for workflow_details in workflows_details:
-        updated_workflow_details = deepcopy(workflow_details)
-
-        if source_type:
-            updated_workflow_details.sources = [
-                source for source in workflow_details.sources if source.type == source_type
-            ]
-
-        if destination_type:
-            updated_workflow_details.destinations = [
-                destination
-                for destination in workflow_details.destinations
-                if destination.type == destination_type
-            ]
-
-        updated_workflow_details.jobs = [
-            job for job in workflow_details.jobs if job.status == JobStatus.COMPLETED
-        ]
-
-        if (
-            updated_workflow_details.sources
-            and updated_workflow_details.destinations
-            and updated_workflow_details.jobs
-        ):
-            filtered_workflows_details.append(updated_workflow_details)
-
-    if not filtered_workflows_details:
-        return "No workflows found with finished jobs"
-
-    result = ["Workflows:"]
-    for workflow_details in filtered_workflows_details:
-        result.append(f"- Workflow ID: {workflow_details.workflow.id}")
-        result.append("  Sources:")
-        for source in workflow_details.sources:
-            result.append(f"    - {source.name} (ID: {source.id})")
-            for key, value in source.config:
-                result.append(f"      {key}: {value}")
-
-        result.append("  Destinations:")
-        for destination in workflow_details.destinations:
-            result.append(f"    - {destination.name} (ID: {destination.id})")
-            for key, value in destination.config:
-                result.append(f"      {key}: {value}")
-
-    return "\n".join(result)
 
 
 def main():
