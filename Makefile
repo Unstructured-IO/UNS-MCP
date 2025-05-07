@@ -4,7 +4,7 @@ debug:
 
 .PHONY: sse-client
 sse-client:
-	uv run python minimal_client/client.py "http://127.0.0.1:8080/sse"
+	uv run python minimal_client/client.py "http://127.0.0.1:8081/sse"
 
 .PHONY: sse-client-terminal
 sse-client-terminal:
