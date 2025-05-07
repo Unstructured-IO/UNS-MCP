@@ -4,27 +4,28 @@ An MCP server implementation for interacting with the Unstructured API. This ser
 
 ## Available Tools
 
-| Tool                           | Description                                                   |
-|--------------------------------|---------------------------------------------------------------|
-| `list_sources`                 | Lists available sources from the Unstructured API.            |
-| `get_source_info`              | Get detailed information about a specific source connector.   |
-| `create_source_connector`      | Create a source connector.)                                   |
-| `update_source_connector`      | Update an existing source connector by params.                |
-| `delete_source_connector`      | Delete a source connector by source id.                       |
-| `list_destinations`            | Lists available destinations from the Unstructured API.       |
-| `get_destination_info`         | Get detailed info about a specific destination connector      |
-| `create_destination_connector` | Create a destination connector by params.                     |
-| `update_destination_connector` | Update an existing destination connector by destination id.   |
-| `delete_destination_connector` | Delete a destination connector by destination id.             |
-| `list_workflows`               | Lists workflows from the Unstructured API.                    |
-| `get_workflow_info`            | Get detailed information about a specific workflow.           |
-| `create_workflow`              | Create a new workflow with source, destination id, etc.       |
-| `run_workflow`                 | Run a specific workflow with workflow id                      |
-| `update_workflow`              | Update an existing workflow by params.                        |
-| `delete_workflow`              | Delete a specific workflow by id.                             |
-| `list_jobs`                    | Lists jobs for a specific workflow from the Unstructured API. |
-| `get_job_info`                 | Get detailed information about a specific job by job id.      |
-| `cancel_job`                   | Delete a specific job by id.                                  |
+| Tool                                | Description                                                                                                      |
+|-------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| `list_sources`                      | Lists available sources from the Unstructured API.                                                               |
+| `get_source_info`                   | Get detailed information about a specific source connector.                                                      |
+| `create_source_connector`           | Create a source connector.)                                                                                      |
+| `update_source_connector`           | Update an existing source connector by params.                                                                   |
+| `delete_source_connector`           | Delete a source connector by source id.                                                                          |
+| `list_destinations`                 | Lists available destinations from the Unstructured API.                                                          |
+| `get_destination_info`              | Get detailed info about a specific destination connector                                                         |
+| `create_destination_connector`      | Create a destination connector by params.                                                                        |
+| `update_destination_connector`      | Update an existing destination connector by destination id.                                                      |
+| `delete_destination_connector`      | Delete a destination connector by destination id.                                                                |
+| `list_workflows`                    | Lists workflows from the Unstructured API.                                                                       |
+| `get_workflow_info`                 | Get detailed information about a specific workflow.                                                              |
+| `create_workflow`                   | Create a new workflow with source, destination id, etc.                                                          |
+| `run_workflow`                      | Run a specific workflow with workflow id                                                                         |
+| `update_workflow`                   | Update an existing workflow by params.                                                                           |
+| `delete_workflow`                   | Delete a specific workflow by id.                                                                                |
+| `list_jobs`                         | Lists jobs for a specific workflow from the Unstructured API.                                                    |
+| `get_job_info`                      | Get detailed information about a specific job by job id.                                                         |
+| `cancel_job`                        | Delete a specific job by id.                                                                                     |
+| `list_workflows_with_finished_jobs` | Lists all workflows that have any completed job, together with information about source and destination details. |
 
 Below is a list of connectors the `UNS-MCP` server currently supports, please see the full list of source connectors that Unstructured platform supports [here](https://docs.unstructured.io/api-reference/workflow/sources/overview) and destination list [here](https://docs.unstructured.io/api-reference/workflow/destinations/overview). We are planning on adding more!
 
