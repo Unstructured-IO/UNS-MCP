@@ -1,9 +1,16 @@
-## 0.1.6-dev0
+## 0.1.7-dev0
 
 ### Enhancements
 - Added example how to configure MCP server in CrewAI framework
 
 ### Fixes
+
+## 0.1.6
+
+### Enhancements
+
+### Fixes
+- Workflow name is added when `list_workflows_with_finished_jobs` is called
 
 ## 0.1.5
 

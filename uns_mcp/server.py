@@ -629,7 +629,8 @@ async def list_workflows_with_finished_jobs(
 
     result = ["Workflows:"]
     for workflow_details in filtered_workflows_details:
-        result.append(f"- Workflow ID: {workflow_details.workflow.id}")
+        result.append(f"- Name: {workflow_details.workflow.name}")
+        result.append(f"  ID: {workflow_details.workflow.id}")
         result.append("  Sources:")
         for source in workflow_details.sources:
             result.append(f"    - {source.name} (ID: {source.id})")
