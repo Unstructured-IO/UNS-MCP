@@ -28,7 +28,6 @@ async def create_source_connector(
     type_specific_config: dict[str, Any],
 ) -> str:
     """Create a source connector based on type.
-
     Args:
         ctx: Context object with the request and lifespan context
         name: A unique name for this connector
