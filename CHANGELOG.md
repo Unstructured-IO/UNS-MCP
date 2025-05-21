@@ -1,3 +1,10 @@
+## 0.1.6-dev0
+
+### Enhancements
+- Added example how to configure MCP server in CrewAI framework
+
+### Fixes
+
 ## 0.1.5
 
 ### Enhancements
