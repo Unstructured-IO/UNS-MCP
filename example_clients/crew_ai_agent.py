@@ -3,8 +3,8 @@
 # dependencies = [
 #   "crewai>=0.11.0",
 #   "crewai-tools[mcp]>=0.0.5",
+#   "pydantic>=2.11.0",
 #   "python-dotenv>=1.0.0",
-#   "mcp>=0.1.9"
 # ]
 # ///
 
@@ -39,20 +39,20 @@ load_dotenv()
 
 class SourceConfigurationResult(BaseModel):
     source_id: Optional[str] = Field(
-        description="The ID of the configured data source",
         default=None,
+        description="The ID of the configured data source",
     )
     source_type: Optional[str] = Field(
-        description="The type of data source configured",
         default=None,
+        description="The type of data source configured",
     )
     source_name: Optional[str] = Field(
-        description="The name of the configured data source",
         default=None,
+        description="The name of the configured data source",
     )
     source_config: Optional[dict] = Field(
-        description="The configuration details of the data source",
         default=None,
+        description="The configuration details of the data source",
     )
 
 
