@@ -21,3 +21,8 @@ test-firecrawl:
 .PHONY: install-pre-commit
 install-pre-commit:
 	uv pip install ".[dev]"
+
+.PHONY: uv-lock-update
+uv-lock-update:
+	@rm -f uv.lock
+	@env -u UV_INDEX_URL -u PIP_EXTRA_INDEX_URL uv lock --index-url https://pypi.org/simple/ --no-cache
