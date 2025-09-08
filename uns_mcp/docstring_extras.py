@@ -30,7 +30,7 @@ Examples:
     "subtype": "vlm",
     "settings": {
         "provider": "anthropic", (required)
-        "model": "claude-3-5-sonnet-20241022", (required)
+        "model": "claude-sonnet-4-20250514", (required)
         "output_format": "text/html",
         "user_prompt": null,
         "format_html": true,
@@ -42,7 +42,7 @@ Examples:
 
 - vlm strategy:
     Allowed values are provider and model. Below are examples:
-        - "provider": "anthropic" "model": "claude-3-5-sonnet-20241022",
+        - "provider": "anthropic" "model": "claude-sonnet-4-20250514",
         - "provider": "openai" "model": "gpt-4o"
 
 
