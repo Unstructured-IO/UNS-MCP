@@ -411,14 +411,14 @@ wheels = [
 
 [[package]]
 name = "click"
-version = "8.2.2"
+version = "8.2.1"
 source = { registry = "https://pkgs.dev.azure.com/unstructured/_packaging/unstructured/pypi/simple/" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://pkgs.dev.azure.com/unstructured/_packaging/aa52cea6-240c-4a8e-8608-5e743a9d3711/pypi/download/click/8.2.2/click-8.2.2.tar.gz", hash = "sha256:068616e6ef9705a07b6db727cb9c248f4eb9dae437a30239f56fa94b18b852ef" }
+sdist = { url = "https://pkgs.dev.azure.com/unstructured/_packaging/aa52cea6-240c-4a8e-8608-5e743a9d3711/pypi/download/click/8.2.1/click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202" }
 wheels = [
-    { url = "https://pkgs.dev.azure.com/unstructured/_packaging/aa52cea6-240c-4a8e-8608-5e743a9d3711/pypi/download/click/8.2.2/click-8.2.2-py3-none-any.whl", hash = "sha256:52e1e9f5d3db8c85aa76968c7c67ed41ddbacb167f43201511c8fd61eb5ba2ca" },
+    { url = "https://pkgs.dev.azure.com/unstructured/_packaging/aa52cea6-240c-4a8e-8608-5e743a9d3711/pypi/download/click/8.2.1/click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b" },
 ]
 
 [[package]]
