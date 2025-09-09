@@ -8,7 +8,7 @@ sse-client:
 
 .PHONY: sse-client-terminal
 sse-client-terminal:
-	uv run python minimal_client/client.py "http://127.0.0.1:8080/sse" "@wonderwhy-er/desktop-commander"
+	uv run python minimal_client/client.py "http://127.0.0.1:8080/sse" "@wonderwhy-er/desktop-commander@^0.2.11"
 
 .PHONY: sse-server
 sse-server:
@@ -21,3 +21,8 @@ test-firecrawl:
 .PHONY: install-pre-commit
 install-pre-commit:
 	uv pip install ".[dev]"
+
+.PHONY: uv-lock-update
+uv-lock-update:
+	@rm -f uv.lock
+	@env -u UV_INDEX_URL -u PIP_EXTRA_INDEX_URL uv lock --index-url https://pypi.org/simple/ --no-cache
