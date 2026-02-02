@@ -651,7 +651,7 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
     """Create a Starlette application that can server the provied mcp server with SSE."""
     sse = SseServerTransport("/messages/")
 
-    async def handle_sse(request: Request):
+    async def handle_sse(request: Request) -> Response:
         async with sse.connect_sse(
             request.scope,
             request.receive,
@@ -664,6 +664,7 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
             )
 
         return Response(status_code=200)
+
     return Starlette(
         debug=debug,
         routes=[
