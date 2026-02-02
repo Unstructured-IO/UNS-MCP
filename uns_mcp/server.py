@@ -16,6 +16,7 @@ from mcp.server.sse import SseServerTransport
 from pydantic import BaseModel
 from starlette.applications import Starlette
 from starlette.requests import Request
+from starlette.responses import Response
 from starlette.routing import Mount, Route
 from unstructured_client import UnstructuredClient
 from unstructured_client.models.operations import (
@@ -650,7 +651,7 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
     """Create a Starlette application that can server the provied mcp server with SSE."""
     sse = SseServerTransport("/messages/")
 
-    async def handle_sse(request: Request) -> None:
+    async def handle_sse(request: Request):
         async with sse.connect_sse(
             request.scope,
             request.receive,
@@ -662,6 +663,7 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
                 mcp_server.create_initialization_options(),
             )
 
+        return Response(status_code=200)
     return Starlette(
         debug=debug,
         routes=[
