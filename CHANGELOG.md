@@ -1,3 +1,9 @@
+## 0.1.7
+
+### Security
+
+- **security:** fix(deps): upgrade vulnerable transitive dependencies [security]
+
 ## 0.1.7-dev0
 
 ### Enhancements
