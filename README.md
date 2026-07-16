@@ -5,7 +5,7 @@
 >
 > If you want to parse and transform files into structured output (markdown, JSON, HTML, or plain text), use the [Unstructured Transform MCP server](https://docs.unstructured.io/transform/overview) instead.
 >
-> Unstructured Transform brings production-grade document processing to your agents as an MCP server. It gives them the ability to turn 60+ file types into structured data that's ready for your applications, vector databases, and any downstream processes by parsing, enriching, chunking, and embedding files directly inside their current session.
+> Unstructured Transform brings production-grade document processing to your agents as a hosted MCP server. It gives them the ability to turn 60+ file types into structured data that's ready for your applications, vector databases, and any downstream processes by parsing, enriching, chunking, and embedding files directly inside their current session.
 >
 > You can start using it by [signing up here](https://unstructured.io/?modal=try-for-free).
 
