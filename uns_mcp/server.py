@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from itertools import groupby
 from typing import AsyncIterator, Optional
 
+import httpx
 import uvicorn
 from dotenv import load_dotenv
 from mcp.server import Server
@@ -25,7 +26,6 @@ from unstructured_client.models.operations import (
     DeleteWorkflowRequest,
     GetDestinationRequest,
     GetJobRequest,
-    GetSourceRequest,
     GetWorkflowRequest,
     ListDestinationsRequest,
     ListJobsRequest,
@@ -111,6 +111,20 @@ mcp = FastMCP(
 register_connectors(mcp)
 
 
+# Raw API Helper
+async def raw_unstructured_get(path: str) -> dict | list:
+    api_key = os.environ["UNSTRUCTURED_API_KEY"]
+
+    async with httpx.AsyncClient(
+        base_url="https://platform.unstructuredapp.io",
+        headers={"UNSTRUCTURED-API-KEY": api_key},
+        timeout=30,
+    ) as client:
+        resp = await client.get(path)
+        resp.raise_for_status()
+        return resp.json()
+
+
 @mcp.tool()
 async def list_sources(
     ctx: Context,
@@ -125,30 +139,28 @@ async def list_sources(
     Returns:
         String containing the list of sources
     """
-    client = ctx.request_context.lifespan_context.client
-
-    request = ListSourcesRequest()
+    sources = await raw_unstructured_get("/api/v1/sources/")
     if source_type:
         try:
-            source_type = (
-                SourceConnectorType(source_type) if isinstance(source_type, str) else source_type
+            st = (
+                SourceConnectorType(source_type).value
+                if isinstance(source_type, str)
+                else source_type.value
             )
-            request.source_type = source_type
-        except KeyError:
+            sources = [s for s in sources if s.get("type") == st]
+        except Exception:
             return f"Invalid source type: {source_type}"
 
-    response = await client.sources.list_sources_async(request=request)
+    if not sources:
+        return "No sources found"
 
     # Sort sources by name
-    sorted_sources = sorted(response.response_list_sources, key=lambda source: source.name.lower())
-
-    if not sorted_sources:
-        return "No sources found"
+    sources = sorted(sources, key=lambda s: s["name"].lower())
 
     # Format response
     result = ["Available sources:"]
-    for source in sorted_sources:
-        result.append(f"- {source.name} (ID: {source.id})")
+    for src in sources:
+        result.append(f"- {src['name']} (ID: {src['id']})")
 
     return "\n".join(result)
 
@@ -163,16 +175,20 @@ async def get_source_info(ctx: Context, source_id: str) -> str:
     Returns:
         String containing the source connector information
     """
-    client = ctx.request_context.lifespan_context.client
+    sources = await raw_unstructured_get("/api/v1/sources/")
+    source = next((src for src in sources if src["id"] == source_id), None)
 
-    response = await client.sources.get_source_async(request=GetSourceRequest(source_id=source_id))
-
-    info = response.source_connector_information
+    if not source:
+        return f"Source not found: {source_id}"
 
     result = ["Source Connector Information:"]
-    result.append(f"Name: {info.name}")
+    result.append(f"Name: {source['name']}")
+    result.append(f"ID: {source['id']}")
+    result.append(f"Type: {source['type']}")
     result.append("Configuration:")
-    for key, value in info.config:
+
+    config = source.get("config", {})
+    for key, value in config.items():
         result.append(f"  {key}: {value}")
 
     return "\n".join(result)
