@@ -1,12 +1,14 @@
 [project]
 name = "uns_mcp"
-version = "0.1.7" # Set only non-dev versions to release
+version = "0.1.8" # Set only non-dev versions to release
 description = "MCP server implementation providing structured tools for interacting with the Unstructured API, managing sources, destinations, workflows, and jobs"
 requires-python = ">=3.12"
 readme = "README.md"
 dependencies = [
     "anthropic>=0.49.0",
     "boto3>=1.37.27",
+    # certifi >=2026.10.19 removes emSign ECC Root CA - G3 (eMudhra intermediate CA key compromise)
+    "certifi>=2026.10.19",
     "firecrawl-py>=1.14.1",
     "mcp[cli]>=1.13.1",
     "python-dotenv>=1.0.1",
