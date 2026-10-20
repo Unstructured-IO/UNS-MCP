@@ -2313,6 +2313,7 @@ source = { editable = "." }
 dependencies = [
     { name = "anthropic" },
     { name = "boto3" },
+    { name = "certifi" },
     { name = "firecrawl-py" },
     { name = "mcp", extra = ["cli"] },
     { name = "pip" },
@@ -2334,6 +2335,7 @@ dev = [
 requires-dist = [
     { name = "anthropic", specifier = ">=0.49.0" },
     { name = "boto3", specifier = ">=1.37.27" },
+    { name = "certifi", specifier = ">=2026.10.19" },
     { name = "firecrawl-py", specifier = ">=1.14.1" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.29.5" },
     { name = "jupyter", marker = "extra == 'dev'", specifier = ">=1.1.1" },
