@@ -2308,7 +2308,7 @@ wheels = [
 
 [[package]]
 name = "uns-mcp"
-version = "0.1.8"
+version = "0.1.9"
 source = { editable = "." }
 dependencies = [
     { name = "anthropic" },
@@ -2339,7 +2339,7 @@ requires-dist = [
     { name = "firecrawl-py", specifier = ">=1.14.1" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.29.5" },
     { name = "jupyter", marker = "extra == 'dev'", specifier = ">=1.1.1" },
-    { name = "mcp", extras = ["cli"], specifier = ">=1.13.1" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.13.1,<2" },
     { name = "notebook", marker = "extra == 'dev'", specifier = ">=7.3.3" },
     { name = "pip" },
     { name = "pre-commit", marker = "extra == 'dev'" },

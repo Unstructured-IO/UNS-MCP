@@ -1,3 +1,9 @@
+## 0.1.9
+
+### Fixes
+
+- **fix(deps):** cap `mcp` below 2. `uvx uns_mcp` resolved mcp 2.3.0, which removed `mcp.server.fastmcp`, so the server failed on import.
+
 ## 0.1.8
 
 ### Security
